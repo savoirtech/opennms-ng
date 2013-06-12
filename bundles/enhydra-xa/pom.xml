@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <parent>
+           <artifactId>bundles</artifactId>
+           <groupId>org.opennms.ng</groupId>
+           <version>1.0-SNAPSHOT</version>
+       </parent>
+    <modelVersion>4.0.0</modelVersion>
+
+    <artifactId>enhydra-xa</artifactId>
+
+    <name>OPENNMS :: Enhydra XA Adapter with pooling</name>
+        <description>OPENNMS Enhydra XA Adapter with pooling</description>
+
+    <packaging>bundle</packaging>
+
+    <properties>
+        <pkgGroupId>xa-pool</pkgGroupId>
+        <pkgArtifactId>xa-pool</pkgArtifactId>
+        <pkgVersion>1.6</pkgVersion>
+
+        <opennms.osgi.import.pkg>
+            !org.enhydra*,
+            org.apache.commons.logging;version="[1.1,2)",
+            org.apache.commons.logging.impl;version="[1.1,2)",
+            javax.transaction;version="[1.1,1.2)",
+            javax.transaction.xa;version="[1.1,1.2)",
+            oracle.jdbc.xa;resolution:=optional,
+            oracle.jdbc.xa.client;resolution:=optional
+            org.enhydra.instantdb.jdbc;resolution:=optional,
+            *
+        </opennms.osgi.import.pkg>
+        <opennms.osgi.export>
+            org.enhydra*;version="${project.version}"
+        </opennms.osgi.export>
+
+        <opennms.osgi.include.resource>{maven-resources},{maven-dependencies}</opennms.osgi.include.resource>
+        <opennms.osgi.failok>true</opennms.osgi.failok>
+
+    </properties>
+
+    <dependencies>
+
+        <dependency>
+            <groupId>xa-pool</groupId>
+            <artifactId>xa-pool</artifactId>
+            <version>1.6</version>
+            <scope>system</scope>
+            <systemPath>${basedir}/lib/xa-pool.jar</systemPath>
+        </dependency>
+
+    </dependencies>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-shade-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>shade</goal>
+                        </goals>
+                        <configuration>
+                            <artifactSet>
+                                <includes>
+                                    <include>${pkgGroupId}:${pkgArtifactId}</include>
+                                </includes>
+                            </artifactSet>
+
+                            <promoteTransitiveDependencies>true</promoteTransitiveDependencies>
+                            <createDependencyReducedPom>true</createDependencyReducedPom>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
+
+</project>

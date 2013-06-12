@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <parent>
+        <artifactId>opennms-tools</artifactId>
+        <groupId>org.opennms.ng</groupId>
+        <version>1.0-SNAPSHOT</version>
+    </parent>
+
+    <!-- version and groupId inherited from our parent -->
+    <artifactId>hsqldb-test-server</artifactId>
+    <name>OPENNMS :: HSQLDB Test Server</name>
+    <packaging>bundle</packaging>
+
+    <properties>
+        <opennms.osgi.export.pkg>
+            org.opennms.ng.hsqldb*,
+        </opennms.osgi.export.pkg>
+        <opennms.osgi.import.pkg>
+            org.slf4j,
+            org.hsqldb*",
+            org.hsqldb.jdbc*",
+            *
+        </opennms.osgi.import.pkg>
+        <opennms.osgi.dynamic>org.osgi.service.blueprint,*</opennms.osgi.dynamic>
+
+    </properties>
+
+    <dependencies>
+
+        <!-- This dependency is to force the schema creation before embedding -->
+        <dependency>
+            <groupId>org.opennms.ng</groupId>
+            <artifactId>db</artifactId>
+            <version>${project.version}</version>
+            <type>pom</type>
+        </dependency>
+
+        <dependency>
+            <groupId>org.hsqldb</groupId>
+            <artifactId>hsqldb</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>org.apache.felix</groupId>
+            <artifactId>org.apache.felix.framework</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-api</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-log4j12</artifactId>
+        </dependency>
+
+    </dependencies>
+
+    <build>
+        <resources>
+            <resource>
+                <directory>src/main/resources</directory>
+                <filtering>true</filtering>
+            </resource>
+            <resource>
+                <directory>${basedir}/../../db/target/db/hsqldb</directory>
+                <includes>
+                    <include>db.sql</include>
+                </includes>
+            </resource>
+        </resources>
+
+    </build>
+
+</project>

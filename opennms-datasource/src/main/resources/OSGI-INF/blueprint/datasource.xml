@@ -1,0 +1,73 @@
+<blueprint xmlns="http://www.osgi.org/xmlns/blueprint/v1.0.0"
+           xmlns:cm="http://aries.apache.org/blueprint/xmlns/blueprint-cm/v1.0.0">
+
+    <cm:property-placeholder persistent-id="org.opennms.ng.datasource" id="datasource">
+        <cm:default-properties>
+
+            <!-- mercantil.jdbc Drivers -->
+            <cm:property name="opennms.jdbc.driverClassName" value="org.hsqldb.jdbc.JDBCDriver"/>
+            <cm:property name="opennms.jdbc.url" value="jdbc:hsqldb:hsql://localhost/opennms"/>
+            <cm:property name="opennms.jdbc.username" value="sa"/>
+            <cm:property name="opennms.jdbc.password" value=""/>
+
+            <!-- Connection Pooling DBCP -->
+            <cm:property name="opennms.jdbc.initialSize" value="5"/>
+            <cm:property name="opennms.jdbc.maxActive" value="10"/>
+            <cm:property name="opennms.jdbc.maxIdle" value="10"/>
+            <cm:property name="opennms.jdbc.defaultAutoCommit" value="false"/>
+            <cm:property name="opennms.jdbc.removeAbandoned" value="false"/>
+            <cm:property name="opennms.jdbc.removeAbandonedTimeout" value="300"/>
+            <cm:property name="opennms.jdbc.logAbandoned" value="false"/>
+
+        </cm:default-properties>
+    </cm:property-placeholder>
+
+    <service interface="javax.sql.DataSource" ref="jta">
+        <service-properties>
+            <entry key="transactional" value="true"/>
+        </service-properties>
+    </service>
+
+    <service interface="javax.sql.DataSource" ref="nonJTA">
+        <service-properties>
+            <entry key="transactional" value="false"/>
+        </service-properties>
+    </service>
+
+    <!-- ###### mercantil.jdbc Data Source ###### -->
+
+    <reference id="txManager" interface="javax.transaction.TransactionManager" availability="mandatory"/>
+
+    <bean id="dataSource" class="org.enhydra.jdbc.standard.StandardXADataSource">
+        <property name="driverName" value="${opennms.jdbc.driverClassName}"/>
+        <property name="url" value="${opennms.jdbc.url}"/>
+        <property name="user" value="${opennms.jdbc.username}"/>
+        <property name="password" value="${opennms.jdbc.password}"/>
+        <property name="minCon" value="${opennms.jdbc.initialSize}"/>
+        <property name="maxCon" value="${opennms.jdbc.maxActive}"/>
+    </bean>
+
+    <bean id="jta" class="org.enhydra.jdbc.pool.StandardXAPoolDataSource">
+        <property name="dataSource" ref="dataSource"/>
+        <property name="transactionManager" ref="txManager"/>
+        <property name="user" value="${opennms.jdbc.username}"/>
+        <property name="password" value="${opennms.jdbc.password}"/>
+        <property name="minSize" value="${opennms.jdbc.initialSize}"/>
+        <property name="maxSize" value="${opennms.jdbc.maxActive}"/>
+    </bean>
+
+    <bean class="org.apache.commons.dbcp.BasicDataSource" id="nonJTA">
+        <property name="driverClassName" value="${opennms.jdbc.driverClassName}"/>
+        <property name="url" value="${opennms.jdbc.url}"/>
+        <property name="username" value="${opennms.jdbc.username}"/>
+        <property name="password" value="${opennms.jdbc.password}"/>
+        <property name="initialSize" value="${opennms.jdbc.initialSize}"/>
+        <property name="maxActive" value="${opennms.jdbc.maxActive}"/>
+        <property name="maxIdle" value="${opennms.jdbc.maxIdle}"/>
+        <property name="defaultAutoCommit" value="false"/>
+        <property name="removeAbandoned" value="${opennms.jdbc.removeAbandoned}"/>
+        <property name="removeAbandonedTimeout" value="${opennms.jdbc.removeAbandonedTimeout}"/>
+        <property name="logAbandoned" value="${opennms.jdbc.logAbandoned}"/>
+    </bean>
+
+</blueprint>

@@ -1,0 +1,93 @@
+<project>
+
+    <modelVersion>4.0.0</modelVersion>
+
+    <parent>
+        <groupId>org.opennms.ng</groupId>
+        <artifactId>opennms-ng-parent</artifactId>
+        <version>1.0-SNAPSHOT</version>
+    </parent>
+
+    <artifactId>db</artifactId>
+    <packaging>pom</packaging>
+    <name>OPENNMS :: Database Schema</name>
+    <description>OPENNMS Database Schema Processor</description>
+
+    <properties>
+        <features.file>features.xml</features.file>
+    </properties>
+
+    <dependencies>
+    </dependencies>
+
+    <build>
+        <resources>
+            <resource>
+                <directory>src/main/resources</directory>
+                <filtering>true</filtering>
+            </resource>
+        </resources>
+        <plugins>
+            <plugin>
+                <artifactId>maven-antrun-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <phase>generate-sources</phase>
+                        <configuration>
+                            <tasks>
+                                <!-- MYSQL Version -->
+                                <loadfile property="mysql_funcs" srcFile="${basedir}/src/db/mysql_funcs.sql"/>
+                                <filter token="funcs" value="${mysql_funcs}"/>
+                                <filter token="clob" value="longtext"/>
+                                <filter token="boolean" value="smallint"/>
+                                <filter token="double" value="double"/>
+                                <filter token="timestamp_constraint" value=" null default null"/>
+                                <copy file="${basedir}/src/db/db.sql" tofile="${basedir}/target/db/mysql/db.sql"
+                                      filtering="true"/>
+                                <!-- HSQLDB Version -->
+                                <loadfile property="hsqldb_funcs" srcFile="${basedir}/src/db/hsqldb_funcs.sql"/>
+                                <filter token="funcs" value="${hsqldb_funcs}"/>
+                                <filter token="clob" value="longvarchar"/>
+                                <filter token="boolean" value="smallint"/>
+                                <filter token="double" value="double"/>
+                                <filter token="timestamp_constraint" value=""/>
+                                <copy file="${basedir}/src/db/db.sql" tofile="${basedir}/target/db/hsqldb/db.sql"
+                                      filtering="true"/>
+                                <!-- Derby Version -->
+                                <loadfile property="derby_funcs" srcFile="${basedir}/src/db/derby_funcs.sql"/>
+                                <filter token="funcs" value="${derby_funcs}"/>
+                                <filter token="clob" value="long varchar"/>
+                                <filter token="boolean" value="smallint"/>
+                                <filter token="double" value="double"/>
+                                <filter token="timestamp_constraint" value=""/>
+                                <copy file="${basedir}/src/db/db.sql" tofile="${basedir}/target/db/derby/db.sql"
+                                      filtering="true"/>
+                                <!-- Oracle Version -->
+                                <loadfile property="oracle_funcs" srcFile="${basedir}/src/db/oracle_funcs.sql"/>
+                                <filter token="funcs" value="${oracle_funcs}"/>
+                                <filter token="clob" value="clob"/>
+                                <filter token="boolean" value="number(1)"/>
+                                <filter token="double" value="number(20,10)"/>
+                                <filter token="timestamp_constraint" value=""/>
+                                <copy file="${basedir}/src/db/db.sql" tofile="${basedir}/target/db/oracle/db.sql"
+                                      filtering="true"/>
+                                <!-- PostgreSQL Version -->
+                                <loadfile property="postgreSQL_funcs" srcFile="${basedir}/src/db/postgreSQL_funcs.sql"/>
+                                <filter token="funcs" value="${postgreSQL_funcs}"/>
+                                <filter token="clob" value="text"/>
+                                <filter token="boolean" value="smallint"/>
+                                <filter token="double" value="numeric(20,10)"/>
+                                <filter token="timestamp_constraint" value=""/>
+                                <copy file="${basedir}/src/db/db.sql" tofile="${basedir}/target/db/postgreSQL/db.sql"
+                                      filtering="true"/>
+                            </tasks>
+                        </configuration>
+                        <goals>
+                            <goal>run</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
+</project>

@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<features>
+    <feature name="amq-pool" version="${project.version}">
+        <feature version="${activemq.version}">activemq-client</feature>
+        <bundle>mvn:org.opennms.ng/amq-pool/${project.version}</bundle>
+    </feature>
+
+    <feature name="datasource" version="${project.version}">
+        <bundle>mvn:commons-dbcp/commons-dbcp/${commons-dbcp.version}</bundle>
+        <bundle>mvn:org.opennms.ng/enhydra-xa/${project.version}</bundle>
+        <bundle>mvn:org.hsqldb/hsqldb/${hsqldb.version}</bundle>
+        <bundle>mvn:org.opennms.ng/oracle/${project.version}</bundle>
+        <bundle>mvn:org.opennms.ng/opennms-datasource/${project.version}</bundle>
+    </feature>
+
+    <feature name="hsqldb-test-server" version="${project.version}">
+        <bundle>mvn:org.hsqldb/hsqldb/${hsqldb.version}</bundle>
+        <bundle>mvn:org.opennms.ng/hsqldb-test-server/${project.version}</bundle>
+    </feature>
+
+    <feature name="persistence" version="${project.version}">
+        <bundle>mvn:org.apache.openjpa/openjpa/${openjpa.version}</bundle>
+        <feature version="${project.version}">datasource</feature>
+        <feature>transaction</feature>
+        <feature>jndi</feature>
+        <bundle dependency='true'>mvn:commons-collections/commons-collections/${commons-collections.version}</bundle>
+        <feature version="${aries.blueprint.version}">jpa</feature>
+        <bundle>mvn:org.opennms.ng/persistence/${project.version}</bundle>
+    </feature>
+
+</features>
