@@ -12,13 +12,15 @@
     <description>OPENNMS Parent POM module</description>
 
     <modules>
-        <module>amq-pool</module>
-        <module>bundles</module>
+        <module>container-resources</module>
+        <module>tools</module>
         <module>db</module>
         <module>features</module>
         <module>persistence</module>
-        <module>tools</module>
+
         <module>opennms-datasource</module>
+        <module>daemons</module>
+
     </modules>
 
     <properties>
@@ -30,20 +32,21 @@
         <maven.eclipse.plugin.version>2.5.1</maven.eclipse.plugin.version>
         <maven.pax.plugin.version>1.4</maven.pax.plugin.version>
         <!-- turn down the default DEBUG logLevel. Override on the command line if you want -->
-        <dist.name>xtrakter-${project.version}</dist.name>
+        <dist.name>OPENNMS--${project.version}</dist.name>
         <!-- dependency versions -->
         <fuse.version.suffix>redhat-60024</fuse.version.suffix>
 
-        <activemq.version>5.8.0.${fuse.version.suffix}</activemq.version>
-        <aries.blueprint.version>1.0.1.${fuse.version.suffix}</aries.blueprint.version>
+        <activemq.version>5.8.0</activemq.version>
+        <aries.blueprint.version>1.0.1</aries.blueprint.version>
+        <aries.blueprint.jpa.container.version>1.0.0</aries.blueprint.jpa.container.version>
         <aspectj.version>1.6.8</aspectj.version>
-        <camel.version>2.10.0.${fuse.version.suffix}</camel.version>
-        <cxf.version>2.6.0.${fuse.version.suffix}</cxf.version>
+        <camel.version>2.10.0</camel.version>
+        <cxf.version>2.6.0</cxf.version>
         <commons-collections.version>3.2.1</commons-collections.version>
         <commons-pool.version>1.6</commons-pool.version>
         <commons-dbcp.version>1.4</commons-dbcp.version>
         <dbunit.version>2.4.9</dbunit.version>
-        <felix.version>4.0.3.${fuse.version.suffix}</felix.version>
+        <felix.version>4.0.3</felix.version>
         <geronimo-jta_1.1_spec.version>1.1.1</geronimo-jta_1.1_spec.version>
         <hsqldb.version>2.2.9</hsqldb.version>
         <junit.version>4.11</junit.version>
@@ -123,12 +126,6 @@
             <id>central</id>
             <name>Central Maven Repo</name>
             <url>http://repo1.maven.org/maven2</url>
-        </repository>
-
-        <repository>
-            <id>fusesource</id>
-            <name>Fusesource Release Repository</name>
-            <url>http://repo.fusesource.com/maven2</url>
         </repository>
 
     </repositories>
@@ -321,6 +318,7 @@
                         <Implementation-Version>${project.version}</Implementation-Version>
                         <_versionpolicy>${opennms.osgi.import.default.version}</_versionpolicy>
                         <_failok>${opennms.osgi.failok}</_failok>
+                        <!-- Will add a JPA context tag to the bundle, used by aries JPA -->
                         <Meta-Persistence>${opennms.osgi.jpa.context}</Meta-Persistence>
                     </instructions>
                 </configuration>
@@ -424,7 +422,7 @@
             <dependency>
                 <groupId>org.apache.aries.jpa</groupId>
                 <artifactId>org.apache.aries.jpa.container</artifactId>
-                <version>${aries.blueprint.version}</version>
+                <version>${aries.blueprint.jpa.container.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.apache.camel</groupId>
