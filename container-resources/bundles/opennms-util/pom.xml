@@ -1,0 +1,104 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <parent>
+        <artifactId>bundles</artifactId>
+        <groupId>org.opennms.ng</groupId>
+        <version>1.0-SNAPSHOT</version>
+    </parent>
+    <modelVersion>4.0.0</modelVersion>
+    <groupId>org.opennms.bundles</groupId>
+
+    <packaging>bundle</packaging>
+
+    <name>OPENNMS :: Utils - DB, XML, Core</name>
+    <description>OPENNMS Utils - DB, XML, Core</description>
+
+    <artifactId>opennms-util</artifactId>
+    <version>${opennms.version}</version>
+
+    <properties>
+        <pkgGroupId>org.opennms.bundles</pkgGroupId>
+        <pkgArtifactId>opennms-util</pkgArtifactId>
+        <pkgVersion>${opennms.version}</pkgVersion>
+
+        <opennms.osgi.import.pkg>
+            org.xbill.DNS;resolution:=optional,
+            *
+        </opennms.osgi.import.pkg>
+        <opennms.osgi.export.pkg>
+            org.opennms.core.concurrent;version="${opennms.version}",
+            org.opennms.core.fiber;version="${opennms.version}",
+            org.opennms.core.queue;version="${opennms.version}",
+            org.opennms.core.resource;version="${opennms.version}",
+            org.opennms.core.resource.db;version="${opennms.version}",
+            org.opennms.core.utils;version="${opennms.version}",
+            org.opennms.core.utils.url;version="${opennms.version}",
+            org.opennms.core.xml;version="${opennms.version}",
+            org.opennms.core.xml.bind;version="${opennms.version}",
+            org.opennms.netmgt.config.opennmsDataSources;version="${opennms.version},
+            org.opennms.netmgt.config.opennmsDataSources.descriptors;version="${opennms.version},
+            org.opennms.core.db;version="${opennms.version}",
+
+        </opennms.osgi.export.pkg>
+
+        <opennms.osgi.include.resource>{maven-resources},{maven-dependencies}</opennms.osgi.include.resource>
+        <opennms.osgi.failok>true</opennms.osgi.failok>
+
+    </properties>
+
+    <dependencies>
+
+        <dependency>
+            <groupId>org.opennms</groupId>
+            <artifactId>opennms-util</artifactId>
+            <version>${opennms.version}</version>
+        </dependency>
+
+        <!-- CORE XML -->
+
+        <dependency>
+            <groupId>org.opennms.core</groupId>
+            <artifactId>org.opennms.core.xml</artifactId>
+            <version>${opennms.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.opennms.core</groupId>
+            <artifactId>org.opennms.core.db</artifactId>
+            <version>${opennms.version}</version>
+        </dependency>
+
+    </dependencies>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-shade-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>shade</goal>
+                        </goals>
+                        <configuration>
+                            <artifactSet>
+                                <includes>
+                                    <include>${pkgGroupId}:${pkgArtifactId}</include>
+                                    <include>org.opennms.core:org.opennms.core.xml</include>
+                                    <include>org.opennms.core:org.opennms.core.db</include>
+                                </includes>
+                            </artifactSet>
+
+                            <promoteTransitiveDependencies>true</promoteTransitiveDependencies>
+                            <createDependencyReducedPom>true</createDependencyReducedPom>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
+
+</project>

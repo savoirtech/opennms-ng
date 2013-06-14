@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <parent>
+        <artifactId>bundles</artifactId>
+        <groupId>org.opennms.ng</groupId>
+        <version>1.0-SNAPSHOT</version>
+    </parent>
+    <modelVersion>4.0.0</modelVersion>
+
+    <name>OPENNMS :: Models</name>
+    <description>OPENNMS Models</description>
+
+    <groupId>org.opennms.bundles</groupId>
+    <artifactId>opennms-model</artifactId>
+    <version>${opennms.version}</version>
+
+    <packaging>bundle</packaging>
+
+    <properties>
+        <pkgGroupId>org.opennms.bundles</pkgGroupId>
+        <pkgArtifactId>opennms-model</pkgArtifactId>
+        <pkgVersion>${opennms.version}</pkgVersion>
+
+        <opennms.osgi.import>
+            org.hibernate;resolution:=optional,
+            org.hibernate.annotations;resolution:=optional,
+            org.hibernate.criterion;resolution:=optional,
+            org.hibernate.engine;resolution:=optional,
+            org.hibernate.impl;resolution:=optional,
+            org.hibernate.transform;resolution:=optional,
+            org.hibernate.type;resolution:=optional,
+            org.hibernate.usertype;resolution:=optional,
+            org.opennms.netmgt.snmp;resolution:=optional,
+            org.springframework.security.core;resolution:=optional,
+            org.springframework.security.core.userdetails;resolution:=optional,
+            org.opennms*;;version="[1.13,2)",
+            *
+
+        </opennms.osgi.import>
+        <opennms.osgi.export.pkg>
+            org.opennms.netmgt;version="${opennms.version}",
+            org.opennms.netmgt.model*;version="${opennms.version}",
+
+            org.opennms.netmgt.xml*;version="${opennms.version}",
+        </opennms.osgi.export.pkg>
+
+        <opennms.osgi.include.resource>{maven-resources},{maven-dependencies}</opennms.osgi.include.resource>
+        <opennms.osgi.failok>true</opennms.osgi.failok>
+
+    </properties>
+
+    <dependencies>
+
+        <dependency>
+            <groupId>org.opennms</groupId>
+            <artifactId>opennms-model</artifactId>
+            <version>${opennms.version}</version>
+        </dependency>
+
+    </dependencies>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-shade-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>shade</goal>
+                        </goals>
+                        <configuration>
+                            <artifactSet>
+                                <includes>
+                                    <include>${pkgGroupId}:${pkgArtifactId}</include>
+                                </includes>
+                            </artifactSet>
+
+                            <promoteTransitiveDependencies>true</promoteTransitiveDependencies>
+                            <createDependencyReducedPom>true</createDependencyReducedPom>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
+
+</project>

@@ -1,0 +1,148 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <parent>
+        <artifactId>bundles</artifactId>
+        <groupId>org.opennms.ng</groupId>
+        <version>1.0-SNAPSHOT</version>
+    </parent>
+    <modelVersion>4.0.0</modelVersion>
+
+    <name>OPENNMS :: Configuration model</name>
+    <description>OPENNMS Configuration model</description>
+
+    <groupId>org.opennms.bundles</groupId>
+    <artifactId>opennms-config-model</artifactId>
+    <version>${opennms.version}</version>
+
+    <packaging>bundle</packaging>
+
+    <properties>
+        <pkgGroupId>org.opennms.bundles</pkgGroupId>
+        <pkgArtifactId>opennms-model</pkgArtifactId>
+        <pkgVersion>${opennms.version}</pkgVersion>
+
+        <opennms.osgi.import>
+            org.hibernate;resolution:=optional,
+            org.hibernate.annotations;resolution:=optional,
+            org.hibernate.criterion;resolution:=optional,
+            org.hibernate.engine;resolution:=optional,
+            org.hibernate.impl;resolution:=optional,
+            org.hibernate.transform;resolution:=optional,
+            org.hibernate.type;resolution:=optional,
+            org.hibernate.usertype;resolution:=optional,
+            org.opennms.netmgt.snmp;resolution:=optional,
+            org.springframework.security.core;resolution:=optional,
+            org.springframework.security.core.userdetails;resolution:=optional,
+
+            *
+
+        </opennms.osgi.import>
+        <opennms.osgi.export.pkg>
+
+            org.opennms.netmgt.config.ackd.*;version="${opennms.version}",
+            org.opennms.netmgt.config.actiond.*;version="${opennms.version}",
+            org.opennms.netmgt.config.ami.*;version="${opennms.version}",
+            org.opennms.netmgt.config.archiver.events.*;version="${opennms.version}",
+            org.opennms.netmgt.config.capsd.*;version="${opennms.version}",
+            org.opennms.netmgt.config.categories.*;version="${opennms.version}",
+            org.opennms.netmgt.config.charts.*;version="${opennms.version}",
+            org.opennms.netmgt.config.collectd.*;version="${opennms.version}",
+            org.opennms.netmgt.config.databaseReports.*;version="${opennms.version}",
+            org.opennms.netmgt.config.datacollection.*;version="${opennms.version}",
+            org.opennms.netmgt.config.destinationPaths.*;version="${opennms.version}",
+            org.opennms.netmgt.config.discovery.*;version="${opennms.version}",
+            org.opennms.netmgt.config.eventd.*;version="${opennms.version}",
+            org.opennms.netmgt.config.groups.*;version="${opennms.version}",
+            org.opennms.netmgt.config.httpdatacollection.*;version="${opennms.version}",
+            org.opennms.netmgt.config.javamail.*;version="${opennms.version}",
+            org.opennms.netmgt.config.kscReports.*;version="${opennms.version}",
+            org.opennms.netmgt.config.linkd.*;version="${opennms.version}",
+            org.opennms.netmgt.config.mailtransporttest.*;version="${opennms.version}",
+            org.opennms.netmgt.config.map.adapter.*;version="${opennms.version}",
+            org.opennms.netmgt.config.microblog.*;version="${opennms.version}",
+            org.opennms.netmgt.config.monitoringLocations.*;version="${opennms.version}",
+            org.opennms.netmgt.config.notifd.*;version="${opennms.version}",
+            org.opennms.netmgt.config.notificationCommands.*;version="${opennms.version}",
+            org.opennms.netmgt.config.notifications.*;version="${opennms.version}",
+            org.opennms.netmgt.config.outage.*;version="${opennms.version}",
+            org.opennms.netmgt.config.pagesequence.*;version="${opennms.version}",
+            org.opennms.netmgt.config.poller.*;version="${opennms.version}",
+            org.opennms.netmgt.config.provisiond.*;version="${opennms.version}",
+            org.opennms.netmgt.config.rancid.adapter.*;version="${opennms.version}",
+            org.opennms.netmgt.config.reportd.*;version="${opennms.version}",
+            org.opennms.netmgt.config.reporting.*;version="${opennms.version}",
+            org.opennms.netmgt.config.rtc.*;version="${opennms.version}",
+            org.opennms.netmgt.config.rws.*;version="${opennms.version}",
+            org.opennms.netmgt.config.scriptd.*;version="${opennms.version}",
+            org.opennms.netmgt.config.server.*;version="${opennms.version}",
+            org.opennms.netmgt.config.service.*;version="${opennms.version}",
+            org.opennms.netmgt.config.siteStatusViews.*;version="${opennms.version}",
+            org.opennms.netmgt.config.snmp.*;version="${opennms.version}",
+            org.opennms.netmgt.config.snmpAsset.adapter.*;version="${opennms.version}",
+            org.opennms.netmgt.config.snmpinterfacepoller.*;version="${opennms.version}",
+            org.opennms.netmgt.config.statsd.*;version="${opennms.version}",
+            org.opennms.netmgt.config.surveillanceViews.*;version="${opennms.version}",
+            org.opennms.netmgt.config.syslogd.*;version="${opennms.version}",
+            org.opennms.netmgt.config.tags.*;version="${opennms.version}",
+            org.opennms.netmgt.config.threshd.*;version="${opennms.version}",
+            org.opennms.netmgt.config.tl1d.*;version="${opennms.version}",
+            org.opennms.netmgt.config.translator.*;version="${opennms.version}",
+            org.opennms.netmgt.config.trapd.*;version="${opennms.version}",
+            org.opennms.netmgt.config.users.*;version="${opennms.version}",
+            org.opennms.netmgt.config.vacuumd.*;version="${opennms.version}",
+            org.opennms.netmgt.config.views.*;version="${opennms.version}",
+            org.opennms.netmgt.config.viewsdisplay.*;version="${opennms.version}",
+            org.opennms.netmgt.config.webuiColors.*;version="${opennms.version}",
+            org.opennms.netmgt.config.wmi.*;version="${opennms.version}",
+            org.opennms.netmgt.config.xmlrpcd.*;version="${opennms.version}",
+            org.opennms.netmgt.xml.eventconf.*;version="${opennms.version}",
+            org.opennms.netmgt.xml.rtc.*;version="${project.version}",
+            org.opennms.netmgt.eventd.datablock*;version="${opennms.version}",
+
+        </opennms.osgi.export.pkg>
+
+        <opennms.osgi.include.resource>{maven-resources},{maven-dependencies}</opennms.osgi.include.resource>
+        <opennms.osgi.failok>true</opennms.osgi.failok>
+
+    </properties>
+
+    <dependencies>
+
+        <dependency>
+            <groupId>org.opennms</groupId>
+            <artifactId>opennms-config-model</artifactId>
+            <version>${opennms.version}</version>
+        </dependency>
+
+    </dependencies>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-shade-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>shade</goal>
+                        </goals>
+                        <configuration>
+                            <artifactSet>
+                                <includes>
+                                    <include>${pkgGroupId}:${pkgArtifactId}</include>
+                                </includes>
+                            </artifactSet>
+
+                            <promoteTransitiveDependencies>true</promoteTransitiveDependencies>
+                            <createDependencyReducedPom>true</createDependencyReducedPom>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
+
+</project>

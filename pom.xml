@@ -14,12 +14,10 @@
     <modules>
         <module>container-resources</module>
         <module>tools</module>
-        <module>db</module>
-        <module>features</module>
-        <module>persistence</module>
+        <module>db-integration</module>
 
-        <module>opennms-datasource</module>
-        <module>daemons</module>
+        <module>services</module>
+        <module>features</module>
 
     </modules>
 
@@ -36,15 +34,26 @@
         <!-- dependency versions -->
         <fuse.version.suffix>redhat-60024</fuse.version.suffix>
 
+        <!-- OPENNMS -->
+
+        <opennms.version>1.13.0-SNAPSHOT</opennms.version>
+
         <activemq.version>5.8.0</activemq.version>
         <aries.blueprint.version>1.0.1</aries.blueprint.version>
         <aries.blueprint.jpa.container.version>1.0.0</aries.blueprint.jpa.container.version>
         <aspectj.version>1.6.8</aspectj.version>
+
+        <c3p0.version>0.9.1.2</c3p0.version>
+
         <camel.version>2.10.0</camel.version>
         <cxf.version>2.6.0</cxf.version>
         <commons-collections.version>3.2.1</commons-collections.version>
+
+        <commons-io.version>2.4</commons-io.version>
+
         <commons-pool.version>1.6</commons-pool.version>
         <commons-dbcp.version>1.4</commons-dbcp.version>
+
         <dbunit.version>2.4.9</dbunit.version>
         <felix.version>4.0.3</felix.version>
         <geronimo-jta_1.1_spec.version>1.1.1</geronimo-jta_1.1_spec.version>
@@ -53,6 +62,7 @@
         <log4jVersion>1.2.16</log4jVersion>
         <openjpa.version>2.2.0</openjpa.version>
         <oracle.jdbc.version>6.0</oracle.jdbc.version>
+
         <pojosr-version>0.1.8</pojosr-version>
         <pax-tiny-bundle-version>1.3.1</pax-tiny-bundle-version>
         <slf4j.version>1.6.4</slf4j.version>
@@ -84,7 +94,7 @@
         <opennms.osgi.import.additional/>
         <opennms.osgi.import.pkg>
             !${opennms.osgi.export.pkg},
-            org.opennms.*;${opennms.osgi.import.xtrakter.version},
+            org.opennms.ng*;${opennms.osgi.import.xtrakter.version},
             ${opennms.osgi.import.before.defaults},
             ${opennms.osgi.import.defaults},
             ${opennms.osgi.import.additional},
@@ -397,6 +407,21 @@
                 <artifactId>oracle</artifactId>
                 <version>${project.version}</version>
             </dependency>
+
+            <!-- Opennms dependencies -->
+
+            <dependency>
+                <groupId>org.opennms.core</groupId>
+                <artifactId>org.opennms.core.xml</artifactId>
+                <version>${opennms.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>org.opennms</groupId>
+                <artifactId>opennms-config-model</artifactId>
+                <version>${opennms.version}</version>
+            </dependency>
+
             <!-- standard dependencies -->
             <dependency>
                 <groupId>commons-collections</groupId>
@@ -504,6 +529,11 @@
                 <groupId>org.aspectj</groupId>
                 <artifactId>aspectjweaver</artifactId>
                 <version>${aspectj.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.springframework</groupId>
+                <artifactId>spring-core</artifactId>
+                <version>${spring.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.springframework</groupId>
