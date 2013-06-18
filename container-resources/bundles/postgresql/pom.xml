@@ -9,13 +9,11 @@
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
-
-    <artifactId>postgres</artifactId>
+    <artifactId>postgresql</artifactId>
 
     <packaging>bundle</packaging>
 
-    <groupId>postgresql</groupId>
-
+    <groupId>org.opennms.bundles</groupId>
     <name>OPENNMS :: OSGi ${pkgArtifactId}-${pkgVersion}</name>
     <description>OPENNMS OSGi ${pkgArtifactId}-${pkgVersion}</description>
 
@@ -52,9 +50,8 @@
         </plugins>
     </build>
     <properties>
-        <pkgVersion>${postgres.version}</pkgVersion>
         <opennms.osgi.export.pkg>
-            org.postgresql*;version=${project.version},
+            org.postgresql*;version=${project.version}
         </opennms.osgi.export.pkg>
         <pkgArtifactId>postgresql</pkgArtifactId>
         <pkgGroupId>postgresql</pkgGroupId>

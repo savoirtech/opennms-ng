@@ -13,8 +13,10 @@
         <bundle>mvn:org.apache.servicemix.bundles/org.apache.servicemix.bundles.jakarta-regexp</bundle>
         <bundle>mvn:org.apache.servicemix.bundles/org.apache.servicemix.bundles.castor</bundle>
         <bundle>mvn:commons-io/commons-io/${commons-io.version}</bundle>
+        <bundle>mvn:org/opennms/bundles/postgresql/${project.version}</bundle>
 
         <bundle>mvn:org.opennms.bundles/c3p0/${c3p0.version}</bundle>
+
         <bundle>mvn:org.opennms.bundles/opennms-model/${opennms.version}</bundle>
         <bundle>mvn:org.opennms.bundles/opennms-util/${opennms.version}</bundle>
         <bundle>mvn:org.opennms.bundles/opennms-config-model/${opennms.version}</bundle>
@@ -26,7 +28,7 @@
         <bundle>mvn:commons-dbcp/commons-dbcp/${commons-dbcp.version}</bundle>
         <bundle>mvn:org.opennms.ng/enhydra-xa/${project.version}</bundle>
         <bundle>mvn:org.hsqldb/hsqldb/${hsqldb.version}</bundle>
-        <bundle>mvn:org.opennms.ng/oracle/${project.version}</bundle>
+        <bundle>mvn:org/opennms/bundles/postgresql/${project.version}</bundle>
         <bundle>mvn:org.opennms.ng/opennms-datasource/${project.version}</bundle>
     </feature>
 
