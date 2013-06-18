@@ -23,17 +23,15 @@
         <pkgArtifactId>opennms-core-snmp-api</pkgArtifactId>
         <pkgVersion>${opennms.version}</pkgVersion>
 
-        <opennms.osgi.import.pkg>
-            *
-        </opennms.osgi.import.pkg>
-        <opennms.osgi.export.pkg>
-            *
-        </opennms.osgi.export.pkg>
+        <opennms.osgi.export>
+            org.opennms.netmgmt.config;version=${opennms.version},
+            org.opennms.netmgmt.snmp;version=${opennms.version},
+            org.opennms.netmgmt.snmp.internal;version=${opennms.version}
+        </opennms.osgi.export>
 
         <opennms.osgi.include.resource>{maven-resources},{maven-dependencies}</opennms.osgi.include.resource>
         <opennms.osgi.failok>true</opennms.osgi.failok>
-        <!-- Trying to get around dynamic class.forname loading -->
-        <opennms.osgi.dynamic>*</opennms.osgi.dynamic>
+
 
     </properties>
 

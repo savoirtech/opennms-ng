@@ -26,40 +26,42 @@ public class EventTranslator implements Processor {
         //TODO - Move to a central JaxbContext.
         Log xmlEvent = exchange.getIn().getBody(Log.class);
 
-        for (final Event event : xmlEvent.getEvents().getEventCollection()) {
-            if (log.isDebugEnabled()) {
-                // Log the uei, source, and other important aspects
-                final String uuid = event.getUuid();
-                log.debug("Event {");
-                log.debug("  uuid  = " + (uuid != null && uuid.length() > 0 ? uuid : "<not-set>"));
-                log.debug("  uei   = " + event.getUei());
-                log.debug("  src   = " + event.getSource());
-                log.debug("  iface = " + event.getInterface());
-                log.debug("  time  = " + event.getTime());
-                if (event.getParmCollection().size() > 0) {
-                    log.debug("  parms {");
-                    for (final Parm parm : event.getParmCollection()) {
-                        if ((parm.getParmName() != null) && (parm.getValue().getContent() != null)) {
-                            log.debug("    (" + parm.getParmName().trim() + ", " + parm.getValue().getContent().trim() + ")");
+        if (xmlEvent != null && xmlEvent instanceof Log) {
+            for (final Event event : xmlEvent.getEvents().getEventCollection()) {
+                if (log.isDebugEnabled()) {
+                    // Log the uei, source, and other important aspects
+                    final String uuid = event.getUuid();
+                    log.debug("Event {");
+                    log.debug("  uuid  = " + (uuid != null && uuid.length() > 0 ? uuid : "<not-set>"));
+                    log.debug("  uei   = " + event.getUei());
+                    log.debug("  src   = " + event.getSource());
+                    log.debug("  iface = " + event.getInterface());
+                    log.debug("  time  = " + event.getTime());
+                    if (event.getParmCollection().size() > 0) {
+                        log.debug("  parms {");
+                        for (final Parm parm : event.getParmCollection()) {
+                            if ((parm.getParmName() != null) && (parm.getValue().getContent() != null)) {
+                                log.debug("    (" + parm.getParmName().trim() + ", " + parm.getValue().getContent().trim() + ")");
+                            }
                         }
+                        log.debug("  }");
                     }
-                    log.debug("  }");
+                    log.debug("}");
                 }
-                log.debug("}");
-            }
 
-            for (final EventProcessor eventProcessor : eventProcessors) {
-                try {
-                    eventProcessor.process(xmlEvent.getHeader(), event);
-                } catch (SQLException e) {
-                    log.warn(
-                        "Unable to process event using processor " + eventProcessor + "; not processing with any later processors.  Exception: " + e,
-                        e);
-                    break;
-                } catch (Throwable t) {
-                    log.warn("Unknown exception processing event with processor " + eventProcessor
-                        + "; not processing with any later processors.  Exception: " + t, t);
-                    break;
+                for (final EventProcessor eventProcessor : eventProcessors) {
+                    try {
+                        eventProcessor.process(xmlEvent.getHeader(), event);
+                    } catch (SQLException e) {
+                        log.warn(
+                            "Unable to process event using processor " + eventProcessor + "; not processing with any later processors.  Exception: "
+                                + e, e);
+                        break;
+                    } catch (Throwable t) {
+                        log.warn("Unknown exception processing event with processor " + eventProcessor
+                            + "; not processing with any later processors.  Exception: " + t, t);
+                        break;
+                    }
                 }
             }
         }
