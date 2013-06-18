@@ -9,50 +9,19 @@
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
-    <name>OPENNMS :: C3P0</name>
-    <description>OPENNMS C3P0</description>
 
-    <groupId>org.opennms.bundles</groupId>
-    <artifactId>c3p0</artifactId>
-    <version>${c3p0.version}</version>
+    <artifactId>postgres</artifactId>
 
     <packaging>bundle</packaging>
 
-    <properties>
-        <pkgGroupId>org.opennms.bundles</pkgGroupId>
-        <pkgArtifactId>c3p0</pkgArtifactId>
-        <pkgVersion>${c3p0.version}</pkgVersion>
+    <groupId>postgresql</groupId>
 
-        <opennms.osgi.import.pkg>
-            !com.mchange*,
-            *
-        </opennms.osgi.import.pkg>
-        <opennms.osgi.export>
-            com.mchange*;version="${c3p0.version}"
-        </opennms.osgi.export>
-
-        <opennms.osgi.include.resource>{maven-resources},{maven-dependencies}</opennms.osgi.include.resource>
-        <opennms.osgi.failok>true</opennms.osgi.failok>
-
-        <!-- Trying to get around dynamic class.forname loading -->
-        <opennms.osgi.dynamic>*</opennms.osgi.dynamic>
-
-    </properties>
-
-    <dependencies>
-
-        <dependency>
-            <groupId>c3p0</groupId>
-            <artifactId>c3p0</artifactId>
-            <version>${c3p0.version}</version>
-        </dependency>
-
-    </dependencies>
+    <name>OPENNMS :: OSGi ${pkgArtifactId}-${pkgVersion}</name>
+    <description>OPENNMS OSGi ${pkgArtifactId}-${pkgVersion}</description>
 
     <build>
         <plugins>
             <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-shade-plugin</artifactId>
                 <executions>
                     <execution>
@@ -63,10 +32,17 @@
                         <configuration>
                             <artifactSet>
                                 <includes>
-                                    <include>${pkgGroupId}:${pkgArtifactId}</include>
+                                    <include>${pkgGroupId}:postgresql</include>
                                 </includes>
                             </artifactSet>
-
+                            <filters>
+                                <filter>
+                                    <artifact>${pkgGroupId}:postgresql</artifact>
+                                    <excludes>
+                                        <exclude>**</exclude>
+                                    </excludes>
+                                </filter>
+                            </filters>
                             <promoteTransitiveDependencies>true</promoteTransitiveDependencies>
                             <createDependencyReducedPom>true</createDependencyReducedPom>
                         </configuration>
@@ -75,5 +51,21 @@
             </plugin>
         </plugins>
     </build>
+    <properties>
+        <pkgVersion>${postgres.version}</pkgVersion>
+        <opennms.osgi.export.pkg>
+            org.postgresql*;version=${project.version},
+        </opennms.osgi.export.pkg>
+        <pkgArtifactId>postgresql</pkgArtifactId>
+        <pkgGroupId>postgresql</pkgGroupId>
+    </properties>
+
+    <dependencies>
+        <dependency>
+            <groupId>postgresql</groupId>
+            <artifactId>postgresql</artifactId>
+            <version>${postgres.version}</version>
+        </dependency>
+    </dependencies>
 
 </project>

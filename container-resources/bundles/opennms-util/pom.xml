@@ -40,11 +40,12 @@
             org.opennms.netmgt.config.opennmsDataSources;version="${opennms.version},
             org.opennms.netmgt.config.opennmsDataSources.descriptors;version="${opennms.version},
             org.opennms.core.db;version="${opennms.version}",
-
         </opennms.osgi.export.pkg>
 
         <opennms.osgi.include.resource>{maven-resources},{maven-dependencies}</opennms.osgi.include.resource>
         <opennms.osgi.failok>true</opennms.osgi.failok>
+        <!-- Trying to get around dynamic class.forname loading -->
+        <opennms.osgi.dynamic>*</opennms.osgi.dynamic>
 
     </properties>
 

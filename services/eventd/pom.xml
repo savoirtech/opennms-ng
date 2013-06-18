@@ -14,4 +14,38 @@
     <name>OPENNMS :: Daemons :: Eventd</name>
     <description>OPENNMS Daemons :: Eventd</description>
 
+    <packaging>bundle</packaging>
+    <properties>
+
+        <opennms.osgi.import.pkg>
+            org.exolab.castor.xml.util,
+            *
+        </opennms.osgi.import.pkg>
+
+        <opennms.osgi.export.pkg>
+            org.opennms.ng.services.eventd*
+        </opennms.osgi.export.pkg>
+
+        <opennms.osgi.dynamic>org.exolab.castor.xml.util,</opennms.osgi.dynamic>
+
+    </properties>
+
+    <dependencies>
+        <dependency>
+            <groupId>org.apache.camel</groupId>
+            <artifactId>camel-jms</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>org.opennms.ng</groupId>
+            <artifactId>eventconfig</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>org.opennms</groupId>
+            <artifactId>opennms-dao</artifactId>
+        </dependency>
+
+    </dependencies>
+
 </project>

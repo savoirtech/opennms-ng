@@ -50,6 +50,7 @@ import org.opennms.netmgt.xml.eventconf.Events.EventCriteria;
 import org.opennms.netmgt.xml.eventconf.Events.Partition;
 import org.opennms.netmgt.xml.eventconf.Field;
 import org.springframework.core.io.Resource;
+import org.springframework.core.io.UrlResource;
 import org.springframework.dao.DataAccessException;
 import org.springframework.dao.DataRetrievalFailureException;
 
@@ -216,8 +217,10 @@ public class DefaultEventConfDao implements EventConfDao {
         return m_events;
     }
 
-    public void setConfigResource(Resource configResource) throws IOException {
-        m_configResource = configResource;
+    public void setConfigResource(String configResource) throws IOException {
+
+        m_configResource = new UrlResource(configResource);
+        //m_configResource = configResource;
     }
 
     private Events load(Unmarshaller unmarshaller) throws Exception {

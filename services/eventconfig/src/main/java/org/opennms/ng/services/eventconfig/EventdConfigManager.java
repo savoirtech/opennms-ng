@@ -47,7 +47,7 @@ import org.opennms.netmgt.config.eventd.EventdConfiguration;
  *
  * @author david
  */
-public class EventdConfigManager {
+public class EventdConfigManager implements EventdConfigManagement {
     private final ReadWriteLock m_globalLock = new ReentrantReadWriteLock();
     private final Lock m_readLock = m_globalLock.readLock();
     private final Lock m_writeLock = m_globalLock.writeLock();
@@ -90,10 +90,12 @@ public class EventdConfigManager {
         }
     }
 
+    @Override
     public Lock getReadLock() {
         return m_readLock;
     }
     
+    @Override
     public Lock getWriteLock() {
         return m_writeLock;
     }
@@ -103,6 +105,7 @@ public class EventdConfigManager {
      *
      * @return the IP address on which eventd listens for TCP connections
      */
+    @Override
     public String getTCPIpAddress() {
         getReadLock().lock();
         try {
@@ -117,6 +120,7 @@ public class EventdConfigManager {
      *
      * @return the port on which eventd listens for TCP connections
      */
+    @Override
     public int getTCPPort() {
         getReadLock().lock();
         try {
@@ -131,6 +135,7 @@ public class EventdConfigManager {
      *
      * @return the IP address on which eventd listens for UDP packets
      */
+    @Override
     public String getUDPIpAddress() {
         getReadLock().lock();
         try {
@@ -145,6 +150,7 @@ public class EventdConfigManager {
      *
      * @return the port on which eventd listens for UDP data
      */
+    @Override
     public int getUDPPort() {
         getReadLock().lock();
         try {
@@ -159,6 +165,7 @@ public class EventdConfigManager {
      *
      * @return the number of event receivers to be started
      */
+    @Override
     public int getReceivers() {
         getReadLock().lock();
         try {
@@ -173,6 +180,7 @@ public class EventdConfigManager {
      *
      * @return the maximum number of events that can be stored in the incoming event queue
      */
+    @Override
     public int getQueueLength() {
         getReadLock().lock();
         try {
@@ -187,6 +195,7 @@ public class EventdConfigManager {
      *
      * @return string indicating if timeout is to be set on the socket
      */
+    @Override
     public String getSocketSoTimeoutRequired() {
         getReadLock().lock();
         try {
@@ -201,6 +210,7 @@ public class EventdConfigManager {
      *
      * @return timeout is to be set on the socket
      */
+    @Override
     public int getSocketSoTimeoutPeriod() {
         getReadLock().lock();
         try {
@@ -215,6 +225,7 @@ public class EventdConfigManager {
      *
      * @return flag indicating if timeout to be set on the socket is specified <
      */
+    @Override
     public boolean hasSocketSoTimeoutPeriod() {
         getReadLock().lock();
         try {
@@ -229,6 +240,7 @@ public class EventdConfigManager {
      *
      * @return the SQL statement to get the next event ID
      */
+    @Override
     public String getGetNextEventID() {
         getReadLock().lock();
         try {

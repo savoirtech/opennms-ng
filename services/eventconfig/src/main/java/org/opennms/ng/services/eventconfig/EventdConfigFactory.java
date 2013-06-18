@@ -132,8 +132,14 @@ public final class EventdConfigFactory extends EventdConfigManager {
      *             Thrown if the factory has not yet been initialized.
      */
     public static synchronized EventdConfigManager getInstance() {
-        if (!m_loaded) {
-            throw new IllegalStateException("The factory has not been initialized");
+        try {
+            init();
+        } catch (IOException e) {
+            e.printStackTrace();  //TODO
+        } catch (MarshalException e) {
+            e.printStackTrace();  //TODO
+        } catch (ValidationException e) {
+            e.printStackTrace();  //TODO
         }
 
         return m_singleton;

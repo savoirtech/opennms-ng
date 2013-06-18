@@ -64,7 +64,11 @@
         <oracle.jdbc.version>6.0</oracle.jdbc.version>
 
         <pojosr-version>0.1.8</pojosr-version>
+
         <pax-tiny-bundle-version>1.3.1</pax-tiny-bundle-version>
+
+        <postgres.version>9.1-901.jdbc4</postgres.version>
+
         <slf4j.version>1.6.4</slf4j.version>
         <spring.version>3.0.7.RELEASE</spring.version>
 
@@ -402,9 +406,10 @@
                 <artifactId>hsqldb-test-server</artifactId>
                 <version>${project.version}</version>
             </dependency>
+
             <dependency>
                 <groupId>org.opennms.ng</groupId>
-                <artifactId>oracle</artifactId>
+                <artifactId>eventconfig</artifactId>
                 <version>${project.version}</version>
             </dependency>
 
@@ -419,6 +424,12 @@
             <dependency>
                 <groupId>org.opennms</groupId>
                 <artifactId>opennms-config-model</artifactId>
+                <version>${opennms.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>org.opennms</groupId>
+                <artifactId>opennms-dao</artifactId>
                 <version>${opennms.version}</version>
             </dependency>
 

@@ -1,0 +1,76 @@
+<blueprint xmlns="http://www.osgi.org/xmlns/blueprint/v1.0.0"
+           xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+           xmlns:cm="http://aries.apache.org/blueprint/xmlns/blueprint-cm/v1.1.0"
+           xmlns:camel="http://camel.apache.org/schema/blueprint"
+           xmlns:ext="http://aries.apache.org/blueprint/xmlns/blueprint-ext/v1.0.0"
+           xsi:schemaLocation="http://www.osgi.org/xmlns/blueprint/v1.0.0 http://www.osgi.org/xmlns/blueprint/v1.0.0/blueprint.xsd">
+
+    <cm:property-placeholder persistent-id="org.opennms.ng.services.eventd" id="eventd" update-strategy="reload">
+        <cm:default-properties>
+            <cm:property name="openjpa.jdbc.DBDictionary" value="hsql"/>
+        </cm:default-properties>
+    </cm:property-placeholder>
+
+    <bean id="eventdProcessor" class="org.opennms.ng.services.eventd.EventTranslator"/>
+
+    <bean id="eventdRoute" class="org.opennms.ng.services.eventd.EventDRoute">
+        <property name="location" value="jms:eventd"/>
+        <property name="processor" ref="eventdProcessor"/>
+    </bean>
+
+    <!-- The original eventd processors that we will call in the route -->
+
+    <reference id="eventdConfigManager" interface="org.opennms.ng.services.eventconfig.EventdConfigManagement" />
+
+    <reference id="eventConfDao" interface="org.opennms.ng.services.eventconfig.EventConfDao" />
+
+    <bean id="eventWriter" class="org.opennms.ng.services.eventd.processor.JdbcEventWriter">
+        <property name="getNextIdString" ref="getNextEventIdSql"/>
+        <property name="dataSource" ref="dataSource"/>
+        <property name="eventdServiceManager" ref="eventdServiceManager"/>
+    </bean>
+
+    <bean id="eventExpander" class="org.opennms.ng.services.eventconfig.EventExpander" init-method="afterPropertiesSet">
+        <property name="eventConfDao" ref="eventConfDao"/>
+    </bean>
+
+    <bean id="eventdServiceManager" class="org.opennms.ng.services.eventd.DaoEventdServiceManager">
+       <!--
+        <property name="serviceTypeDao" ref="serviceTypeDao"/>
+
+        -->
+    </bean>
+
+    <bean id="getNextEventIdSql" factory-ref="eventdConfigManager" factory-method="getGetNextEventID"/>
+
+    <bean id="dataSource" class="org.opennms.core.db.DataSourceFactoryBean" init-method="afterPropertiesSet" destroy-method="destroy"/>
+
+    <bean id="eventdEventHandler" class="org.opennms.ng.services.eventd.EventTranslator">
+
+        <!-- TODO - These right now are runnables that perform data manipulation, technically they could be processors.  (Same difference)-->
+
+        <property name="eventProcessors">
+            <list>
+                <!--
+                  This EventProcessor can be used to perform regex replacements on incoming parm values.
+                  It was added in 1.11 and because of performance concerns, it is commented-out for now.
+                -->
+                <!-- <ref local="eventParmRegexFilter"/> -->
+
+                <ref component-id="eventExpander"/>
+                <ref component-id="eventWriter"/>
+
+                <!-- TODO Turn this into a subscriber system -->
+
+                <!--
+                <ref local="eventIpcBroadcastProcessor"/>
+                -->
+            </list>
+        </property>
+    </bean>
+
+    <camel:camelContext xmlns="http://camel.apache.org/schema/blueprint" id="eventdRouteContext">
+        <routeBuilder ref="eventdRoute"/>
+    </camel:camelContext>
+
+</blueprint>
