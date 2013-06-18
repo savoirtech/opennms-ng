@@ -15,7 +15,7 @@ import org.slf4j.LoggerFactory;
 
 public class EventTranslator implements Processor {
 
-    private List<EventProcessor> m_eventProcessors;
+    private List<EventProcessor> eventProcessors;
     private EventExpander eventExpander;
     Logger log = LoggerFactory.getLogger(EventTranslator.class);
 
@@ -48,7 +48,7 @@ public class EventTranslator implements Processor {
                 log.debug("}");
             }
 
-            for (final EventProcessor eventProcessor : m_eventProcessors) {
+            for (final EventProcessor eventProcessor : eventProcessors) {
                 try {
                     eventProcessor.process(xmlEvent.getHeader(), event);
                 } catch (SQLException e) {
@@ -63,5 +63,13 @@ public class EventTranslator implements Processor {
                 }
             }
         }
+    }
+
+    public void setEventProcessors(List<EventProcessor> eventProcessors) {
+        this.eventProcessors = eventProcessors;
+    }
+
+    public void setEventExpander(EventExpander eventExpander) {
+        this.eventExpander = eventExpander;
     }
 }

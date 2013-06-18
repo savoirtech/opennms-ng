@@ -2,7 +2,6 @@
            xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
            xmlns:cm="http://aries.apache.org/blueprint/xmlns/blueprint-cm/v1.1.0"
            xmlns:camel="http://camel.apache.org/schema/blueprint"
-           xmlns:ext="http://aries.apache.org/blueprint/xmlns/blueprint-ext/v1.0.0"
            xsi:schemaLocation="http://www.osgi.org/xmlns/blueprint/v1.0.0 http://www.osgi.org/xmlns/blueprint/v1.0.0/blueprint.xsd">
 
     <cm:property-placeholder persistent-id="org.opennms.ng.services.eventd" id="eventd" update-strategy="reload">
@@ -15,18 +14,18 @@
 
     <bean id="eventdRoute" class="org.opennms.ng.services.eventd.EventDRoute">
         <property name="location" value="jms:eventd"/>
-        <property name="processor" ref="eventdProcessor"/>
+        <property name="processor" ref="eventdEventHandler"/>
     </bean>
 
     <!-- The original eventd processors that we will call in the route -->
 
-    <reference id="eventdConfigManager" interface="org.opennms.ng.services.eventconfig.EventdConfigManagement" />
+    <reference id="eventdConfigManager" interface="org.opennms.ng.services.eventconfig.EventdConfigManagement"/>
 
-    <reference id="eventConfDao" interface="org.opennms.ng.services.eventconfig.EventConfDao" />
+    <reference id="eventConfDao" interface="org.opennms.ng.services.eventconfig.EventConfDao"/>
 
     <bean id="eventWriter" class="org.opennms.ng.services.eventd.processor.JdbcEventWriter">
         <property name="getNextIdString" ref="getNextEventIdSql"/>
-        <property name="dataSource" ref="dataSource"/>
+        <property name="dataSource" ref="jta"/>
         <property name="eventdServiceManager" ref="eventdServiceManager"/>
     </bean>
 
@@ -35,15 +34,19 @@
     </bean>
 
     <bean id="eventdServiceManager" class="org.opennms.ng.services.eventd.DaoEventdServiceManager">
-       <!--
-        <property name="serviceTypeDao" ref="serviceTypeDao"/>
+        <!--
+         <property name="serviceTypeDao" ref="serviceTypeDao"/>
 
-        -->
+         -->
     </bean>
 
     <bean id="getNextEventIdSql" factory-ref="eventdConfigManager" factory-method="getGetNextEventID"/>
 
-    <bean id="dataSource" class="org.opennms.core.db.DataSourceFactoryBean" init-method="afterPropertiesSet" destroy-method="destroy"/>
+    <reference id="jta" interface="javax.sql.DataSource"
+               filter="(transactional=true)" availability="mandatory"/>
+
+    <reference id="nonJTA" interface="javax.sql.DataSource"
+               filter="(transactional=false)" availability="mandatory"/>
 
     <bean id="eventdEventHandler" class="org.opennms.ng.services.eventd.EventTranslator">
 
@@ -67,6 +70,19 @@
                 -->
             </list>
         </property>
+    </bean>
+
+    <reference id="jmsConsumerPool" interface="javax.jms.ConnectionFactory" filter="(pooled=false)"/>
+
+    <reference id="jmsProducerPool" interface="javax.jms.ConnectionFactory" filter="(pooled=true)"/>
+
+    <bean id="jmsConfig" class="org.apache.camel.component.jms.JmsConfiguration">
+        <property name="connectionFactory" ref="jmsConsumerPool"/>
+        <property name="templateConnectionFactory" ref="jmsProducerPool"/>
+    </bean>
+
+    <bean id="jms" class="org.apache.camel.component.jms.JmsComponent">
+        <property name="configuration" ref="jmsConfig"/>
     </bean>
 
     <camel:camelContext xmlns="http://camel.apache.org/schema/blueprint" id="eventdRouteContext">

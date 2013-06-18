@@ -10,7 +10,7 @@ public class EventDRoute extends RouteBuilder {
 
     @Override
     public void configure() throws Exception {
-        from("location").process(processor);
+        from(location).process(processor);
     }
 
     public void setLocation(String location) {

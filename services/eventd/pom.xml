@@ -26,7 +26,6 @@
             org.opennms.ng.services.eventd*
         </opennms.osgi.export.pkg>
 
-        <opennms.osgi.dynamic>org.exolab.castor.xml.util,</opennms.osgi.dynamic>
 
     </properties>
 
