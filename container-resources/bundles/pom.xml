@@ -22,6 +22,7 @@
         <module>opennms-model</module>
         <module>opennms-util</module>
         <module>opennms-config-model</module>
+        <module>opennms-core-snmp-api</module>
         <module>postgresql</module>
     </modules>
 
