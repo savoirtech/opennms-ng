@@ -433,6 +433,12 @@
                 <version>${opennms.version}</version>
             </dependency>
 
+            <dependency>
+                <groupId>org.opennms.core.snmp</groupId>
+                <artifactId>org.opennms.core.snmp.implementations.snmp4j</artifactId>
+                <version>${opennms.version}</version>
+            </dependency>
+
             <!-- standard dependencies -->
             <dependency>
                 <groupId>commons-collections</groupId>

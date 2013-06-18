@@ -14,4 +14,11 @@
     <name>OPENNMS :: Daemons :: Trapd</name>
     <description>OPENNMS Daemons :: Trapd</description>
 
+    <dependencies>
+        <dependency>
+            <groupId>org.opennms.core.snmp</groupId>
+            <artifactId>org.opennms.core.snmp.implementations.snmp4j</artifactId>
+            <version>${opennms.version}</version>
+        </dependency>
+    </dependencies>
 </project>

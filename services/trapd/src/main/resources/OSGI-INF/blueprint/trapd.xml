@@ -1,0 +1,18 @@
+<blueprint xmlns="http://www.osgi.org/xmlns/blueprint/v1.0.0"
+           xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+           xmlns:jpa="http://aries.apache.org/xmlns/jpa/v1.1.0"
+           xmlns:tx="http://aries.apache.org/xmlns/transactions/v1.1.0"
+           xmlns:cm="http://aries.apache.org/blueprint/xmlns/blueprint-cm/v1.1.0"
+           xsi:schemaLocation="http://www.osgi.org/xmlns/blueprint/v1.0.0 http://www.osgi.org/xmlns/blueprint/v1.0.0/blueprint.xsd">
+
+    <cm:property-placeholder persistent-id="org.opennms.ng.trapd" id="persistence" update-strategy="reload">
+        <cm:default-properties>
+            <!--cm:property name="openjpa.jdbc.DBDictionary" value="hsql"/-->
+        </cm:default-properties>
+    </cm:property-placeholder>
+
+    <reference id="snmp4jStrategy" interface="org.opennms.netmgt.snmp.SnmpStrategy"
+               filter="(implementation=org.opennms.netmgt.snmp.snmp4j.Snmp4JStrategy)"
+               availability="mandatory"/>
+
+</blueprint>
