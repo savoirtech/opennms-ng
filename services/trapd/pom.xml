@@ -16,6 +16,10 @@
 
     <dependencies>
         <dependency>
+            <groupId>org.apache.camel</groupId>
+            <artifactId>camel-core</artifactId>
+        </dependency>
+        <dependency>
             <groupId>org.opennms.core.snmp</groupId>
             <artifactId>org.opennms.core.snmp.implementations.snmp4j</artifactId>
             <version>${opennms.version}</version>
