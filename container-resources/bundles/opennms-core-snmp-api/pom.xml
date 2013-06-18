@@ -31,7 +31,8 @@
 
         <opennms.osgi.include.resource>{maven-resources},{maven-dependencies}</opennms.osgi.include.resource>
         <opennms.osgi.failok>true</opennms.osgi.failok>
-
+        <!-- Trying to get around dynamic class.forname loading -->
+        <opennms.osgi.dynamic>*</opennms.osgi.dynamic>
 
     </properties>
 
