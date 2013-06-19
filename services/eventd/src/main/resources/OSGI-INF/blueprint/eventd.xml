@@ -13,7 +13,7 @@
     <bean id="eventdProcessor" class="org.opennms.ng.services.eventd.EventTranslator"/>
 
     <bean id="eventdRoute" class="org.opennms.ng.services.eventd.EventDRoute">
-        <property name="location" value="jms:eventd"/>
+        <property name="location" value="jms:eventd?concurrentConsumers=5"/>
         <property name="processor" ref="eventdEventHandler"/>
     </bean>
 
@@ -25,7 +25,7 @@
 
     <bean id="eventWriter" class="org.opennms.ng.services.eventd.processor.JdbcEventWriter">
         <property name="getNextIdString" ref="getNextEventIdSql"/>
-        <property name="dataSource" ref="jta"/>
+        <property name="dataSource" ref="nonJTA"/>
         <property name="eventdServiceManager" ref="eventdServiceManager"/>
     </bean>
 

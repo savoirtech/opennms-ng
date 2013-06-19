@@ -16,13 +16,20 @@ public class EventDTester extends RouteBuilder {
             public void process(Exchange exchange) throws Exception {
                 Log log = new Log();
                 Events events = new Events();
-                events.addEvent(EventUtils.createNodeAddedEvent("A", 1, "LABEL", "BOB"));
+
+                for(int i=0;i<1000;i++) {
+                    events.addEvent(EventUtils.createNodeAddedEvent("SAVOIR", 1, "LABEL", "BOB"));
+                }
+
 
                 Header header = new Header();
                 header.setCreated("NOW");
 
                 log.setHeader(header);
                 log.setEvents(events);
+
+
+
 
                 exchange.getIn().setBody(log);
             }

@@ -1,5 +1,5 @@
-<blueprint xmlns="http://www.osgi.org/xmlns/blueprint/v1.0.0"
-           xmlns:cm="http://aries.apache.org/blueprint/xmlns/blueprint-cm/v1.1.0">
+<blueprint xmlns:cm="http://aries.apache.org/blueprint/xmlns/blueprint-cm/v1.1.0"
+           xmlns="http://www.osgi.org/xmlns/blueprint/v1.0.0">
     <!-- Allows us to use system properties as variables in this configuration file -->
 
     <cm:property-placeholder persistent-id="org.opennms.ng.amqpool" update-strategy="reload">
@@ -10,44 +10,46 @@
             <cm:property name="amq.connection.maximumActiveSessionPerConnection" value="10"/>
             <cm:property name="amq.client.connection.url"
                          value="tcp://localhost:61616?wireFormat.cacheEnabled=false&amp;wireFormat.tightEncodingEnabled=false&amp;wireFormat.maxInactivityDurationInitalDelay=30000&amp;jms.prefetchPolicy.all=1"/>
-            <cm:property name="username" value="karaf" />
+            <cm:property name="username" value="karaf"/>
             <cm:property name="password" value="karaf"/>
         </cm:default-properties>
     </cm:property-placeholder>
 
-    <bean id="amqXAConnectionFactory" class="org.apache.activemq.ActiveMQXAConnectionFactory">
+    <bean id="amqXAConnectionFactory" class="org.apache.activemq.ActiveMQConnectionFactory">
         <property name="brokerURL" value="${amq.connection.url}"/>
         <property name="userName" value="${username}"/>
         <property name="password" value="${password}"/>
     </bean>
 
-    <bean id="amqPooledConnectionFactory" class="org.apache.activemq.pool.JcaPooledConnectionFactory" init-method="start" destroy-method="stop">
+    <bean id="amqPooledConnectionFactory" class="org.apache.activemq.pool.PooledConnectionFactory" init-method="start" destroy-method="stop">
         <property name="maxConnections" value="${amq.connection.maxConnections}"/>
         <property name="maximumActiveSessionPerConnection" value="${amq.connection.maximumActiveSessionPerConnection}"/>
         <property name="connectionFactory" ref="amqXAConnectionFactory"/>
     </bean>
-
-    <bean id="resourceManager" class="org.apache.activemq.pool.ActiveMQResourceManager" init-method="recoverResource">
-        <property name="transactionManager" ref="recoverableTxManager"/>
-        <property name="connectionFactory" ref="amqXAConnectionFactory"/>
-        <property name="resourceName" value="activemq.default"/>
-    </bean>
+    <!--
+ <bean id="resourceManager" class="org.apache.activemq.pool.ActiveMQResourceManager" init-method="recoverResource">
+     <property name="transactionManager" ref="recoverableTxManager"/>
+     <property name="connectionFactory" ref="amqXAConnectionFactory"/>
+     <property name="resourceName" value="activemq.default"/>
+ </bean>
+ -->
 
     <!-- Client single config -->
 
-    <bean id="amqClientConnectionFactory" class="org.apache.activemq.ActiveMQXAConnectionFactory">
+    <bean id="amqClientConnectionFactory" class="org.apache.activemq.ActiveMQConnectionFactory">
         <property name="brokerURL" value="${amq.client.connection.url}"/>
         <property name="userName" value="${username}"/>
         <property name="password" value="${password}"/>
     </bean>
 
+    <!--
     <bean id="resourceClientManager" class="org.apache.activemq.pool.ActiveMQResourceManager"
           init-method="recoverResource">
         <property name="transactionManager" ref="recoverableTxManager"/>
         <property name="connectionFactory" ref="amqClientConnectionFactory"/>
         <property name="resourceName" value="activemq.client.default"/>
     </bean>
-
+        -->
     <!-- Transactions -->
 
     <reference id="transactionManager" interface="javax.transaction.TransactionManager"/>

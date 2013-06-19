@@ -1,14 +1,14 @@
 <blueprint xmlns="http://www.osgi.org/xmlns/blueprint/v1.0.0"
-           xmlns:cm="http://aries.apache.org/blueprint/xmlns/blueprint-cm/v1.0.0">
+           xmlns:cm="http://aries.apache.org/blueprint/xmlns/blueprint-cm/v1.1.0">
 
-    <cm:property-placeholder persistent-id="org.opennms.ng.datasource" id="datasource">
+    <cm:property-placeholder persistent-id="org.opennms.ng.datasource" id="datasource" update-strategy="reload">
         <cm:default-properties>
 
             <!-- OPENNMS.jdbc Drivers -->
-            <cm:property name="opennms.jdbc.driverClassName" value="org.hsqldb.jdbc.JDBCDriver"/>
-            <cm:property name="opennms.jdbc.url" value="jdbc:hsqldb:hsql://localhost/opennms"/>
-            <cm:property name="opennms.jdbc.username" value="sa"/>
-            <cm:property name="opennms.jdbc.password" value=""/>
+            <cm:property name="opennms.jdbc.driverClassName" value="org.postgresql.Driver"/>
+            <cm:property name="opennms.jdbc.url" value="jdbc:postgresql://localhost:5432/opennms"/>
+            <cm:property name="opennms.jdbc.username" value="opennms"/>
+            <cm:property name="opennms.jdbc.password" value="opennms"/>
 
             <!-- Connection Pooling DBCP -->
             <cm:property name="opennms.jdbc.initialSize" value="5"/>
