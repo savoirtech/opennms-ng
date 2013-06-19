@@ -86,11 +86,6 @@ public class Trapd implements TrapProcessorFactory, TrapNotificationListener {
     private int status = START_PENDING;
 
     /**
-     * The queue processing thread
-     */
-    private TrapQueueProcessorFactory processorFactory;
-
-    /**
      * Trapd IP manager.  Contains IP address -> node ID mapping.
      */
     private TrapdIpMgr trapdIpMgr;
@@ -103,7 +98,7 @@ public class Trapd implements TrapProcessorFactory, TrapNotificationListener {
 
     private boolean registeredForTraps;
 
-    private TrapdComponent component;
+    private TrapdConsumer consumer;
 
     /**
      * <P>
@@ -114,8 +109,8 @@ public class Trapd implements TrapProcessorFactory, TrapNotificationListener {
      * </P>
      *
      */
-    public Trapd(TrapdComponent component) {
-        this.component = component;
+    public Trapd(TrapdConsumer consumer) {
+        this.consumer = consumer;
     }
 
     /**
@@ -131,8 +126,11 @@ public class Trapd implements TrapProcessorFactory, TrapNotificationListener {
     /** {@inheritDoc} */
     @Override
     public void trapReceived(TrapNotification trapNotification) {
-        component.onTrap(trapNotification);
-        //m_backlogQ.submit(processorFactory.getInstance(trapNotification));
+        try{
+            consumer.onTrap(trapNotification);
+        }catch (Exception e) {
+            LogUtils.errorf(this, e, "trapReceived: error occured in processing the trap notification");
+        }
     }
 
     /**
@@ -275,6 +273,10 @@ public class Trapd implements TrapProcessorFactory, TrapNotificationListener {
         LogUtils.warnf(this, "Error Processing Received Trap: error = " + error + (msg != null ? ", ref = " + msg : ""));
     }
 
+    public void setTrapdIpMgr(TrapdIpMgr trapdIpMgr) {
+        this.trapdIpMgr = trapdIpMgr;
+    }
+
     public void setSnmpTrapAddress(String snmpTrapAddress) {
         this.snmpTrapAddress = snmpTrapAddress;
     }
@@ -287,7 +289,4 @@ public class Trapd implements TrapProcessorFactory, TrapNotificationListener {
         this.snmpV3Users = snmpV3Users;
     }
 
-    public void setProcessorFactory(TrapQueueProcessorFactory processorFactory) {
-        this.processorFactory = processorFactory;
-    }
 }

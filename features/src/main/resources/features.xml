@@ -39,6 +39,11 @@
 
     </feature>
 
+    <feature name="trapd" version="${project.version}">
+        <feature name="eventd"/>
+        <bundle>mvn:org.opennms.ng/trapd/${project.version}</bundle>
+    </feature>
+
     <feature name="datasource" version="${project.version}">
         <bundle>mvn:commons-dbcp/commons-dbcp/${commons-dbcp.version}</bundle>
         <bundle>mvn:org.opennms.ng/enhydra-xa/${project.version}</bundle>
