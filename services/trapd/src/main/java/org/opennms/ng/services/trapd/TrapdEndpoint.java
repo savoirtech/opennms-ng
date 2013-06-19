@@ -6,6 +6,13 @@ import org.apache.camel.Producer;
 import org.apache.camel.impl.DefaultEndpoint;
 
 public class TrapdEndpoint extends DefaultEndpoint {
+
+    private TrapdConfiguration config;
+
+    public TrapdEndpoint(TrapdConfiguration config) {
+        this.config = config;
+    }
+
     @Override
     public Producer createProducer() throws Exception {
         throw new UnsupportedOperationException("Producer not supported for trapd endpoint");
@@ -13,11 +20,15 @@ public class TrapdEndpoint extends DefaultEndpoint {
 
     @Override
     public Consumer createConsumer(Processor processor) throws Exception {
-        return null;  //To change body of implemented methods use File | Settings | File Templates.
+        return new TrapdConsumer(this, processor);
     }
 
     @Override
     public boolean isSingleton() {
         return true;
+    }
+
+    public TrapdConfiguration getConfig() {
+        return config;
     }
 }
