@@ -9,8 +9,8 @@
     <feature name="eventd" version="${project.version}">
         <!-- Shaded bundles to incorporate Castor into OSGi -->
 
-        <feature name="spring-jdbc"/>
-        <feature name="spring-orm"/>
+        <feature>spring-jdbc</feature>
+        <feature>spring-orm"</feature>
 
         <bundle>mvn:org.opennms.ng/amq-pool/${project.version}</bundle>
 
@@ -23,7 +23,7 @@
         <bundle>mvn:org.opennms.bundles/postgresql/${project.version}</bundle>
 
         <bundle>mvn:org.opennms.bundles/c3p0/${c3p0.version}</bundle>
-        <bundle>mvn:org.opennms.ng/opennms-datasource/${project.version}</bundle>
+        <bundle>mvn:org.opennms.ng/datasource/${project.version}</bundle>
 
         <bundle>mvn:org.opennms.bundles/dnsjava/${project.version}</bundle>
         <bundle>mvn:org.opennms.bundles/opennms-util/${opennms.version}</bundle>
