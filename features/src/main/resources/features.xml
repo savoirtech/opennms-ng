@@ -40,7 +40,7 @@
     </feature>
 
     <feature name="trapd" version="${project.version}">
-        <feature name="eventd"/>
+        <feature>eventd</feature>
         <bundle>mvn:org.opennms.ng/trapd/${project.version}</bundle>
     </feature>
 

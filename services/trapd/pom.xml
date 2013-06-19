@@ -10,6 +10,15 @@
     <modelVersion>4.0.0</modelVersion>
 
     <artifactId>trapd</artifactId>
+    <packaging>bundle</packaging>
+
+    <properties>
+        <opennms.osgi.import.pkg>
+            org.hibernate*;resolution:=optional,
+            org.springframework.security.core*;resolution:=optional,
+            *
+        </opennms.osgi.import.pkg>
+    </properties>
 
     <name>OPENNMS :: Daemons :: Trapd</name>
     <description>OPENNMS Daemons :: Trapd</description>
