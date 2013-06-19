@@ -23,11 +23,14 @@
         <pkgArtifactId>opennms-core-snmp-api</pkgArtifactId>
         <pkgVersion>${opennms.version}</pkgVersion>
 
-        <opennms.osgi.export>
-            org.opennms.netmgmt.config;version=${opennms.version},
-            org.opennms.netmgmt.snmp;version=${opennms.version},
-            org.opennms.netmgmt.snmp.internal;version=${opennms.version}
-        </opennms.osgi.export>
+        <opennms.osgi.export.pkg>
+            org.opennms.netmgt.config;version="${opennms.version}",
+            org.opennms.netmgt.snmp;version="${opennms.version}",
+            org.opennms.netmgt.snmp.internal;version="${opennms.version}",
+            org.opennms.netmgt.snmp.snmp4j;version="${opennms.version}",
+            org.snmp4j*
+
+        </opennms.osgi.export.pkg>
 
         <opennms.osgi.include.resource>{maven-resources},{maven-dependencies}</opennms.osgi.include.resource>
         <opennms.osgi.failok>true</opennms.osgi.failok>
@@ -50,19 +53,6 @@
             <version>${opennms.version}</version>
         </dependency>
 
-        <!-- CORE XML -->
-
-        <!--dependency>
-            <groupId>org.opennms.core</groupId>
-            <artifactId>org.opennms.core.xml</artifactId>
-            <version>${opennms.version}</version>
-        </dependency>
-
-        <dependency>
-            <groupId>org.opennms.core</groupId>
-            <artifactId>org.opennms.core.db</artifactId>
-            <version>${opennms.version}</version>
-        </dependency-->
 
     </dependencies>
 

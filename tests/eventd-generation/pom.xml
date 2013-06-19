@@ -14,9 +14,18 @@
     <packaging>bundle</packaging>
 
     <properties>
+
+        <opennms.osgi.import>
+            org.opennms.netmgt,
+            *
+        </opennms.osgi.import>
+
         <opennms.osgi.export.pkg>
             org.opennms.ng.testing.eventd
         </opennms.osgi.export.pkg>
+
+        <!-- Trying to get around dynamic class.forname loading -->
+        <opennms.osgi.dynamic>*</opennms.osgi.dynamic>
     </properties>
 
     <dependencies>
@@ -33,6 +42,11 @@
         <dependency>
             <groupId>org.opennms</groupId>
             <artifactId>opennms-dao</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>org.opennms.bundles</groupId>
+            <artifactId>opennms-model</artifactId>
         </dependency>
 
     </dependencies>

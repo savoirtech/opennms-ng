@@ -106,6 +106,7 @@
         <opennms.osgi.include.resource>{maven-resources},{maven-dependencies}</opennms.osgi.include.resource>
         <opennms.osgi.failok>true</opennms.osgi.failok>
 
+
     </properties>
 
     <dependencies>

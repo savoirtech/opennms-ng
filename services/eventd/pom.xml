@@ -19,6 +19,7 @@
 
         <opennms.osgi.import.pkg>
             org.exolab.castor.xml.util,
+            org.opennms.netmgt,
             *
         </opennms.osgi.import.pkg>
 

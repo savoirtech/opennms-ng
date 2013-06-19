@@ -20,7 +20,6 @@
         <module>features</module>
         <module>tests</module>
 
-
     </modules>
 
     <properties>
@@ -439,6 +438,12 @@
             <dependency>
                 <groupId>org.opennms.core.snmp</groupId>
                 <artifactId>org.opennms.core.snmp.implementations.snmp4j</artifactId>
+                <version>${opennms.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>org.opennms.bundles</groupId>
+                <artifactId>opennms-model</artifactId>
                 <version>${opennms.version}</version>
             </dependency>
 

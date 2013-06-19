@@ -11,7 +11,7 @@ import org.opennms.netmgt.xml.event.Log;
 public class EventDTester extends RouteBuilder {
     @Override
     public void configure() throws Exception {
-        from("jetty:localhost:10999/event").process(new Processor() {
+        from("jetty:http://0.0.0.0:10999/event").process(new Processor() {
             @Override
             public void process(Exchange exchange) throws Exception {
                 Log log = new Log();
