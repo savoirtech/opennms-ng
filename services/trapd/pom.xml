@@ -24,5 +24,14 @@
             <artifactId>org.opennms.core.snmp.implementations.snmp4j</artifactId>
             <version>${opennms.version}</version>
         </dependency>
+        <dependency>
+            <groupId>org.opennms.bundles</groupId>
+            <artifactId>opennms-util</artifactId>
+            <version>${opennms.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.opennms.ng</groupId>
+            <artifactId>eventconfig</artifactId>
+        </dependency>
     </dependencies>
 </project>
