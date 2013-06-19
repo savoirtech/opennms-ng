@@ -8,7 +8,7 @@ import java.util.Map;
 public class TrapdComponent extends DefaultComponent {
 
     @Override
-    protected Endpoint createEndpoint(String s, String s2, Map<String, Object> stringObjectMap) throws Exception {
+    protected Endpoint createEndpoint(String uri, String remaining, Map<String, Object> parameters) throws Exception {
         return null;  //To change body of implemented methods use File | Settings | File Templates.
     }
 
