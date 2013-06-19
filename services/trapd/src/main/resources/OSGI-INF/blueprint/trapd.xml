@@ -9,17 +9,54 @@
 
     <cm:property-placeholder persistent-id="org.opennms.ng.trapd" update-strategy="reload">
         <cm:default-properties>
-            <!--cm:property name="openjpa.jdbc.DBDictionary" value="hsql"/-->
+            <cm:property name="snmpTrapAddress" value="127.0.0.1" />
+            <cm:property name="snmpTrapPort" value="10062" />
+            <cm:property name="newSuspectOnTrap" value="false" />
         </cm:default-properties>
     </cm:property-placeholder>
-
 
     <reference id="snmp4jStrategy" interface="org.opennms.netmgt.snmp.SnmpStrategy"
                filter="(implementation=org.opennms.netmgt.snmp.snmp4j.Snmp4JStrategy)"
                availability="mandatory"/>
 
-    <camel:camelContext xmlns="http://camel.apache.org/schema/blueprint" id="superciasCamel">
-        <routeBuilder ref="superciasRoute"/>
+    <reference id="eventConfDao" interface="org.opennms.ng.services.eventconfig.EventConfDao" availability="mandatory"/>
+
+    <reference id="jta" interface="javax.sql.DataSource"
+               filter="(transactional=true)" availability="mandatory"/>
+
+    <reference id="nonJTA" interface="javax.sql.DataSource"
+               filter="(transactional=false)" availability="mandatory"/>
+
+    <bean id="trapdIpMgr" class="org.opennms.netmgt.trapd,JdbcTrapdIpMgr">
+        <property name="datasource" ref="nonJTA" />
+    </bean>
+
+    <bean id="trapd" class="org.opennms.ng.services.trapd.TrapdComponent">
+        <property name="trapdIpMgr" ref="trapdIpMgr"/>
+        <property name="snmpTrapAddress" value="${snmpTrapAddress}" />
+        <property name="snmpTrapPort" value="${snmpTrapPort}" />
+        <property name="snmpV3Users">
+            <list>
+            </list>
+        </property>
+    </bean>
+
+    <bean id="trapdEventProcessor" class="org.opennms.ng.services.trapd.TrapdEventProcessor" init-method="init">
+        <property name="eventConfDao" ref="eventConfDao" />
+        <property name="newSuspectOnTrap" value="${newSuspectOnTrap}" />
+        <property name="destinationURI" value="jmd:eventd"/>
+        <property name="camelContext" ref="camelContext" />
+    </bean>
+
+    <camel:camelContext xmlns="http://camel.apache.org/schema/blueprint" id="camelContext">
+        <route>
+            <from uri="trapd://${snmpTrapAddress}:${snmpPort}"/>
+            <to uri="seda:trapdQueue"/>
+        </route>
+        <route>
+            <from uri="seda:trapdQueue"/>
+            <to uri="trapdEventProcessor"/>
+        </route>
     </camel:camelContext>
 
 </blueprint>
