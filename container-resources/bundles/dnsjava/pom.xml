@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xmlns="http://maven.apache.org/POM/4.0.0"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <parent>
+        <artifactId>bundles</artifactId>
+        <groupId>org.opennms.ng</groupId>
+        <version>1.0-SNAPSHOT</version>
+    </parent>
+    <modelVersion>4.0.0</modelVersion>
+
+    <artifactId>dnsjava</artifactId>
+
+    <packaging>bundle</packaging>
+
+    <groupId>org.opennms.bundles</groupId>
+    <name>OPENNMS :: OSGi ${pkgArtifactId}-${pkgVersion}</name>
+    <description>OPENNMS OSGi ${pkgArtifactId}-${pkgVersion}</description>
+
+    <build>
+        <plugins>
+            <plugin>
+                <artifactId>maven-shade-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>shade</goal>
+                        </goals>
+                        <configuration>
+                            <artifactSet>
+                                <includes>
+                                    <include>${pkgGroupId}:postgresql</include>
+                                </includes>
+                            </artifactSet>
+                            <filters>
+                                <filter>
+                                    <artifact>${pkgGroupId}:postgresql</artifact>
+                                    <excludes>
+                                        <exclude>**</exclude>
+                                    </excludes>
+                                </filter>
+                            </filters>
+                            <promoteTransitiveDependencies>true</promoteTransitiveDependencies>
+                            <createDependencyReducedPom>true</createDependencyReducedPom>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
+    <properties>
+
+        <opennms.osgi.import.pkg>
+            junit.framework;resolution:=optional,
+            sun.net.spi.nameservice;resolution:=optional ,
+            *
+        </opennms.osgi.import.pkg>
+        <opennms.osgi.export.pkg>
+            org.xbill*;version=${dnsjava.version}
+        </opennms.osgi.export.pkg>
+        <pkgArtifactId>dnsjava</pkgArtifactId>
+        <pkgGroupId>dnsjava</pkgGroupId>
+    </properties>
+
+    <dependencies>
+        <dependency>
+            <groupId>dnsjava</groupId>
+            <artifactId>dnsjava</artifactId>
+            <version>${dnsjava.version}</version>
+        </dependency>
+    </dependencies>
+
+</project>
