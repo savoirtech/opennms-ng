@@ -55,13 +55,13 @@
     <bean id="trapdEventProcessor" class="org.opennms.ng.services.trapd.TrapdEventProcessor" init-method="init">
         <property name="eventConfDao" ref="eventConfDao"/>
         <property name="newSuspectOnTrap" value="${newSuspectOnTrap}"/>
-        <property name="destinationURI" value="jmd:eventd"/>
+        <property name="destinationURI" value="jms:eventd"/>
         <property name="camelContext" ref="camelContext"/>
     </bean>
 
     <camel:camelContext xmlns="http://camel.apache.org/schema/blueprint" id="camelContext">
         <route>
-            <from uri="trapd://${snmpTrapAddress}:${snmpPort}"/>
+            <from uri="trapd://${snmpTrapAddress}:${snmpTrapPort}"/>
             <to uri="seda:trapdQueue"/>
         </route>
         <route>

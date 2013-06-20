@@ -39,7 +39,6 @@ import org.apache.log4j.Logger;
 import org.opennms.core.utils.InetAddressUtils;
 import org.opennms.core.utils.LogUtils;
 import org.opennms.netmgt.snmp.SnmpStrategy;
-import org.opennms.netmgt.snmp.SnmpUtils;
 import org.opennms.netmgt.snmp.SnmpV3User;
 import org.opennms.netmgt.snmp.TrapNotification;
 import org.opennms.netmgt.snmp.TrapNotificationListener;
@@ -81,6 +80,9 @@ public class Trapd implements TrapProcessorFactory, TrapNotificationListener {
     public static final int PAUSE_PENDING = 5;
     public static final int PAUSED = 6;
     public static final int RESUME_PENDING = 7;
+
+
+    private SnmpStrategy strategy;
 
     /**
      * The last status sent to the service control manager.
@@ -152,7 +154,7 @@ public class Trapd implements TrapProcessorFactory, TrapNotificationListener {
             LogUtils.infof(this, "Listening on %s:%d", address == null ? "[all interfaces]" : InetAddressUtils.str(address), snmpTrapPort);
             //SnmpUtils.registerForTraps(this, this, address, snmpTrapPort, snmpV3Users);
 
-            SnmpStrategy strategy = new Snmp4JStrategy();
+            strategy = new Snmp4JStrategy();
             strategy.registerForTraps(this, this, address, snmpTrapPort, snmpV3Users);
 
             registeredForTraps = true;
@@ -245,7 +247,9 @@ public class Trapd implements TrapProcessorFactory, TrapNotificationListener {
         try {
             if (registeredForTraps) {
                 LogUtils.debugf(this, "stop: Closing SNMP trap session.");
-                SnmpUtils.unregisterForTraps(this, getInetAddress(), snmpTrapPort);
+
+                strategy.unregisterForTraps(this,getInetAddress(),snmpTrapPort);
+             //   SnmpUtils.unregisterForTraps(this, getInetAddress(), snmpTrapPort);
                 LogUtils.debugf(this, "stop: SNMP trap session closed.");
             } else {
                 LogUtils.debugf(this, "stop: not attemping to closing SNMP trap session--it was never opened");
