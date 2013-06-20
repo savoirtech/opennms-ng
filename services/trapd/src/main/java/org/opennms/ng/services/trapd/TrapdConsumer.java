@@ -29,9 +29,6 @@ public class TrapdConsumer extends DefaultConsumer {
         trapd.setProcessorFactory(config.getTrapQueueProcessorFactory());
         trapd.setBacklogQ(config.getBacklogQ());
 
-        ProducerTemplate template = endpoint.getCamelContext().createProducerTemplate();
-        trapd.setTemplate(template);
-
         trapd.onInit();
     }
 
