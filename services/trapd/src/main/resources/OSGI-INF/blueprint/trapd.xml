@@ -13,9 +13,11 @@
         </cm:default-properties>
     </cm:property-placeholder>
 
+    <!--
     <reference id="snmp4jStrategy" interface="org.opennms.netmgt.snmp.SnmpStrategy" availability="mandatory"/>
+        -->
 
-    <reference id="eventConfDao" interface="org.opennms.ng.services.eventconfig.EventConfDao" availability="mandatory"/>
+    <reference id="eventConfDao" interface="org.opennms.ng.services.eventconfig.EventConfDao"/>
 
     <reference id="jta" interface="javax.sql.DataSource"
                filter="(transactional=true)" availability="mandatory"/>
@@ -24,7 +26,7 @@
                filter="(transactional=false)" availability="mandatory"/>
 
     <bean id="trapdIpMgr" class="org.opennms.ng.services.trapd.JdbcTrapdIpMgr">
-        <property name="datasource" ref="nonJTA"/>
+        <property name="dataSource" ref="nonJTA"/>
     </bean>
 
     <bean id="trapd" class="org.opennms.ng.services.trapd.TrapdComponent">

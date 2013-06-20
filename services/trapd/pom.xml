@@ -16,8 +16,17 @@
         <opennms.osgi.import.pkg>
             org.hibernate*;resolution:=optional,
             org.springframework.security.core*;resolution:=optional,
+            org.opennms.netmgt.snmp.snmp4j,
             *
         </opennms.osgi.import.pkg>
+
+        <opennms.osgi.export.pkg>
+                    org.opennms.ng.services.trapd*
+                </opennms.osgi.export.pkg>
+
+        <!-- Trying to get around dynamic class.forname loading -->
+                <opennms.osgi.dynamic>*</opennms.osgi.dynamic>
+
     </properties>
 
     <name>OPENNMS :: Daemons :: Trapd</name>

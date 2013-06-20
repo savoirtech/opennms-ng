@@ -9,7 +9,8 @@ public class TrapdEndpoint extends DefaultEndpoint {
 
     private TrapdConfiguration config;
 
-    public TrapdEndpoint(TrapdConfiguration config) {
+    public TrapdEndpoint(String uri, String remaining, TrapdComponent trapdComponent, TrapdConfiguration config) {
+        super(uri, trapdComponent);
         this.config = config;
     }
 

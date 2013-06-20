@@ -1,11 +1,11 @@
 package org.opennms.ng.services.trapd;
 
+import java.util.List;
+import java.util.Map;
+
 import org.apache.camel.Endpoint;
 import org.apache.camel.impl.DefaultComponent;
 import org.opennms.netmgt.snmp.SnmpV3User;
-
-import java.util.List;
-import java.util.Map;
 
 public class TrapdComponent extends DefaultComponent {
 
@@ -16,6 +16,9 @@ public class TrapdComponent extends DefaultComponent {
     private Integer snmpTrapPort;
 
     private List<SnmpV3User> snmpV3Users;
+
+    public TrapdComponent() {
+    }
 
     public TrapdComponent(TrapdIpMgr trapdIpMgr, String snmpTrapAddress, Integer snmpTrapPort, List<SnmpV3User> snmpV3Users) {
         this.trapdIpMgr = trapdIpMgr;
@@ -33,7 +36,7 @@ public class TrapdComponent extends DefaultComponent {
         config.setSnmpTrapPort(snmpTrapPort);
         config.setSnmpV3Users(snmpV3Users);
 
-        return new TrapdEndpoint(config);
+        return new TrapdEndpoint(uri,remaining,this,config);
     }
 
     public void setTrapdIpMgr(TrapdIpMgr trapdIpMgr) {
@@ -51,4 +54,6 @@ public class TrapdComponent extends DefaultComponent {
     public void setSnmpV3Users(List<SnmpV3User> snmpV3Users) {
         this.snmpV3Users = snmpV3Users;
     }
+
+
 }
