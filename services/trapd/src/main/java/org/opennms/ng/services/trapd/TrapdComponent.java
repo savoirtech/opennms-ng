@@ -2,6 +2,7 @@ package org.opennms.ng.services.trapd;
 
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ExecutorService;
 
 import org.apache.camel.Endpoint;
 import org.apache.camel.impl.DefaultComponent;
@@ -17,14 +18,20 @@ public class TrapdComponent extends DefaultComponent {
 
     private List<SnmpV3User> snmpV3Users;
 
+    private TrapQueueProcessorFactory trapQueueProcessorFactory;
+
+    private ExecutorService backlogQ;
+
     public TrapdComponent() {
     }
 
-    public TrapdComponent(TrapdIpMgr trapdIpMgr, String snmpTrapAddress, Integer snmpTrapPort, List<SnmpV3User> snmpV3Users) {
+    public TrapdComponent(TrapdIpMgr trapdIpMgr, String snmpTrapAddress, Integer snmpTrapPort, List<SnmpV3User> snmpV3Users, TrapQueueProcessorFactory trapQueueProcessorFactory, ExecutorService backlogQ) {
         this.trapdIpMgr = trapdIpMgr;
         this.snmpTrapAddress = snmpTrapAddress;
         this.snmpTrapPort = snmpTrapPort;
         this.snmpV3Users = snmpV3Users;
+        this.trapQueueProcessorFactory = trapQueueProcessorFactory;
+        this.backlogQ = backlogQ;
     }
 
     @Override
@@ -35,6 +42,8 @@ public class TrapdComponent extends DefaultComponent {
         config.setSnmpTrapAddress(snmpTrapAddress);
         config.setSnmpTrapPort(snmpTrapPort);
         config.setSnmpV3Users(snmpV3Users);
+        config.setTrapQueueProcessorFactory(trapQueueProcessorFactory);
+        config.setBacklogQ(backlogQ);
 
         return new TrapdEndpoint(uri,remaining,this,config);
     }
@@ -55,5 +64,11 @@ public class TrapdComponent extends DefaultComponent {
         this.snmpV3Users = snmpV3Users;
     }
 
+    public void setTrapQueueProcessorFactory(TrapQueueProcessorFactory trapQueueProcessorFactory) {
+        this.trapQueueProcessorFactory = trapQueueProcessorFactory;
+    }
 
+    public void setBacklogQ(ExecutorService backlogQ) {
+        this.backlogQ = backlogQ;
+    }
 }

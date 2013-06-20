@@ -3,6 +3,7 @@ package org.opennms.ng.services.trapd;
 import org.apache.camel.Endpoint;
 import org.apache.camel.Exchange;
 import org.apache.camel.Processor;
+import org.apache.camel.ProducerTemplate;
 import org.apache.camel.impl.DefaultConsumer;
 import org.apache.camel.impl.DefaultExchange;
 import org.opennms.netmgt.snmp.TrapNotification;
@@ -20,25 +21,18 @@ public class TrapdConsumer extends DefaultConsumer {
 
         TrapdConfiguration config = ((TrapdEndpoint) endpoint).getConfig();
 
-        trapd = new Trapd(this);
+        trapd = new Trapd();
         trapd.setTrapdIpMgr(config.getTrapdIpMgr());
         trapd.setSnmpTrapAddress(config.getSnmpTrapAddress());
         trapd.setSnmpTrapPort(config.getSnmpTrapPort());
         trapd.setSnmpV3Users(config.getSnmpV3Users());
+        trapd.setProcessorFactory(config.getTrapQueueProcessorFactory());
+        trapd.setBacklogQ(config.getBacklogQ());
+
+        ProducerTemplate template = endpoint.getCamelContext().createProducerTemplate();
+        trapd.setTemplate(template);
 
         trapd.onInit();
-    }
-
-
-
-
-
-    public void onTrap(TrapNotification trapNotification) throws Exception {
-
-        Exchange exchange = new DefaultExchange(endpoint);
-        exchange.getIn().setBody(trapNotification);
-
-        processor.process(exchange);
     }
 
     @Override

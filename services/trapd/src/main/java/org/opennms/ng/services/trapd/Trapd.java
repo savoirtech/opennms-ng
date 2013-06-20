@@ -33,7 +33,9 @@ import java.lang.reflect.UndeclaredThrowableException;
 import java.net.InetAddress;
 import java.sql.SQLException;
 import java.util.List;
+import java.util.concurrent.ExecutorService;
 
+import org.apache.camel.ProducerTemplate;
 import org.apache.log4j.Category;
 import org.apache.log4j.Logger;
 import org.opennms.core.utils.InetAddressUtils;
@@ -102,7 +104,11 @@ public class Trapd implements TrapProcessorFactory, TrapNotificationListener {
 
     private boolean registeredForTraps;
 
-    private TrapdConsumer consumer;
+    private ExecutorService backlogQ;
+
+    private TrapQueueProcessorFactory processorFactory;
+
+    private ProducerTemplate template;
 
     /**
      * <P>
@@ -113,8 +119,7 @@ public class Trapd implements TrapProcessorFactory, TrapNotificationListener {
      * </P>
      *
      */
-    public Trapd(TrapdConsumer consumer) {
-        this.consumer = consumer;
+    public Trapd() {
     }
 
     /**
@@ -130,11 +135,9 @@ public class Trapd implements TrapProcessorFactory, TrapNotificationListener {
     /** {@inheritDoc} */
     @Override
     public void trapReceived(TrapNotification trapNotification) {
-        try{
-            consumer.onTrap(trapNotification);
-        }catch (Exception e) {
-            LogUtils.errorf(this, e, "trapReceived: error occured in processing the trap notification");
-        }
+
+        backlogQ.submit(processorFactory.getInstance(trapNotification));
+
     }
 
     /**
@@ -263,6 +266,8 @@ public class Trapd implements TrapProcessorFactory, TrapNotificationListener {
 
         LogUtils.debugf(this, "stop: Stopping queue processor.");
 
+        backlogQ.shutdown();
+
         status = STOPPED;
 
         LogUtils.debugf(this, "stop: Trapd stopped");
@@ -299,4 +304,15 @@ public class Trapd implements TrapProcessorFactory, TrapNotificationListener {
         this.snmpV3Users = snmpV3Users;
     }
 
+    public void setBacklogQ(ExecutorService backlogQ) {
+        this.backlogQ = backlogQ;
+    }
+
+    public void setProcessorFactory(TrapQueueProcessorFactory processorFactory) {
+        this.processorFactory = processorFactory;
+    }
+
+    public void setTemplate(ProducerTemplate template) {
+        this.template = template;
+    }
 }

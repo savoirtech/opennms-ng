@@ -29,6 +29,12 @@
         <property name="dataSource" ref="nonJTA"/>
     </bean>
 
+    <bean id="trapdBacklogQ" class="java.util.concurrent.Executors" factory-method="newFixedThreadPool"/>
+
+    <bean id="processorFactory" class="org.opennms.ng.services.trapd.TrapQueueProcessorFactory">
+        <property name="eventManager" ref="eventIpcManager"/>
+    </bean>
+
     <bean id="trapd" class="org.opennms.ng.services.trapd.TrapdComponent">
         <property name="trapdIpMgr" ref="trapdIpMgr"/>
         <property name="snmpTrapAddress" value="${opennms.trapd.snmpTrapAddress}"/>
@@ -37,6 +43,8 @@
             <list>
             </list>
         </property>
+        <property name="backlogQ" ref="trapdBacklogQ" />
+        <property name="trapQueueProcessorFactory" ref="processorFactory"/>
     </bean>
 
     <reference id="jmsConsumerPool" interface="javax.jms.ConnectionFactory" filter="(pooled=false)"/>
@@ -63,10 +71,6 @@
         <route>
             <from uri="trapd://${opennms.trapd.snmpTrapAddress}:${opennms.trapd.snmpTrapPort}"/>
             <to uri="seda:trapdQueue"/>
-        </route>
-        <route>
-            <from uri="seda:trapdQueue?concurrentConsumers=5"/>
-            <to uri="trapdEventProcessor"/>
         </route>
     </camel:camelContext>
 

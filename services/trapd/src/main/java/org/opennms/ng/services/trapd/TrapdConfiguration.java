@@ -3,6 +3,7 @@ package org.opennms.ng.services.trapd;
 import org.opennms.netmgt.snmp.SnmpV3User;
 
 import java.util.List;
+import java.util.concurrent.ExecutorService;
 
 public class TrapdConfiguration {
 
@@ -13,6 +14,10 @@ public class TrapdConfiguration {
     private Integer snmpTrapPort;
 
     private List<SnmpV3User> snmpV3Users;
+
+    private TrapQueueProcessorFactory trapQueueProcessorFactory;
+
+    private ExecutorService backlogQ;
 
     public TrapdIpMgr getTrapdIpMgr() {
         return trapdIpMgr;
@@ -44,5 +49,21 @@ public class TrapdConfiguration {
 
     public void setSnmpV3Users(List<SnmpV3User> snmpV3Users) {
         this.snmpV3Users = snmpV3Users;
+    }
+
+    public TrapQueueProcessorFactory getTrapQueueProcessorFactory() {
+        return trapQueueProcessorFactory;
+    }
+
+    public void setTrapQueueProcessorFactory(TrapQueueProcessorFactory trapQueueProcessorFactory) {
+        this.trapQueueProcessorFactory = trapQueueProcessorFactory;
+    }
+
+    public ExecutorService getBacklogQ() {
+        return backlogQ;
+    }
+
+    public void setBacklogQ(ExecutorService backlogQ) {
+        this.backlogQ = backlogQ;
     }
 }
