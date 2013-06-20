@@ -39,6 +39,37 @@
 
     </feature>
 
+    <feature name="eventconfig" version="${project.version}">
+        <!-- Shaded bundles to incorporate Castor into OSGi -->
+
+        <feature>spring-jdbc</feature>
+        <feature>spring-orm"</feature>
+
+        <bundle>mvn:org.opennms.ng/amq-pool/${project.version}</bundle>
+
+        <bundle>mvn:org.apache.servicemix.bundles/org.apache.servicemix.bundles.oro</bundle>
+        <bundle>mvn:org.apache.servicemix.bundles/org.apache.servicemix.bundles.jakarta-regexp</bundle>
+        <bundle>mvn:org.apache.servicemix.bundles/org.apache.servicemix.bundles.castor</bundle>
+        <bundle>mvn:commons-io/commons-io/${commons-io.version}</bundle>
+        <bundle>mvn:commons-dbcp/commons-dbcp/${commons-dbcp.version}</bundle>
+        <bundle>mvn:org.opennms.ng/enhydra-xa/${project.version}</bundle>
+        <bundle>mvn:org.opennms.bundles/postgresql/${project.version}</bundle>
+
+        <bundle>mvn:org.opennms.bundles/c3p0/${c3p0.version}</bundle>
+        <bundle>mvn:org.opennms.ng/datasource/${project.version}</bundle>
+
+        <bundle>mvn:org.opennms.bundles/dnsjava/${project.version}</bundle>
+        <bundle>mvn:org.opennms.bundles/opennms-util/${opennms.version}</bundle>
+        <bundle>mvn:org.opennms.bundles/opennms-core-snmp-api/${opennms.version}</bundle>
+
+        <bundle>mvn:org.opennms.bundles/opennms-model/${opennms.version}</bundle>
+
+        <bundle>mvn:org.opennms.bundles/opennms-config-model/${opennms.version}</bundle>
+
+        <bundle>mvn:org.opennms.ng/eventconfig/${project.version}</bundle>
+
+    </feature>
+
     <feature name="trapd" version="${project.version}">
         <feature>eventd</feature>
         <bundle>mvn:org.opennms.ng/trapd/${project.version}</bundle>
