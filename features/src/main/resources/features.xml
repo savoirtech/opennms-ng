@@ -10,7 +10,7 @@
         <!-- Shaded bundles to incorporate Castor into OSGi -->
 
         <feature>spring-jdbc</feature>
-        <feature>spring-orm"</feature>
+        <feature>spring-orm</feature>
 
         <bundle>mvn:org.opennms.ng/amq-pool/${project.version}</bundle>
 
@@ -43,7 +43,7 @@
         <!-- Shaded bundles to incorporate Castor into OSGi -->
 
         <feature>spring-jdbc</feature>
-        <feature>spring-orm"</feature>
+        <feature>spring-orm</feature>
 
         <bundle>mvn:org.opennms.ng/amq-pool/${project.version}</bundle>
 
