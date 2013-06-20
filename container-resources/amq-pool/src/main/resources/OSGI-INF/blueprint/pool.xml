@@ -9,7 +9,7 @@
             <cm:property name="amq.connection.maxConnections" value="8"/>
             <cm:property name="amq.connection.maximumActiveSessionPerConnection" value="10"/>
             <cm:property name="amq.client.connection.url"
-                         value="tcp://localhost:61616?wireFormat.cacheEnabled=false&amp;wireFormat.tightEncodingEnabled=false&amp;wireFormat.maxInactivityDurationInitalDelay=30000&amp;jms.prefetchPolicy.all=1"/>
+                         value="tcp://localhost:61616?wireFormat.cacheEnabled=false&amp;wireFormat.tightEncodingEnabled=false&amp;wireFormat.maxInactivityDurationInitalDelay=30000&amp;jms.prefetchPolicy.all=5"/>
             <cm:property name="username" value="karaf"/>
             <cm:property name="password" value="karaf"/>
         </cm:default-properties>

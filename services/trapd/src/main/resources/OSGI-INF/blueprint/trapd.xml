@@ -29,12 +29,17 @@
         <property name="dataSource" ref="nonJTA"/>
     </bean>
 
-    <bean id="trapdBacklogQ" class="java.util.concurrent.Executors" factory-method="newFixedThreadPool"/>
+    <bean id="trapdBacklogQ" class="java.util.concurrent.Executors" factory-method="newFixedThreadPool">
+        <argument value="2"/>
+    </bean>
 
-    <bean id="processorFactory" class="org.opennms.ng.services.trapd.TrapQueueProcessorFactory">
-        <property name="eventManager" ref="eventIpcManager"/>
+    <bean id="processorFactory" class="org.opennms.ng.services.trapd.TrapQueueProcessorFactory" init-method="init">
+
         <property name="camelContext" ref="camelContext"/>
-        <property name="destinationURI" value="jms:eventd" />
+        <property name="destinationURI" value="jms:eventd"/>
+
+        <property name="eventConfDao" ref="eventConfDao"/>
+        <property name="newSuspectOnTrap" value="${opennms.trapd.newSuspectOnTrap}"/>
     </bean>
 
     <bean id="trapd" class="org.opennms.ng.services.trapd.TrapdComponent">
@@ -45,7 +50,7 @@
             <list>
             </list>
         </property>
-        <property name="backlogQ" ref="trapdBacklogQ" />
+        <property name="backlogQ" ref="trapdBacklogQ"/>
         <property name="trapQueueProcessorFactory" ref="processorFactory"/>
     </bean>
 

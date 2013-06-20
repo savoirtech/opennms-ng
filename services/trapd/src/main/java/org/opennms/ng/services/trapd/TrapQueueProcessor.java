@@ -1,18 +1,19 @@
 package org.opennms.ng.services.trapd;
 
+import java.net.InetAddress;
+import java.util.concurrent.Callable;
+
 import org.apache.camel.ProducerTemplate;
+import org.apache.commons.pool.ObjectPool;
 import org.opennms.core.concurrent.WaterfallCallable;
 import org.opennms.core.utils.InetAddressUtils;
 import org.opennms.core.utils.ThreadCategory;
 import org.opennms.netmgt.model.events.EventBuilder;
-import org.opennms.netmgt.model.events.EventIpcManager;
 import org.opennms.netmgt.snmp.TrapNotification;
 import org.opennms.netmgt.xml.event.Event;
 import org.opennms.netmgt.xml.eventconf.Logmsg;
 import org.opennms.ng.services.eventconfig.EventConfDao;
 
-import java.net.InetAddress;
-import java.util.concurrent.Callable;
 
 import static org.opennms.core.utils.InetAddressUtils.addr;
 
@@ -32,23 +33,24 @@ class TrapQueueProcessor implements WaterfallCallable {
      * The name of the local host.
      */
     private static final String LOCALHOST_ADDRESS = InetAddressUtils.getLocalHostName();
-
     /**
      * Whether or not a newSuspect event should be generated with a trap from an
      * unknown IP address
      */
     private Boolean newSuspect;
-
     /**
      * The event configuration DAO that we use to convert from traps to events.
      */
     private EventConfDao eventConfDao;
-
     private TrapNotification trapNotification;
-
-    private ProducerTemplate template;
-
     private String destinationURI;
+    private ObjectPool pool;
+
+    /**
+     * The constructor
+     */
+    public TrapQueueProcessor() {
+    }
 
     /**
      * Process a V2 trap and convert it to an event for transmission.
@@ -156,7 +158,22 @@ class TrapQueueProcessor implements WaterfallCallable {
         }
 
         // send the event to eventd
-        template.sendBody(destinationURI, event);
+
+        ProducerTemplate template=null;
+        try {
+            template = (ProducerTemplate) pool.borrowObject();
+            template.sendBody(destinationURI, event);
+        } catch (Exception e) {
+            e.printStackTrace();  //TODO
+        } finally {
+            if (template != null) {
+                try {
+                    pool.returnObject(template);
+                } catch (Exception e) {
+                    e.printStackTrace();  //TODO
+                }
+            }
+        }
 
         log().debug("Trap successfully converted and sent to eventd with UEI " + event.getUei());
 
@@ -182,13 +199,21 @@ class TrapQueueProcessor implements WaterfallCallable {
         bldr.setHost(LOCALHOST_ADDRESS);
 
         // send the event to eventd
-        template.sendBody(destinationURI, bldr.getEvent());
-    }
-
-    /**
-     * The constructor
-     */
-    public TrapQueueProcessor() {
+        ProducerTemplate template = null;
+        try {
+            template = (ProducerTemplate) pool.borrowObject();
+            template.sendBody(destinationURI, bldr.getEvent());
+        } catch (Exception e) {
+            e.printStackTrace();  //TODO
+        } finally {
+            if (template != null) {
+                try {
+                    pool.returnObject(template);
+                } catch (Exception e) {
+                    e.printStackTrace();  //TODO
+                }
+            }
+        }
     }
 
     private ThreadCategory log() {
@@ -235,12 +260,18 @@ class TrapQueueProcessor implements WaterfallCallable {
         trapNotification = info;
     }
 
-    void setTemplate(ProducerTemplate template) {
-        this.template = template;
-    }
+
 
     void setDestinationURI(String destinationURI) {
         this.destinationURI = destinationURI;
+    }
+
+    public ObjectPool getPool() {
+        return pool;
+    }
+
+    void setPool(ObjectPool pool) {
+        this.pool = pool;
     }
 }
 

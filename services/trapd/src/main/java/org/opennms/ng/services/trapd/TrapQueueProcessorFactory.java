@@ -1,12 +1,14 @@
 package org.opennms.ng.services.trapd;
 
+import javax.annotation.Resource;
+
 import org.apache.camel.CamelContext;
 import org.apache.camel.ProducerTemplate;
-import org.opennms.netmgt.model.events.EventIpcManager;
+import org.apache.commons.pool.ObjectPool;
+import org.apache.commons.pool.PoolUtils;
+import org.apache.commons.pool.impl.StackObjectPool;
 import org.opennms.netmgt.snmp.TrapNotification;
 import org.opennms.ng.services.eventconfig.EventConfDao;
-
-import javax.annotation.Resource;
 
 /**
  * This factory constructs {@link TrapQueueProcessor} instances.
@@ -19,6 +21,21 @@ public class TrapQueueProcessorFactory {
      */
     @Resource(name = "newSuspectOnTrap")
     private Boolean newSuspectOnTrap;
+    /**
+     * The event configuration DAO that we use to convert from traps to events.
+     */
+    private EventConfDao eventConfDao;
+    private ProducerTemplate template;
+    private String destinationURI;
+    private CamelContext camelContext;
+    private ObjectPool pool;
+
+    /**
+     * The constructor
+     */
+    public TrapQueueProcessorFactory() {
+
+    }
 
     /**
      * @return the newSuspectOnTrap
@@ -34,31 +51,21 @@ public class TrapQueueProcessorFactory {
         this.newSuspectOnTrap = newSuspectOnTrap;
     }
 
-    /**
-     * The event configuration DAO that we use to convert from traps to events.
-     */
-    private EventConfDao eventConfDao;
+    public void init() {
 
-    private ProducerTemplate template;
-
-    private String destinationURI;
-
-    private CamelContext camelContext;
-
-    /**
-     * The constructor
-     */
-    public TrapQueueProcessorFactory() {
+        pool = PoolUtils.erodingPool(new StackObjectPool(new ContextProducerPool(camelContext)));
         template = camelContext.createProducerTemplate();
     }
 
     public TrapQueueProcessor getInstance(TrapNotification info) {
         TrapQueueProcessor retval = new TrapQueueProcessor();
+        retval.setPool(pool);
         retval.setEventConfDao(eventConfDao);
         retval.setDestinationURI(destinationURI);
-        retval.setTemplate(template);
+
         retval.setNewSuspect(newSuspectOnTrap);
         retval.setTrapNotification(info);
+
         return retval;
     }
 

@@ -91,7 +91,7 @@ public class EventTranslator implements Processor {
 
         long stop = System.currentTimeMillis();
         long time = stop - start;
-        System.out.println("Processing " + numEvents + " events - time " + time + " ms.");
+        //System.out.println("Processing " + numEvents + " events - time " + time + " ms.");
     }
 
     public void setEventProcessors(List<EventProcessor> eventProcessors) {
