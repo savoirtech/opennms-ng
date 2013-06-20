@@ -21,10 +21,11 @@ public class EventTranslator implements Processor {
 
     @Override
     public void process(Exchange exchange) throws Exception {
+        // System.out.println("Incoming data " + exchange.getIn().getBody());
         long start = System.currentTimeMillis();
         long numEvents = 0;
-        Event singelEvent = exchange.getIn(Event.class);
-
+        Event singelEvent = exchange.getIn().getBody(Event.class);
+        // System.out.println("Event " + singelEvent);
         if (singelEvent != null && singelEvent instanceof Event) {
 
             for (final EventProcessor eventProcessor : eventProcessors) {

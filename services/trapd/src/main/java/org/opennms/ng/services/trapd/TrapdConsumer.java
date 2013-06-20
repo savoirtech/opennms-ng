@@ -29,6 +29,10 @@ public class TrapdConsumer extends DefaultConsumer {
         trapd.onInit();
     }
 
+
+
+
+
     public void onTrap(TrapNotification trapNotification) throws Exception {
 
         Exchange exchange = new DefaultExchange(endpoint);
