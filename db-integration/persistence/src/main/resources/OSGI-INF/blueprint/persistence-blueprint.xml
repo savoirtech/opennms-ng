@@ -12,7 +12,7 @@
         </cm:default-properties>
     </cm:property-placeholder>
 
-    <bean id="versionDao" class="com.xtrakter.xbus.persistence.dao.jpa.VersionJpaDao">
+    <bean id="versionDao" class="org.opennms.ng.persistence.dao.jpa.VersionJpaDao">
         <tx:transaction method="*" value="Required"/>
         <jpa:context property="entityManager" unitname="opennms-jpa">
             <jpa:map>
@@ -21,11 +21,11 @@
         </jpa:context>
     </bean>
 
-    <bean id="versionSvc" class="com.xtrakter.xbus.persistence.service.impl.VersionServiceImpl">
+    <bean id="versionSvc" class="org.opennms.ng.persistence.service.impl.VersionServiceImpl">
         <property name="versionDao" ref="versionDao"/>
     </bean>
 
-    <service ref="versionSvc" interface="com.xtrakter.xbus.persistence.service.VersionService">
+    <service ref="versionSvc" interface="org.opennms.ng.persistence.service.VersionService">
     </service>
 
     <reference id="jta" interface="javax.sql.DataSource" filter="(transactional=true)" availability="mandatory"/>
