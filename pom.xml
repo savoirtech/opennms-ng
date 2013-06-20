@@ -118,7 +118,7 @@
         <opennms.osgi.symbolic.name>${project.groupId}.${project.artifactId}</opennms.osgi.symbolic.name>
         <opennms.osgi.exclude.dependencies>false</opennms.osgi.exclude.dependencies>
         <opennms.osgi.export.pkg>
-            org.opennms.*
+            org.opennms.ng*
         </opennms.osgi.export.pkg>
         <!--opennms.osgi.import>
             !org.opennms.*,

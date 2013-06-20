@@ -38,12 +38,14 @@ import org.apache.log4j.Category;
 import org.apache.log4j.Logger;
 import org.opennms.core.utils.InetAddressUtils;
 import org.opennms.core.utils.LogUtils;
+import org.opennms.netmgt.snmp.SnmpStrategy;
 import org.opennms.netmgt.snmp.SnmpUtils;
 import org.opennms.netmgt.snmp.SnmpV3User;
 import org.opennms.netmgt.snmp.TrapNotification;
 import org.opennms.netmgt.snmp.TrapNotificationListener;
 import org.opennms.netmgt.snmp.TrapProcessor;
 import org.opennms.netmgt.snmp.TrapProcessorFactory;
+import org.opennms.netmgt.snmp.snmp4j.Snmp4JStrategy;
 
 /**
  * <p>
@@ -148,7 +150,11 @@ public class Trapd implements TrapProcessorFactory, TrapNotificationListener {
         try {
             InetAddress address = getInetAddress();
             LogUtils.infof(this, "Listening on %s:%d", address == null ? "[all interfaces]" : InetAddressUtils.str(address), snmpTrapPort);
-            SnmpUtils.registerForTraps(this, this, address, snmpTrapPort, snmpV3Users);
+            //SnmpUtils.registerForTraps(this, this, address, snmpTrapPort, snmpV3Users);
+
+            SnmpStrategy strategy = new Snmp4JStrategy();
+            strategy.registerForTraps(this, this, address, snmpTrapPort, snmpV3Users);
+
             registeredForTraps = true;
 
             LogUtils.debugf(this, "init: Creating the trap session");
