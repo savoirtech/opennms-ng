@@ -83,7 +83,6 @@ public class Trapd implements TrapProcessorFactory, TrapNotificationListener {
     public static final int PAUSED = 6;
     public static final int RESUME_PENDING = 7;
 
-
     private SnmpStrategy strategy;
 
     /**
@@ -107,8 +106,6 @@ public class Trapd implements TrapProcessorFactory, TrapNotificationListener {
     private ExecutorService backlogQ;
 
     private TrapQueueProcessorFactory processorFactory;
-
-    private ProducerTemplate template;
 
     /**
      * <P>
@@ -312,7 +309,4 @@ public class Trapd implements TrapProcessorFactory, TrapNotificationListener {
         this.processorFactory = processorFactory;
     }
 
-    public void setTemplate(ProducerTemplate template) {
-        this.template = template;
-    }
 }

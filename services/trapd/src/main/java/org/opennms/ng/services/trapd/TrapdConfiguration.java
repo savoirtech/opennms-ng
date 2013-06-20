@@ -66,4 +66,5 @@ public class TrapdConfiguration {
     public void setBacklogQ(ExecutorService backlogQ) {
         this.backlogQ = backlogQ;
     }
+
 }

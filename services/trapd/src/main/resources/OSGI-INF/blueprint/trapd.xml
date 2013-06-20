@@ -33,6 +33,8 @@
 
     <bean id="processorFactory" class="org.opennms.ng.services.trapd.TrapQueueProcessorFactory">
         <property name="eventManager" ref="eventIpcManager"/>
+        <property name="camelContext" ref="camelContext"/>
+        <property name="destinationURI" value="jms:eventd" />
     </bean>
 
     <bean id="trapd" class="org.opennms.ng.services.trapd.TrapdComponent">
@@ -60,12 +62,12 @@
         <property name="configuration" ref="jmsConfig"/>
     </bean>
 
-    <bean id="trapdEventProcessor" class="org.opennms.ng.services.trapd.TrapdEventProcessor" init-method="init">
+    <!--bean id="trapdEventProcessor" class="org.opennms.ng.services.trapd.TrapdEventProcessor" init-method="init">
         <property name="eventConfDao" ref="eventConfDao"/>
         <property name="newSuspectOnTrap" value="${opennms.trapd.newSuspectOnTrap}"/>
         <property name="destinationURI" value="jms:eventd"/>
         <property name="camelContext" ref="camelContext"/>
-    </bean>
+    </bean-->
 
     <camel:camelContext xmlns="http://camel.apache.org/schema/blueprint" id="camelContext">
         <route>
