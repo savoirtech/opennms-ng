@@ -18,6 +18,7 @@
     <properties>
         <opennms.osgi.export.pkg></opennms.osgi.export.pkg>
         <opennms.osgi.import.pkg>
+            org.postgresql;resolution:=optional,
             org.hsqldb;resolution:=optional,
             com.oracle*;resolution:=optional,
             javax.sql,
