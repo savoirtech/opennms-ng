@@ -249,7 +249,7 @@ public class DefaultEventConfDao implements EventConfDao {
 
             Events events = load(unmarshaller);
 
-            events.loadEventFiles(m_configResource, unmarshaller);
+            events.loadEventFiles(m_configResource);
 
             m_partition = new EnterpriseIdPartition();
             events.initialize(m_partition);
@@ -284,4 +284,5 @@ public class DefaultEventConfDao implements EventConfDao {
         }
     }
 }
+
 
