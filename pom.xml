@@ -72,7 +72,7 @@
         <postgres.version>9.1-901.jdbc4</postgres.version>
         <postgres.bundle.version>9.1.0.901</postgres.bundle.version>
 
-        <slf4j.version>1.6.4</slf4j.version>
+        <slf4j.version>1.7.4</slf4j.version>
         <spring.version>3.0.7.RELEASE</spring.version>
 
         <!-- JDK Info -->

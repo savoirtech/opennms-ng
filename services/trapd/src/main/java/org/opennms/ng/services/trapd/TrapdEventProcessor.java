@@ -5,18 +5,21 @@ import org.apache.camel.Exchange;
 import org.apache.camel.Processor;
 import org.apache.camel.ProducerTemplate;
 import org.opennms.core.utils.InetAddressUtils;
-import org.opennms.core.utils.ThreadCategory;
 import org.opennms.netmgt.model.events.EventBuilder;
 import org.opennms.netmgt.snmp.TrapNotification;
 import org.opennms.netmgt.xml.event.Event;
 import org.opennms.netmgt.xml.eventconf.Logmsg;
 import org.opennms.ng.services.eventconfig.EventConfDao;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.net.InetAddress;
 
 import static org.opennms.core.utils.InetAddressUtils.addr;
 
 public class TrapdEventProcessor implements Processor {
+
+    private static final Logger LOG = LoggerFactory.getLogger(TrapdEventProcessor.class);
 
     private static final String LOCALHOST_ADDRESS = InetAddressUtils.getLocalHostName();
 
@@ -57,9 +60,9 @@ public class TrapdEventProcessor implements Processor {
         try {
             processTrapEvent(((EventCreator)notification.getTrapProcessor()).getEvent());
         } catch (IllegalArgumentException e) {
-            log().info(e.getMessage());
+            LOG.info(e.getMessage());
         } catch (Throwable e) {
-            log().error("Unexpected error processing trap: " + e, e);
+            LOG.error("Unexpected error processing trap: " + e, e);
         }
     }
 
@@ -83,7 +86,7 @@ public class TrapdEventProcessor implements Processor {
             if (logmsg != null) {
                 final String dest = logmsg.getDest();
                 if ("discardtraps".equals(dest)) {
-                    log().debug("Trap discarded due to matching event having logmsg dest == discardtraps");
+                    LOG.debug("Trap discarded due to matching event having logmsg dest == discardtraps");
                     return;
                 }
             }
@@ -92,13 +95,13 @@ public class TrapdEventProcessor implements Processor {
         // send the event to eventd
         template.sendBody(destinationURI, event);
 
-        log().debug("Trap successfully converted and sent to eventd with UEI " + event.getUei());
+        LOG.debug("Trap successfully converted and sent to eventd with UEI " + event.getUei());
 
         if (!event.hasNodeid() && newSuspectOnTrap) {
             sendNewSuspectEvent(InetAddressUtils.str(trapInterface));
 
-            if (log().isDebugEnabled()) {
-                log().debug("Sent newSuspectEvent for interface: " + trapInterface);
+            if (LOG.isDebugEnabled()) {
+                LOG.debug("Sent newSuspectEvent for interface: " + trapInterface);
             }
         }
     }
@@ -120,7 +123,4 @@ public class TrapdEventProcessor implements Processor {
         template.sendBody(destinationURI, bldr.getEvent());
     }
 
-    private ThreadCategory log() {
-        return ThreadCategory.getInstance(getClass());
-    }
 }

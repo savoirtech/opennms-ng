@@ -28,17 +28,14 @@
 
 package org.opennms.ng.services.eventd.adaptors;
 
-import java.util.List;
-import javax.management.InstanceNotFoundException;
-import javax.management.MBeanServer;
-import javax.management.MBeanServerFactory;
-import javax.management.MalformedObjectNameException;
-import javax.management.ObjectName;
-
 import org.apache.commons.lang.builder.HashCodeBuilder;
-import org.opennms.core.utils.ThreadCategory;
 import org.opennms.netmgt.xml.event.Event;
 import org.opennms.netmgt.xml.event.EventReceipt;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import javax.management.*;
+import java.util.List;
 
 /**
  * This interface provides the contract that implementor must implement in order
@@ -49,6 +46,9 @@ import org.opennms.netmgt.xml.event.EventReceipt;
  * @version $Id: $
  */
 public class EventHandlerMBeanProxy implements EventHandler {
+
+    private static final Logger LOG = LoggerFactory.getLogger(EventHandlerMBeanProxy.class);
+
     private MBeanServer m_mbserver;
 
     private ObjectName m_listener;
@@ -117,7 +117,7 @@ public class EventHandlerMBeanProxy implements EventHandler {
         try {
             result = (Boolean) m_mbserver.invoke(m_listener, "processEvent", new Object[] { event }, new String[] { "org.opennms.netmgt.xml.event.Event" });
         } catch (final Throwable t) {
-            ThreadCategory.getInstance(getClass()).warn("Invocation on object " + m_listener + " failed", t);
+            LOG.warn("Invocation on object " + m_listener + " failed", t);
         }
 
         return result;
@@ -129,7 +129,7 @@ public class EventHandlerMBeanProxy implements EventHandler {
         try {
             m_mbserver.invoke(m_listener, "receiptSent", new Object[] { receipt }, new String[] { "org.opennms.netmgt.xml.event.EventReceipt" });
         } catch (final Throwable t) {
-            ThreadCategory.getInstance(getClass()).warn("Invocation on object " + m_listener + " failed", t);
+            LOG.warn("Invocation on object " + m_listener + " failed", t);
         }
     }
 

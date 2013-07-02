@@ -28,12 +28,7 @@ package org.opennms.ng.services.trapd;
  *     http://www.opennms.com/
  *******************************************************************************/
 
-import static org.opennms.core.utils.InetAddressUtils.str;
-
-import java.net.InetAddress;
-
 import org.opennms.core.utils.InetAddressUtils;
-import org.opennms.core.utils.ThreadCategory;
 import org.opennms.netmgt.EventConstants;
 import org.opennms.netmgt.model.events.EventBuilder;
 import org.opennms.netmgt.model.events.snmp.SyntaxToEvent;
@@ -42,6 +37,12 @@ import org.opennms.netmgt.snmp.SnmpValue;
 import org.opennms.netmgt.snmp.TrapIdentity;
 import org.opennms.netmgt.snmp.TrapProcessor;
 import org.opennms.netmgt.xml.event.Event;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.net.InetAddress;
+
+import static org.opennms.core.utils.InetAddressUtils.str;
 
 /**
  * <p>EventCreator class.</p>
@@ -50,6 +51,8 @@ import org.opennms.netmgt.xml.event.Event;
  * @version $Id: $
  */
 public class EventCreator implements TrapProcessor {
+
+    private static final Logger LOG = LoggerFactory.getLogger(EventCreator.class);
 
     private EventBuilder eventBuilder;
     private TrapdIpMgr trapdIpMgr;
@@ -124,18 +127,14 @@ public class EventCreator implements TrapProcessor {
         setSpecific(trapIdentity.getSpecific());
         setEnterpriseId(trapIdentity.getEnterpriseId().toString());
 
-        if (log().isDebugEnabled()) {
-            log().debug("setTrapIdentity: SNMP trap "+trapIdentity);
+        if (LOG.isDebugEnabled()) {
+            LOG.debug("setTrapIdentity: SNMP trap "+trapIdentity);
         }
 
     }
 
     public Event getEvent() {
         return eventBuilder.getEvent();
-    }
-
-    private ThreadCategory log() {
-        return ThreadCategory.getInstance(getClass());
     }
 
 }
