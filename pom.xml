@@ -44,6 +44,7 @@
         <aries.blueprint.jpa.container.version>1.0.0</aries.blueprint.jpa.container.version>
         <aspectj.version>1.6.8</aspectj.version>
 
+        <bsf.version>2.4.0</bsf.version>
         <c3p0.version>0.9.1.2</c3p0.version>
 
         <camel.version>2.10.0</camel.version>
@@ -60,6 +61,7 @@
         <felix.version>4.0.3</felix.version>
         <geronimo-jta_1.1_spec.version>1.1.1</geronimo-jta_1.1_spec.version>
         <hsqldb.version>2.2.9</hsqldb.version>
+        <httpclient.version>4.2.5</httpclient.version>
         <junit.version>4.11</junit.version>
         <log4jVersion>1.2.16</log4jVersion>
         <openjpa.version>2.2.0</openjpa.version>
@@ -407,6 +409,16 @@
         <dependencies>
             <!-- Project dependencies -->
             <dependency>
+                <groupId>org.opennms.bundles</groupId>
+                <artifactId>bsf</artifactId>
+                <version>${bsf.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.opennms.bundles</groupId>
+                <artifactId>httpclient</artifactId>
+                <version>${httpclient.version}</version>
+            </dependency>
+            <dependency>
                 <groupId>org.opennms.ng</groupId>
                 <artifactId>db</artifactId>
                 <version>${project.version}</version>
@@ -433,6 +445,18 @@
                 <version>${project.version}</version>
             </dependency>
 
+            <dependency>
+                <groupId>org.opennms.ng</groupId>
+                <artifactId>poller</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>org.opennms.ng</groupId>
+                <artifactId>scheduler</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+
             <!-- Opennms dependencies -->
 
             <dependency>
@@ -454,6 +478,12 @@
             </dependency>
 
             <dependency>
+                <groupId>org.opennms</groupId>
+                <artifactId>opennms-icmp-api</artifactId>
+                <version>${opennms.version}</version>
+            </dependency>
+
+            <dependency>
                 <groupId>org.opennms.core.snmp</groupId>
                 <artifactId>org.opennms.core.snmp.implementations.snmp4j</artifactId>
                 <version>${opennms.version}</version>
@@ -466,12 +496,23 @@
             </dependency>
 
             <dependency>
+                <groupId>org.opennms.features.poller</groupId>
+                <artifactId>org.opennms.features.poller.api</artifactId>
+                <version>${opennms.version}</version>
+            </dependency>
+
+            <dependency>
                 <groupId>org.opennms.bundles</groupId>
                 <artifactId>opennms-util</artifactId>
                 <version>${opennms.version}</version>
             </dependency>
 
             <!-- standard dependencies -->
+            <dependency>
+                <groupId>bsf</groupId>
+                <artifactId>bsf</artifactId>
+                <version>${bsf.version}</version>
+            </dependency>
             <dependency>
                 <groupId>commons-collections</groupId>
                 <artifactId>commons-collections</artifactId>
@@ -553,6 +594,11 @@
                 <groupId>org.apache.cxf</groupId>
                 <artifactId>cxf-rt-transports-http-jetty</artifactId>
                 <version>${cxf.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.httpcomponents</groupId>
+                <artifactId>httpclient</artifactId>
+                <version>${httpclient.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.apache.geronimo.specs</groupId>
