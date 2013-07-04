@@ -42,7 +42,7 @@ import org.opennms.netmgt.model.OnmsLocationMonitor.MonitorStatus;
 import org.opennms.netmgt.model.events.EventBuilder;
 import org.opennms.netmgt.model.events.EventIpcManager;
 import org.opennms.netmgt.poller.DistributionContext;
-import org.opennms.ng.services.poller.ServiceMonitorLocator;
+import org.opennms.netmgt.poller.ServiceMonitorLocator;
 import org.opennms.ng.services.poller.remote.OnmsPollModel;
 import org.opennms.ng.services.poller.remote.PolledService;
 import org.opennms.ng.services.poller.remote.PollerBackEnd;

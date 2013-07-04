@@ -33,7 +33,7 @@ import org.apache.commons.lang.builder.EqualsBuilder;
 import org.apache.commons.lang.builder.HashCodeBuilder;
 import org.opennms.core.utils.InetAddressUtils;
 import org.opennms.netmgt.model.OnmsMonitoredService;
-import org.opennms.ng.services.poller.InetNetworkInterface;
+import org.opennms.netmgt.poller.InetNetworkInterface;
 import org.opennms.netmgt.poller.MonitoredService;
 import org.opennms.netmgt.poller.NetworkInterface;
 

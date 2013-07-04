@@ -29,7 +29,7 @@
 package org.opennms.ng.services.poller.remote;
 
 import org.opennms.netmgt.model.PollStatus;
-import org.opennms.ng.services.poller.ServiceMonitorLocator;
+import org.opennms.netmgt.poller.ServiceMonitorLocator;
 
 import java.util.Collection;
 

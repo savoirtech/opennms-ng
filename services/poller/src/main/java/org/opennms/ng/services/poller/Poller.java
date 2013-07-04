@@ -35,13 +35,12 @@ import org.opennms.netmgt.config.OpennmsServerConfigFactory;
 import org.opennms.netmgt.config.PollOutagesConfig;
 import org.opennms.netmgt.config.PollerConfig;
 import org.opennms.netmgt.config.poller.Package;
+import org.opennms.netmgt.daemon.AbstractServiceDaemon;
 import org.opennms.netmgt.model.PollStatus;
 import org.opennms.netmgt.model.events.EventIpcManager;
-import org.opennms.ng.services.poller.ServiceMonitor;
+import org.opennms.netmgt.poller.ServiceMonitor;
 import org.opennms.ng.services.poller.pollables.*;
-import org.opennms.ng.services.scheduler.LegacyScheduler;
-import org.opennms.ng.services.scheduler.Schedule;
-import org.opennms.ng.services.scheduler.Scheduler;
+import org.opennms.ng.services.scheduler.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

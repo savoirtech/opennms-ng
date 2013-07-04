@@ -34,7 +34,7 @@ import org.opennms.netmgt.model.OnmsMonitoredService;
 import org.opennms.netmgt.model.OnmsMonitoringLocationDefinition;
 import org.opennms.netmgt.model.PollStatus;
 import org.opennms.netmgt.poller.DistributionContext;
-import org.opennms.ng.services.poller.ServiceMonitorLocator;
+import org.opennms.netmgt.poller.ServiceMonitorLocator;
 import org.opennms.ng.services.poller.remote.PollerBackEnd;
 import org.opennms.ng.services.poller.remote.PollerConfiguration;
 import org.slf4j.Logger;

@@ -30,7 +30,6 @@ package org.opennms.ng.services.poller.jmx;
 
 import org.opennms.netmgt.daemon.AbstractSpringContextJmxServiceDaemon;
 import org.opennms.ng.services.poller.Poller;
-import org.opennms.ng.services.poller.Poller;
 
 /**
  * <p>Pollerd class.</p>

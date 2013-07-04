@@ -23,6 +23,7 @@
         <module>httpclient</module>
         <module>opennms-javamail-api</module>
         <module>opennms-model</module>
+        <module>opennms-protocols</module>
         <module>opennms-util</module>
         <module>opennms-config-model</module>
         <module>opennms-core-snmp-api</module>

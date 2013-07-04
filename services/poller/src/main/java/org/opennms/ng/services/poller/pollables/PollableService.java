@@ -30,13 +30,13 @@ package org.opennms.ng.services.poller.pollables;
 
 import org.opennms.netmgt.EventConstants;
 import org.opennms.netmgt.model.PollStatus;
-import org.opennms.ng.services.poller.InetNetworkInterface;
+import org.opennms.netmgt.poller.InetNetworkInterface;
 import org.opennms.netmgt.poller.MonitoredService;
 import org.opennms.netmgt.poller.NetworkInterface;
 import org.opennms.netmgt.scheduler.PostponeNecessary;
-import org.opennms.netmgt.scheduler.ReadyRunnable;
-import org.opennms.netmgt.scheduler.Schedule;
 import org.opennms.netmgt.xml.event.Event;
+import org.opennms.ng.services.scheduler.ReadyRunnable;
+import org.opennms.ng.services.scheduler.Schedule;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -51,7 +51,7 @@ import java.util.Date;
  */
 public class PollableService extends PollableElement implements ReadyRunnable, MonitoredService {
     
-    private static final Logger LOG = LoggerFactory.getLogger(org.opennms.ng.services.poller.pollables.PollableService.class);
+    private static final Logger LOG = LoggerFactory.getLogger(PollableService.class);
 
     private final class PollRunner implements Runnable {
     	

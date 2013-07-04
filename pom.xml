@@ -424,6 +424,11 @@
                 <version>${opennms.version}</version>
             </dependency>
             <dependency>
+                <groupId>org.opennms.bundles</groupId>
+                <artifactId>opennms-protocols</artifactId>
+                <version>${opennms.version}</version>
+            </dependency>
+            <dependency>
                 <groupId>org.opennms.ng</groupId>
                 <artifactId>db</artifactId>
                 <version>${project.version}</version>
@@ -509,6 +514,12 @@
             <dependency>
                 <groupId>org.opennms.features.poller</groupId>
                 <artifactId>org.opennms.features.poller.api</artifactId>
+                <version>${opennms.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>org.opennms</groupId>
+                <artifactId>opennms-services</artifactId>
                 <version>${opennms.version}</version>
             </dependency>
 

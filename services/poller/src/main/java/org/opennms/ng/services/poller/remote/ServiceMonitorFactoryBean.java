@@ -28,7 +28,7 @@
 
 package org.opennms.ng.services.poller.remote;
 
-import org.opennms.ng.services.poller.ServiceMonitor;
+import org.opennms.netmgt.poller.ServiceMonitor;
 import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.util.Assert;
@@ -69,7 +69,7 @@ public class ServiceMonitorFactoryBean implements FactoryBean<ServiceMonitor>, I
 	/**
 	 * <p>getObject</p>
 	 *
-	 * @return a {@link org.opennms.ng.services.poller.ServiceMonitor} object.
+	 * @return a {@link org.opennms.netmgt.poller.ServiceMonitor} object.
 	 * @throws Exception if any.
 	 */
         @Override

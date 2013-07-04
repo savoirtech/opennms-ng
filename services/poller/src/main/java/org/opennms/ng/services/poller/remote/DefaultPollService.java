@@ -29,8 +29,8 @@
 package org.opennms.ng.services.poller.remote;
 
 import org.opennms.netmgt.model.PollStatus;
-import org.opennms.ng.services.poller.ServiceMonitor;
-import org.opennms.ng.services.poller.ServiceMonitorLocator;
+import org.opennms.netmgt.poller.ServiceMonitor;
+import org.opennms.netmgt.poller.ServiceMonitorLocator;
 import org.springframework.util.Assert;
 
 import java.util.Collection;

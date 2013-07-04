@@ -35,7 +35,7 @@ import org.opennms.netmgt.config.poller.Package;
 import org.opennms.netmgt.model.PollStatus;
 import org.opennms.netmgt.model.RrdRepository;
 import org.opennms.netmgt.poller.MonitoredService;
-import org.opennms.ng.services.poller.ServiceMonitor;
+import org.opennms.netmgt.poller.ServiceMonitor;
 import org.opennms.netmgt.rrd.RrdDataSource;
 import org.opennms.netmgt.rrd.RrdException;
 import org.opennms.netmgt.rrd.RrdUtils;
@@ -73,7 +73,7 @@ public class LatencyStoringServiceMonitorAdaptor implements ServiceMonitor {
     /**
      * <p>Constructor for LatencyStoringServiceMonitorAdaptor.</p>
      *
-     * @param monitor a {@link org.opennms.ng.services.poller.ServiceMonitor} object.
+     * @param monitor a {@link org.opennms.netmgt.poller.ServiceMonitor} object.
      * @param config a {@link org.opennms.netmgt.config.PollerConfig} object.
      * @param pkg a {@link org.opennms.netmgt.config.poller.Package} object.
      */

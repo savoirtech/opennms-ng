@@ -71,6 +71,10 @@
             <artifactId>opennms-javamail-api</artifactId>
         </dependency>
         <dependency>
+            <groupId>org.opennms.bundles</groupId>
+            <artifactId>opennms-protocols</artifactId>
+        </dependency>
+        <dependency>
             <groupId>org.opennms</groupId>
             <artifactId>opennms-icmp-api</artifactId>
         </dependency>
