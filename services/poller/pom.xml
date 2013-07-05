@@ -63,8 +63,8 @@
             <artifactId>bsf</artifactId>
         </dependency>
         <dependency>
-            <groupId>org.opennms.bundles</groupId>
-            <artifactId>httpclient</artifactId>
+            <groupId>org.apache.httpcomponents</groupId>
+            <artifactId>httpclient-osgi</artifactId>
         </dependency>
         <dependency>
             <groupId>org.opennms.bundles</groupId>

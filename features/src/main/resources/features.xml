@@ -7,68 +7,67 @@
         <bundle>mvn:org.opennms.ng/amq-pool/${project.version}</bundle>
     </feature>
 
-    <feature name="eventd" version="${project.version}">
-        <!-- Shaded bundles to incorporate Castor into OSGi -->
-
+    <feature name="opennms-util" version="${project.version}">
         <feature>spring-jdbc</feature>
-        <feature>spring-orm</feature>
-
-        <bundle>mvn:org.opennms.ng/amq-pool/${project.version}</bundle>
-
-        <bundle>mvn:org.apache.servicemix.bundles/org.apache.servicemix.bundles.oro</bundle>
         <bundle>mvn:org.apache.servicemix.bundles/org.apache.servicemix.bundles.jakarta-regexp</bundle>
         <bundle>mvn:org.apache.servicemix.bundles/org.apache.servicemix.bundles.castor</bundle>
         <bundle>mvn:commons-io/commons-io/${commons-io.version}</bundle>
-        <bundle>mvn:commons-dbcp/commons-dbcp/${commons-dbcp.version}</bundle>
-        <bundle>mvn:org.opennms.ng/enhydra-xa/${project.version}</bundle>
-        <bundle>mvn:org.opennms.bundles/postgresql/${project.version}</bundle>
-
         <bundle>mvn:org.opennms.bundles/c3p0/${c3p0.version}</bundle>
-        <bundle>mvn:org.opennms.ng/datasource/${project.version}</bundle>
-
-        <bundle>mvn:org.opennms.bundles/dnsjava/${project.version}</bundle>
         <bundle>mvn:org.opennms.bundles/opennms-util/${opennms.version}</bundle>
+    </feature>
+
+    <feature name="opennms-config-model" version="${project.version}">
+        <feature>opennms-util</feature>
+        <bundle>mvn:org.opennms.core/org.opennms.core.logging/${opennms.version}</bundle>
         <bundle>mvn:org.opennms.bundles/opennms-core-snmp-api/${opennms.version}</bundle>
-
         <bundle>mvn:org.opennms.bundles/opennms-model/${opennms.version}</bundle>
-
+        <feature>spring-orm</feature>
         <bundle>mvn:org.opennms.bundles/opennms-config-model/${opennms.version}</bundle>
+    </feature>
 
-        <bundle>mvn:org.opennms.ng/eventconfig/${project.version}</bundle>
-
-        <bundle>mvn:org.opennms.ng/eventd/${project.version}</bundle>
-
+    <feature name="opennms-javamail-api" version="${project.version}">
+        <feature>opennms-config-model</feature>
+        <bundle>mvn:org.opennms.bundles/opennms-javamail-api/${opennms.version}</bundle>
     </feature>
 
     <feature name="eventconfig" version="${project.version}">
         <!-- Shaded bundles to incorporate Castor into OSGi -->
 
-        <feature>spring-jdbc</feature>
-        <feature>spring-orm</feature>
-
         <bundle>mvn:org.opennms.ng/amq-pool/${project.version}</bundle>
 
         <bundle>mvn:org.apache.servicemix.bundles/org.apache.servicemix.bundles.oro</bundle>
-        <bundle>mvn:org.apache.servicemix.bundles/org.apache.servicemix.bundles.jakarta-regexp</bundle>
-        <bundle>mvn:org.apache.servicemix.bundles/org.apache.servicemix.bundles.castor</bundle>
-        <bundle>mvn:commons-io/commons-io/${commons-io.version}</bundle>
+
         <bundle>mvn:commons-dbcp/commons-dbcp/${commons-dbcp.version}</bundle>
         <bundle>mvn:org.opennms.ng/enhydra-xa/${project.version}</bundle>
         <bundle>mvn:org.opennms.bundles/postgresql/${project.version}</bundle>
 
-        <bundle>mvn:org.opennms.bundles/c3p0/${c3p0.version}</bundle>
         <bundle>mvn:org.opennms.ng/datasource/${project.version}</bundle>
 
         <bundle>mvn:org.opennms.bundles/dnsjava/${project.version}</bundle>
-        <bundle>mvn:org.opennms.bundles/opennms-util/${opennms.version}</bundle>
         <bundle>mvn:org.opennms.bundles/opennms-core-snmp-api/${opennms.version}</bundle>
 
-        <bundle>mvn:org.opennms.bundles/opennms-model/${opennms.version}</bundle>
-
-        <bundle>mvn:org.opennms.bundles/opennms-config-model/${opennms.version}</bundle>
+        <feature>opennms-config-model</feature>
 
         <bundle>mvn:org.opennms.ng/eventconfig/${project.version}</bundle>
 
+    </feature>
+
+    <feature name="eventd" version="${project.version}">
+        <feature>eventconfig</feature>
+        <bundle>mvn:org.opennms.ng/eventd/${project.version}</bundle>
+    </feature>
+
+    <feature name="poller" version="${project.version}">
+        <feature>eventconfig</feature>
+        <bundle>mvn:org.opennms.bundles/opennms-javamail-api/${opennms.version}</bundle>
+        <bundle>mvn:org.apache.httpcomponents/httpcore-osgi/${httpcore.version}</bundle>
+        <bundle>mvn:org.apache.httpcomponents/httpclient-osgi/${httpclient.version}</bundle>
+        <bundle>mvn:org.opennms.bundles/bsf/${bsf.version}</bundle>
+        <bundle>mvn:org.opennms.bundles/opennms-protocols/${opennms.version}</bundle>
+        <bundle>mvn:org.opennms/opennms-icmp-api/${opennms.version}</bundle>
+        <bundle>mvn:org.opennms.ng/scheduler/${project.version}</bundle>
+        <bundle>mvn:org.apache.servicemix.bundles/org.apache.servicemix.bundles.antlr/${antlr.version}</bundle>
+        <bundle>mvn:org.opennms.ng/poller/${project.version}</bundle>
     </feature>
 
     <feature name="trapd" version="${project.version}">

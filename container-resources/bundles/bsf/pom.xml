@@ -25,6 +25,11 @@
 
         <opennms.osgi.import.pkg>
             !org.apache.bsf*,
+            COM.ibm.netrexx.process;resolution:=optional,
+            netrexx.lang;resolution:=optional,
+            org.python.core;resolution:=optional,
+            org.python.util;resolution:=optional,
+            tcl.lang;resolution:=optional,
             *
         </opennms.osgi.import.pkg>
         <opennms.osgi.export>

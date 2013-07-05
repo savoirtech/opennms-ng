@@ -40,6 +40,7 @@
         <opennms.version>1.13.0-SNAPSHOT</opennms.version>
 
         <activemq.version>5.7.0</activemq.version>
+        <antlr.version>2.7.7_5</antlr.version>
         <aries.blueprint.version>1.0.1</aries.blueprint.version>
         <aries.blueprint.jpa.container.version>1.0.0</aries.blueprint.jpa.container.version>
         <aspectj.version>1.6.8</aspectj.version>
@@ -62,6 +63,7 @@
         <geronimo-jta_1.1_spec.version>1.1.1</geronimo-jta_1.1_spec.version>
         <hsqldb.version>2.2.9</hsqldb.version>
         <httpclient.version>4.2.5</httpclient.version>
+        <httpcore.version>4.2.4</httpcore.version>
         <junit.version>4.11</junit.version>
         <log4jVersion>1.2.16</log4jVersion>
         <openjpa.version>2.2.0</openjpa.version>
@@ -74,7 +76,7 @@
         <postgres.version>9.1-901.jdbc4</postgres.version>
         <postgres.bundle.version>9.1.0.901</postgres.bundle.version>
 
-        <slf4j.version>1.7.4</slf4j.version>
+        <slf4j.version>1.7.2</slf4j.version>
         <spring.version>3.0.7.RELEASE</spring.version>
 
         <!-- JDK Info -->
@@ -415,11 +417,6 @@
             </dependency>
             <dependency>
                 <groupId>org.opennms.bundles</groupId>
-                <artifactId>httpclient</artifactId>
-                <version>${httpclient.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.opennms.bundles</groupId>
                 <artifactId>opennms-javamail-api</artifactId>
                 <version>${opennms.version}</version>
             </dependency>
@@ -619,8 +616,13 @@
             </dependency>
             <dependency>
                 <groupId>org.apache.httpcomponents</groupId>
-                <artifactId>httpclient</artifactId>
+                <artifactId>httpclient-osgi</artifactId>
                 <version>${httpclient.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.httpcomponents</groupId>
+                <artifactId>httpcore-osgi</artifactId>
+                <version>${httpcore.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.apache.geronimo.specs</groupId>
@@ -631,6 +633,11 @@
                 <groupId>org.apache.openjpa</groupId>
                 <artifactId>openjpa</artifactId>
                 <version>${openjpa.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.servicemix.bundles</groupId>
+                <artifactId>org.apache.servicemix.bundles.antlr</artifactId>
+                <version>${antlr.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.aspectj</groupId>
