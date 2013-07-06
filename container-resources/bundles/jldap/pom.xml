@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <parent>
+        <artifactId>bundles</artifactId>
+        <groupId>org.opennms.ng</groupId>
+        <version>1.0-SNAPSHOT</version>
+    </parent>
+    <modelVersion>4.0.0</modelVersion>
+
+    <name>OPENNMS :: JLDAP</name>
+    <description>OPENNMS JLDAP</description>
+
+    <groupId>org.opennms.bundles</groupId>
+    <artifactId>jldap</artifactId>
+    <version>${jldap.version}</version>
+
+    <packaging>bundle</packaging>
+
+    <properties>
+        <pkgGroupId>org.opennms.bundles</pkgGroupId>
+        <pkgArtifactId>jldap</pkgArtifactId>
+        <pkgVersion>${jldap.version}</pkgVersion>
+
+        <opennms.osgi.import.pkg>
+            !com.novell.ldap*,
+            !com.novell.sasl*,
+            !com.novell.security*,
+            !org.ietf.ldap*,
+            org.apache.commons.httpclient*;resolution:=optional,
+            org.openspml*;resolution:=optional,
+            *
+        </opennms.osgi.import.pkg>
+        <opennms.osgi.export>
+            com.novell.ldap*;version="${jldap.version}",
+            com.novell.sasl*;version="${jldap.version}",
+            com.novell.security*;version="${jldap.version}",
+            org.ietf.ldap*;version="${jldap.version}"
+        </opennms.osgi.export>
+
+        <opennms.osgi.include.resource>{maven-resources},{maven-dependencies}</opennms.osgi.include.resource>
+        <opennms.osgi.failok>true</opennms.osgi.failok>
+
+        <!-- Trying to get around dynamic class.forname loading -->
+        <opennms.osgi.dynamic>*</opennms.osgi.dynamic>
+
+    </properties>
+
+    <dependencies>
+
+        <dependency>
+            <groupId>com.novell.ldap</groupId>
+            <artifactId>jldap</artifactId>
+        </dependency>
+
+    </dependencies>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-shade-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>shade</goal>
+                        </goals>
+                        <configuration>
+                            <artifactSet>
+                                <includes>
+                                    <include>${pkgGroupId}:${pkgArtifactId}</include>
+                                </includes>
+                            </artifactSet>
+
+                            <promoteTransitiveDependencies>true</promoteTransitiveDependencies>
+                            <createDependencyReducedPom>true</createDependencyReducedPom>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
+
+</project>

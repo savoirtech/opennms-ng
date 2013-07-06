@@ -20,6 +20,7 @@
         <module>enhydra-xa</module>
         <module>bsf</module>
         <module>c3p0</module>
+        <module>jldap</module>
         <module>opennms-javamail-api</module>
         <module>opennms-model</module>
         <module>opennms-protocols</module>
