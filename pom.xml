@@ -455,7 +455,37 @@
 
             <dependency>
                 <groupId>org.opennms.ng</groupId>
+                <artifactId>capsdconfig</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>org.opennms.ng</groupId>
                 <artifactId>eventconfig</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>org.opennms.ng</groupId>
+                <artifactId>collectdconfig</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>org.opennms.ng</groupId>
+                <artifactId>database-schema-config</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>org.opennms.ng</groupId>
+                <artifactId>opennms-server-config</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>org.opennms.ng</groupId>
+                <artifactId>snmp-config</artifactId>
                 <version>${project.version}</version>
             </dependency>
 

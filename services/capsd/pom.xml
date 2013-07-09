@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <parent>
+        <artifactId>services</artifactId>
+        <groupId>org.opennms.ng</groupId>
+        <version>1.0-SNAPSHOT</version>
+    </parent>
+    <modelVersion>4.0.0</modelVersion>
+
+    <artifactId>capsd</artifactId>
+    <packaging>bundle</packaging>
+
+    <properties>
+        <opennms.osgi.import.pkg>
+            org.hibernate*;resolution:=optional,
+            org.springframework.security.core*;resolution:=optional,
+            org.opennms.netmgt.snmp.snmp4j,
+            *
+        </opennms.osgi.import.pkg>
+
+        <opennms.osgi.export.pkg>
+            org.opennms.ng.services.capsd*
+        </opennms.osgi.export.pkg>
+
+        <!-- Trying to get around dynamic class.forname loading -->
+        <opennms.osgi.dynamic>*</opennms.osgi.dynamic>
+
+    </properties>
+
+    <name>OPENNMS :: Daemons :: Capsd</name>
+    <description>OPENNMS Daemons :: Capsd</description>
+
+    <dependencies>
+        <dependency>
+            <groupId>com.novell.ldap</groupId>
+            <artifactId>jldap</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.camel</groupId>
+            <artifactId>camel-core</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.servicemix.bundles</groupId>
+            <artifactId>org.apache.servicemix.bundles.jcifs</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.opennms.core.snmp</groupId>
+            <artifactId>org.opennms.core.snmp.implementations.snmp4j</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.opennms.bundles</groupId>
+            <artifactId>opennms-util</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.opennms.ng</groupId>
+            <artifactId>capsdconfig</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.opennms.ng</groupId>
+            <artifactId>eventconfig</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.opennms.ng</groupId>
+            <artifactId>snmp-config</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-api</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.opennms.bundles</groupId>
+            <artifactId>opennms-protocols</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.opennms</groupId>
+            <artifactId>opennms-icmp-api</artifactId>
+        </dependency>
+    </dependencies>
+</project>

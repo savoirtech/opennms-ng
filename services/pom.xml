@@ -16,10 +16,16 @@
     <description>OPENNMS Daemons</description>
 
     <modules>
+        <module>capsd</module>
+        <module>capsdconfig</module>
+        <module>collectdconfig</module>
+        <module>database-schema-config</module>
         <module>eventconfig</module>
         <module>eventd</module>
+        <module>opennms-server-config</module>
         <module>poller</module>
         <module>scheduler</module>
+        <module>snmp-config</module>
         <module>syslogd</module>
         <module>trapd</module>
     </modules>
