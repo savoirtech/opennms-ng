@@ -3,23 +3,23 @@
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <parent>
-        <artifactId>config</artifactId>
+        <artifactId>configs</artifactId>
         <groupId>org.opennms.ng</groupId>
         <version>1.0-SNAPSHOT</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
-    <artifactId>database-schema-config</artifactId>
+    <artifactId>collectd-config</artifactId>
 
     <packaging>bundle</packaging>
 
-    <name>OPENNMS :: Config :: Database Schema Config</name>
-    <description>OPENNMS Config :: Database Schema Config</description>
+    <name>OPENNMS :: Configs :: CollectD Config</name>
+    <description>OPENNMS Configs :: CollectD Config</description>
 
 
     <properties>
         <opennms.osgi.export.pkg>
-            org.opennms.ng.services.databaseschemaconfig
+            org.opennms.ng.services.collectdconfig
         </opennms.osgi.export.pkg>
 
     </properties>
@@ -30,10 +30,15 @@
             <artifactId>opennms-server-config</artifactId>
         </dependency>
 
-        <!--dependency>
+        <dependency>
+            <groupId>org.opennms.ng</groupId>
+            <artifactId>database-schema-config</artifactId>
+        </dependency>
+
+        <dependency>
             <groupId>org.opennms.core</groupId>
             <artifactId>org.opennms.core.xml</artifactId>
-        </dependency-->
+        </dependency>
 
         <dependency>
             <groupId>org.opennms</groupId>
