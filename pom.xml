@@ -12,6 +12,7 @@
     <description>OPENNMS Parent POM module</description>
 
     <modules>
+        <module>configs</module>
         <module>container-resources</module>
         <module>tools</module>
         <module>db-integration</module>
