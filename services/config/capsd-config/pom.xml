@@ -3,23 +3,23 @@
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <parent>
-        <artifactId>services</artifactId>
+        <artifactId>config</artifactId>
         <groupId>org.opennms.ng</groupId>
         <version>1.0-SNAPSHOT</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
-    <artifactId>opennms-server-config</artifactId>
+    <artifactId>capsd-config</artifactId>
 
     <packaging>bundle</packaging>
 
-    <name>OPENNMS :: Daemons :: Eventconfig</name>
-    <description>OPENNMS Daemons :: Eventconfig</description>
+    <name>OPENNMS :: Config :: Capsd Config</name>
+    <description>OPENNMS Config :: Capsd Config</description>
 
 
     <properties>
         <opennms.osgi.export.pkg>
-            org.opennms.ng.services.opennmsserverconfig
+            org.opennms.ng.services.capsdconfig
         </opennms.osgi.export.pkg>
 
     </properties>
@@ -28,6 +28,11 @@
         <dependency>
             <groupId>org.opennms.core</groupId>
             <artifactId>org.opennms.core.xml</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>org.opennms.ng</groupId>
+            <artifactId>collectd-config</artifactId>
         </dependency>
 
         <dependency>

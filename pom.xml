@@ -455,7 +455,7 @@
 
             <dependency>
                 <groupId>org.opennms.ng</groupId>
-                <artifactId>capsdconfig</artifactId>
+                <artifactId>capsd-config</artifactId>
                 <version>${project.version}</version>
             </dependency>
 
@@ -467,7 +467,7 @@
 
             <dependency>
                 <groupId>org.opennms.ng</groupId>
-                <artifactId>collectdconfig</artifactId>
+                <artifactId>collectd-config</artifactId>
                 <version>${project.version}</version>
             </dependency>
 
