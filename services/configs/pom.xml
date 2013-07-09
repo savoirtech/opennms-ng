@@ -9,17 +9,17 @@
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
-    <artifactId>config</artifactId>
+    <artifactId>configs</artifactId>
     <packaging>pom</packaging>
 
-    <name>OPENNMS :: Config</name>
+    <name>OPENNMS :: Configs</name>
     <description>OPENNMS Configurations</description>
 
     <modules>
         <module>capsd-config</module>
         <module>collectd-config</module>
         <module>database-schema-config</module>
-        <module>eventconfig</module>
+        <module>event-config</module>
         <module>opennms-server-config</module>
         <module>snmp-config</module>
     </modules>

@@ -30,7 +30,7 @@
         <bundle>mvn:org.opennms.bundles/opennms-javamail-api/${opennms.version}</bundle>
     </feature>
 
-    <feature name="eventconfig" version="${project.version}">
+    <feature name="event-config" version="${project.version}">
         <!-- Shaded bundles to incorporate Castor into OSGi -->
 
         <bundle>mvn:org.opennms.ng/amq-pool/${project.version}</bundle>
@@ -48,17 +48,17 @@
 
         <feature>opennms-config-model</feature>
 
-        <bundle>mvn:org.opennms.ng/eventconfig/${project.version}</bundle>
+        <bundle>mvn:org.opennms.ng/event-config/${project.version}</bundle>
 
     </feature>
 
     <feature name="eventd" version="${project.version}">
-        <feature>eventconfig</feature>
+        <feature>event-config</feature>
         <bundle>mvn:org.opennms.ng/eventd/${project.version}</bundle>
     </feature>
 
     <feature name="poller" version="${project.version}">
-        <feature>eventconfig</feature>
+        <feature>event-config</feature>
         <bundle>mvn:org.opennms.bundles/opennms-javamail-api/${opennms.version}</bundle>
         <bundle>mvn:org.apache.httpcomponents/httpcore-osgi/${httpcore.version}</bundle>
         <bundle>mvn:org.apache.httpcomponents/httpclient-osgi/${httpclient.version}</bundle>
@@ -73,7 +73,7 @@
     </feature>
 
     <feature name="trapd" version="${project.version}">
-        <feature>eventconfig</feature>
+        <feature>event-config</feature>
         <bundle>mvn:org.opennms.ng/trapd/${project.version}</bundle>
     </feature>
 

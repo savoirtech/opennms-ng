@@ -40,7 +40,7 @@
 
         <dependency>
             <groupId>org.opennms.ng</groupId>
-            <artifactId>eventconfig</artifactId>
+            <artifactId>event-config</artifactId>
         </dependency>
 
         <dependency>
