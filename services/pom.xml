@@ -17,7 +17,6 @@
 
     <modules>
         <module>capsd</module>
-        <module>configs</module>
         <module>eventd</module>
         <module>poller</module>
         <module>scheduler</module>
