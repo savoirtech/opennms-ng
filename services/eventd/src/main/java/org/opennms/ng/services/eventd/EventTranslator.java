@@ -6,6 +6,7 @@ import java.util.List;
 import org.apache.camel.Exchange;
 import org.apache.camel.Processor;
 import org.opennms.netmgt.model.events.EventProcessor;
+import org.opennms.netmgt.model.events.EventProcessorException;
 import org.opennms.netmgt.xml.event.Event;
 import org.opennms.netmgt.xml.event.Log;
 import org.opennms.netmgt.xml.event.Parm;
@@ -31,7 +32,7 @@ public class EventTranslator implements Processor {
             for (final EventProcessor eventProcessor : eventProcessors) {
                 try {
                     eventProcessor.process(null, singelEvent);
-                } catch (SQLException e) {
+                } catch (EventProcessorException e) {
                     log.warn(
                         "Unable to process event using processor " + eventProcessor + "; not processing with any later processors.  Exception: " + e,
                         e);
@@ -74,7 +75,7 @@ public class EventTranslator implements Processor {
                     for (final EventProcessor eventProcessor : eventProcessors) {
                         try {
                             eventProcessor.process(xmlEvent.getHeader(), event);
-                        } catch (SQLException e) {
+                        } catch (EventProcessorException e) {
                             log.warn("Unable to process event using processor " + eventProcessor
                                 + "; not processing with any later processors.  Exception: " + e, e);
                             break;

@@ -35,6 +35,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.opennms.netmgt.model.events.EventProcessor;
+import org.opennms.netmgt.model.events.EventProcessorException;
 import org.opennms.netmgt.xml.event.Event;
 import org.opennms.netmgt.xml.event.Header;
 import org.opennms.netmgt.xml.event.Parm;
@@ -57,7 +58,7 @@ public final class EventParmRegexFilterProcessor implements EventProcessor, Init
     private Map<String, org.opennms.netmgt.xml.eventconf.Filter> m_filterMap = new HashMap<String, org.opennms.netmgt.xml.eventconf.Filter>();
 
     @Override
-    public void process(Header eventHeader, Event event) throws SQLException {
+    public void process(Header eventHeader, Event event) throws EventProcessorException {
 
         org.opennms.netmgt.xml.eventconf.Event econf = EventExpander.lookup(m_eventConfDao, event);
         if (econf.getFilters() != null) {

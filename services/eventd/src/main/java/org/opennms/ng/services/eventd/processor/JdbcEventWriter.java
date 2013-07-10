@@ -32,6 +32,7 @@ import org.opennms.core.utils.DBUtils;
 import org.opennms.netmgt.model.OnmsSeverity;
 import org.opennms.netmgt.model.events.Constants;
 import org.opennms.netmgt.model.events.EventProcessor;
+import org.opennms.netmgt.model.events.EventProcessorException;
 import org.opennms.netmgt.model.events.Parameter;
 import org.opennms.netmgt.xml.event.Event;
 import org.opennms.netmgt.xml.event.Header;
@@ -89,14 +90,19 @@ public final class JdbcEventWriter extends AbstractJdbcPersister implements Even
      * The method that inserts the event into the database
      */
     @Override
-    public void process(final Header eventHeader, final Event event) throws SQLException, DataAccessException {
+    public void process(final Header eventHeader, final Event event) throws EventProcessorException {
         if (!checkEventSanityAndDoWeProcess(event, "JdbcEventWriter")) {
             return;
         }
 
-        LOG.debug("JdbcEventWriter: processing %s nodeid: %d ipaddr: %s serviceid: %s time: %s", event.getUei(), event.getNodeid(), event.getInterface(), event.getService(), event.getTime());
+        LOG.debug("JdbcEventWriter: processing {} nodeid: {} ipaddr: {} serviceid: {} time: {}", event.getUei(), event.getNodeid(), event.getInterface(), event.getService(), event.getTime());
 
-        final Connection connection = getDataSource().getConnection();
+        Connection connection;
+        try {
+            connection = getDataSource().getConnection();
+        } catch (final SQLException e) {
+            throw new EventProcessorException(e);
+        }
 
         try {
             connection.setAutoCommit(false);
@@ -124,6 +130,10 @@ public final class JdbcEventWriter extends AbstractJdbcPersister implements Even
 
                 throw e;
             }
+        } catch (final DataAccessException e) {
+            throw new EventProcessorException(e);
+        } catch (SQLException e) {
+            throw new EventProcessorException(e);
         } finally {
             try {
                 connection.close();
@@ -132,7 +142,7 @@ public final class JdbcEventWriter extends AbstractJdbcPersister implements Even
             }
         }
 
-        LOG.debug("EventWriter finished for : %s", event.getUei());
+        LOG.debug("EventWriter finished for : {}", event.getUei());
     }
 
     /**
@@ -149,7 +159,7 @@ public final class JdbcEventWriter extends AbstractJdbcPersister implements Even
         // Execute the statement to get the next event id
         final int eventID = getNextId();
 
-        LOG.debug("DBID: %d", eventID);
+        LOG.debug("DBID: {}", eventID);
 
         synchronized (event) {
             event.setDbid(eventID);
@@ -337,7 +347,7 @@ public final class JdbcEventWriter extends AbstractJdbcPersister implements Even
             d.cleanUp();
         }
 
-        LOG.debug("SUCCESSFULLY added %s related  data into the EVENTS table.", event.getUei());
+        LOG.debug("SUCCESSFULLY added {} related  data into the EVENTS table.", event.getUei());
     }
 
 
@@ -370,7 +380,6 @@ public final class JdbcEventWriter extends AbstractJdbcPersister implements Even
 
     /**
      * @param event
-     * @param log
      * @return
      */
     private int getEventServiceId(final Event event) {
@@ -390,7 +399,6 @@ public final class JdbcEventWriter extends AbstractJdbcPersister implements Even
      * <p>getEventHost</p>
      *
      * @param event a {@link org.opennms.netmgt.xml.event.Event} object.
-     * @param connection a {@link java.sql.Connection} object.
      * @return a {@link String} object.
      */
     protected String getEventHost(final Event event) {

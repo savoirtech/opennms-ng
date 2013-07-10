@@ -33,7 +33,7 @@ import org.opennms.netmgt.EventConstants;
 import org.opennms.netmgt.capsd.EventUtils;
 import org.opennms.netmgt.capsd.InsufficientInformationException;
 import org.opennms.netmgt.config.PollerConfig;
-import org.opennms.netmgt.dao.DemandPollDao;
+import org.opennms.netmgt.dao.api.DemandPollDao;
 import org.opennms.netmgt.model.events.EventIpcManager;
 import org.opennms.netmgt.model.events.EventListener;
 import org.opennms.ng.services.poller.pollables.PollableInterface;
@@ -478,7 +478,7 @@ final class PollerEventProcessor implements EventListener {
     /**
      * Constructor
      * 
-     * @param pollableServices
+     * @param poller
      *            List of all the PollableService objects scheduled for polling
      */
     PollerEventProcessor(Poller poller) {
