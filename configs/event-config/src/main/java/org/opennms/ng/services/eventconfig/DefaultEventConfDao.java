@@ -43,11 +43,10 @@ import javax.xml.transform.stream.StreamSource;
 
 import org.opennms.core.xml.JaxbUtils;
 import org.opennms.netmgt.xml.eventconf.Event;
-import org.opennms.netmgt.xml.eventconf.EventMatchers;
 import org.opennms.netmgt.xml.eventconf.Events;
 import org.opennms.netmgt.xml.eventconf.Events.EventCallback;
 import org.opennms.netmgt.xml.eventconf.Events.EventCriteria;
-import org.opennms.netmgt.xml.eventconf.Events.Partition;
+import org.opennms.netmgt.xml.eventconf.Partition;
 import org.opennms.netmgt.xml.eventconf.Field;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.UrlResource;
@@ -108,6 +107,7 @@ public class DefaultEventConfDao implements EventConfDao {
                 return ueis;
             }
         });
+
     }
 
     @Override
@@ -119,6 +119,7 @@ public class DefaultEventConfDao implements EventConfDao {
                 ueiToLabelMap.put(event.getUei(), event.getEventLabel());
                 return ueiToLabelMap;
             }
+
         });
     }
 
@@ -173,14 +174,13 @@ public class DefaultEventConfDao implements EventConfDao {
 
         programmaticEvents.addEvent(event);
         programmaticEvents.initialize(m_partition);
+
     }
 
     @Override
     public boolean removeEventFromProgrammaticStore(Event event) {
         Events programmaticEvents = m_events.getLoadEventsByFile(m_programmaticStoreRelativePath);
-        if (programmaticEvents == null) {
-            return false;
-        }
+        if (programmaticEvents == null) return false;
 
         programmaticEvents.removeEvent(event);
         if (programmaticEvents.getEventCount() <= 0) {
@@ -189,6 +189,7 @@ public class DefaultEventConfDao implements EventConfDao {
             programmaticEvents.initialize(m_partition);
         }
         return true;
+
     }
 
     @Override
@@ -269,20 +270,7 @@ public class DefaultEventConfDao implements EventConfDao {
             return e1.getEventLabel().compareToIgnoreCase(e2.getEventLabel());
         }
     }
-    private static class EnterpriseIdPartition implements Partition {
 
-        private Field m_field = EventMatchers.field("id");
-
-        @Override
-        public List<String> group(Event eventConf) {
-            return eventConf.getMaskElementValues("id");
-        }
-
-        @Override
-        public String group(org.opennms.netmgt.xml.event.Event matchingEvent) {
-            return m_field.get(matchingEvent);
-        }
-    }
 }
 
 

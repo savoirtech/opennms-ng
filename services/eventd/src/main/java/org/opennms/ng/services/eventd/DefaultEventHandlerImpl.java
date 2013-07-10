@@ -29,6 +29,7 @@
 package org.opennms.ng.services.eventd;
 
 import org.opennms.netmgt.model.events.EventProcessor;
+import org.opennms.netmgt.model.events.EventProcessorException;
 import org.opennms.netmgt.xml.event.Event;
 import org.opennms.netmgt.xml.event.Events;
 import org.opennms.netmgt.xml.event.Log;
@@ -123,7 +124,7 @@ public final class DefaultEventHandlerImpl implements InitializingBean, EventHan
                 for (final EventProcessor eventProcessor : m_eventProcessors) {
                     try {
                         eventProcessor.process(m_eventLog.getHeader(), event);
-                    } catch (SQLException e) {
+                    } catch (EventProcessorException e) {
                         LOG.warn("Unable to process event using processor " + eventProcessor + "; not processing with any later processors.  Exception: " + e, e);
                         break;
                     } catch (Throwable t) {
