@@ -100,6 +100,7 @@
             org.opennms.netmgt.xml.eventconf.*;version="${opennms.version}",
             org.opennms.netmgt.xml.rtc.*;version="${project.version}",
             org.opennms.netmgt.eventd.datablock*;version="${opennms.version}",
+            org.opennms.netmgt.config.filter*;version="${opennms.version}",
 
         </opennms.osgi.export.pkg>
 
