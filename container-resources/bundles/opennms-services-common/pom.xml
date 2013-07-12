@@ -24,8 +24,7 @@
         <pkgVersion>${opennms.version}</pkgVersion>
 
         <opennms.osgi.import.pkg>
-            org.xbill.DNS;resolution:=optional,
-            *
+            org.xbill.DNS;resolution:=optional,*
         </opennms.osgi.import.pkg>
         <opennms.osgi.export.pkg>
             org.opennms.netmgt.utils;version="${opennms.version}",
@@ -63,8 +62,6 @@
                             <artifactSet>
                                 <includes>
                                     <include>${pkgGroupId}:${pkgArtifactId}</include>
-                                    <include>org.opennms.core:org.opennms.core.xml</include>
-                                    <include>org.opennms.core:org.opennms.core.db</include>
                                 </includes>
                             </artifactSet>
 
