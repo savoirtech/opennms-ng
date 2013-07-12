@@ -30,12 +30,12 @@ package org.opennms.ng.services.poller;
 
 import org.opennms.core.utils.InetAddressUtils;
 import org.opennms.netmgt.EventConstants;
-import org.opennms.netmgt.capsd.EventUtils;
-import org.opennms.netmgt.capsd.InsufficientInformationException;
 import org.opennms.netmgt.config.PollerConfig;
 import org.opennms.netmgt.dao.api.DemandPollDao;
 import org.opennms.netmgt.model.events.EventIpcManager;
 import org.opennms.netmgt.model.events.EventListener;
+import org.opennms.ng.services.poller.monitors.EventUtils;
+import org.opennms.ng.services.poller.monitors.InsufficientInformationException;
 import org.opennms.ng.services.poller.pollables.PollableInterface;
 import org.opennms.ng.services.poller.pollables.PollableNetwork;
 import org.opennms.ng.services.poller.pollables.PollableNode;

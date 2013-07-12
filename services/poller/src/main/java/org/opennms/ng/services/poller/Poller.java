@@ -35,12 +35,13 @@ import org.opennms.netmgt.config.OpennmsServerConfigFactory;
 import org.opennms.netmgt.config.PollOutagesConfig;
 import org.opennms.netmgt.config.PollerConfig;
 import org.opennms.netmgt.config.poller.Package;
-import org.opennms.netmgt.daemon.AbstractServiceDaemon;
 import org.opennms.netmgt.model.PollStatus;
 import org.opennms.netmgt.model.events.EventIpcManager;
 import org.opennms.netmgt.poller.ServiceMonitor;
 import org.opennms.ng.services.poller.pollables.*;
-import org.opennms.ng.services.scheduler.*;
+import org.opennms.ng.services.scheduler.LegacyScheduler;
+import org.opennms.ng.services.scheduler.Schedule;
+import org.opennms.ng.services.scheduler.Scheduler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -60,7 +61,7 @@ import java.util.concurrent.atomic.AtomicInteger;
  * @author ranger
  * @version $Id: $
  */
-public class Poller extends AbstractServiceDaemon {
+public class Poller {
     
     private final static Logger LOG = LoggerFactory.getLogger(Poller.class);
 
@@ -90,7 +91,6 @@ public class Poller extends AbstractServiceDaemon {
      * <p>Constructor for Poller.</p>
      */
     public Poller() {
-        super(LOG4J_CATEGORY);
     }
 
     /* Getters/Setters used for dependency injection */
@@ -232,7 +232,6 @@ public class Poller extends AbstractServiceDaemon {
     /**
      * <p>onInit</p>
      */
-    @Override
     protected void onInit() {
 
         // serviceUnresponsive behavior enabled/disabled?
@@ -357,7 +356,6 @@ public class Poller extends AbstractServiceDaemon {
     /**
      * <p>onStart</p>
      */
-    @Override
     protected void onStart() {
 		// get the category logger
         // start the scheduler
@@ -376,7 +374,6 @@ public class Poller extends AbstractServiceDaemon {
     /**
      * <p>onStop</p>
      */
-    @Override
     protected void onStop() {
         if(getScheduler()!=null) {
             getScheduler().stop();
@@ -396,7 +393,6 @@ public class Poller extends AbstractServiceDaemon {
 	/**
 	 * <p>onPause</p>
 	 */
-    @Override
 	protected void onPause() {
 		getScheduler().pause();
 	}
@@ -404,7 +400,6 @@ public class Poller extends AbstractServiceDaemon {
     /**
      * <p>onResume</p>
      */
-    @Override
     protected void onResume() {
 		getScheduler().resume();
 	}

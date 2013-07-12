@@ -31,7 +31,6 @@ package org.opennms.ng.services.poller.monitors;
 import org.opennms.core.utils.InetAddressUtils;
 import org.opennms.core.utils.ParameterMap;
 import org.opennms.core.utils.TimeoutTracker;
-import org.opennms.netmgt.capsd.plugins.FtpResponse;
 import org.opennms.netmgt.model.PollStatus;
 import org.opennms.netmgt.poller.Distributable;
 import org.opennms.netmgt.poller.MonitoredService;

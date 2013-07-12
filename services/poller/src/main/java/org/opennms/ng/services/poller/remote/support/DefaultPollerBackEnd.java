@@ -71,7 +71,7 @@ import static org.opennms.core.utils.InetAddressUtils.str;
  * @author <a href="mailto:dj@opennms.org">DJ Gregor</a>
  */
 @Transactional
-public class DefaultPollerBackEnd implements PollerBackEnd, SpringServiceDaemon {
+public class DefaultPollerBackEnd implements PollerBackEnd {
     private static final Logger LOG = LoggerFactory.getLogger(org.opennms.ng.services.poller.remote.support.DefaultPollerBackEnd.class);
 
     private static class SimplePollerConfiguration implements PollerConfiguration, Serializable {
@@ -127,7 +127,6 @@ public class DefaultPollerBackEnd implements PollerBackEnd, SpringServiceDaemon 
      *
      * @throws Exception if any.
      */
-    @Override
     public void afterPropertiesSet() throws Exception {
         Assert.notNull(m_locMonDao, "The LocationMonitorDao must be set");
         Assert.notNull(m_monSvcDao, "The MonitoredServiceDao must be set");
@@ -146,7 +145,6 @@ public class DefaultPollerBackEnd implements PollerBackEnd, SpringServiceDaemon 
      *
      * @throws Exception if any.
      */
-    @Override
     public void start() throws Exception {
         // Nothing to do: job scheduling and RMI export is done externally
     }
@@ -154,7 +152,6 @@ public class DefaultPollerBackEnd implements PollerBackEnd, SpringServiceDaemon 
     /**
      * <p>destroy</p>
      */
-    @Override
     public void destroy() {
         // Nothing to do
     }

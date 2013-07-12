@@ -30,7 +30,7 @@
  * TODO
  * Tremendous amount of code duplication that should be refactored.
  */
-package org.opennms.ng.services.capsd;
+package org.opennms.ng.services.poller.monitors;
 
 import org.opennms.core.utils.InetAddressUtils;
 import org.opennms.netmgt.EventConstants;
@@ -59,7 +59,7 @@ import static org.opennms.core.utils.InetAddressUtils.addr;
 public abstract class EventUtils {
     
     
-    private static final Logger LOG = LoggerFactory.getLogger(org.opennms.ng.services.capsd.EventUtils.class);
+    private static final Logger LOG = LoggerFactory.getLogger(EventUtils.class);
 
     /**
      * Make the given listener object a listener for the list of events
@@ -551,7 +551,7 @@ public abstract class EventUtils {
     public static Event createNodeAddedEvent(String source, int nodeId, String nodeLabel, String labelSource) {
 		EventBuilder bldr = createNodeEventBuilder(EventConstants.NODE_ADDED_EVENT_UEI, source, nodeId, -1);
 
-        bldr.setHost(Capsd.getLocalHostAddress());
+        bldr.setHost(InetAddressUtils.getLocalHostAddressAsString());
 
         bldr.setParam(EventConstants.PARM_NODE_LABEL, nodeLabel);
         bldr.setParam(EventConstants.PARM_NODE_LABEL_SOURCE, labelSource);
@@ -585,7 +585,7 @@ public abstract class EventUtils {
 
 	    EventBuilder bldr = new EventBuilder(EventConstants.NODE_GAINED_INTERFACE_EVENT_UEI, source);
 	    bldr.setNodeid(nodeId);
-	    bldr.setHost(Capsd.getLocalHostAddress());
+	    bldr.setHost(InetAddressUtils.getLocalHostAddressAsString());
 	    bldr.setInterface(ifaddr);
 
 	    bldr.addParam(EventConstants.PARM_IP_HOSTNAME, ifaddr.getHostName());
@@ -728,7 +728,7 @@ public abstract class EventUtils {
 
 	    EventBuilder bldr = createServiceEventBuilder(EventConstants.NODE_GAINED_SERVICE_EVENT_UEI, source, nodeId, InetAddressUtils.str(ifaddr), service, -1);
 
-        bldr.setHost(Capsd.getLocalHostAddress());
+        bldr.setHost(InetAddressUtils.getLocalHostAddressAsString());
 
         bldr.addParam(EventConstants.PARM_IP_HOSTNAME, ifaddr.getHostName());
         bldr.addParam(EventConstants.PARM_NODE_LABEL, nodeLabel);
