@@ -29,6 +29,7 @@
         <module>opennms-core-snmp-api</module>
         <module>postgresql</module>
         <module>dnsjava</module>
+        <module>opennms-services-common</module>
     </modules>
 
 </project>

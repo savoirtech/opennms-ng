@@ -72,6 +72,7 @@
     <feature name="collectd-config" version="${project.version}">
         <feature>configuration-base</feature>
         <feature>opennms-server-config</feature>
+        <feature>event-config</feature>
         <bundle>mvn:org.opennms.ng/collectd-config/${project.version}</bundle>
     </feature>
 
@@ -79,24 +80,29 @@
         <feature>configuration-base</feature>
         <feature>opennms-server-config</feature>
         <feature>collectd-config</feature>
+        <bundle>mvn:org.opennms.ng/snmp-config/${project.version}</bundle>
         <bundle>mvn:org.opennms.ng/capsd-config/${project.version}</bundle>
     </feature>
 
     <feature name="capsd" version="${project.version}">
+        <feature>capsd-config</feature>
 
         <bundle>mvn:org.apache.servicemix.bundles/org.apache.servicemix.bundles.antlr/${antlr.version}</bundle>
         <bundle>mvn:org.apache.servicemix.bundles/org.apache.servicemix.bundles.jcifs/${jcifs.version}</bundle>
         <bundle>mvn:org.apache.servicemix.bundles/org.apache.servicemix.bundles.aspectj/${aspectj.version}</bundle>
         <bundle>mvn:org.opennms.bundles/jldap/${jldap.version}</bundle>
+
+        <bundle>mvn:org.opennms.bundles/opennms-services-common/${opennms.version}</bundle>
         <bundle>mvn:org.opennms.bundles/opennms-javamail-api/${opennms.version}</bundle>
         <bundle>mvn:org.apache.httpcomponents/httpcore-osgi/${httpcore.version}</bundle>
         <bundle>mvn:org.apache.httpcomponents/httpclient-osgi/${httpclient.version}</bundle>
         <bundle>mvn:org.opennms.bundles/bsf/${bsf.version}</bundle>
         <bundle>mvn:org.opennms.bundles/opennms-protocols/${opennms.version}</bundle>
         <bundle>mvn:org.opennms/opennms-icmp-api/${opennms.version}</bundle>
+        <bundle>mvn:org.opennms.features/org.opennms.features.phonebook/${opennms.version}</bundle>
 
-        <feature>capsd-config</feature>
         <bundle>mvn:org.opennms.ng/capsd/${project.version}</bundle>
+
     </feature>
 
     <feature name="eventd" version="${project.version}">
