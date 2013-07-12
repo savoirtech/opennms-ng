@@ -92,7 +92,6 @@
         <bundle>mvn:org.apache.servicemix.bundles/org.apache.servicemix.bundles.jcifs/${jcifs.version}</bundle>
         <bundle>mvn:org.opennms/opennms-icmp-api/${opennms.version}</bundle>
         <bundle>mvn:org.opennms.ng/capsd/${project.version}</bundle>
-        <feature>eventd</feature>
     </feature>
 
     <feature name="eventd" version="${project.version}">
