@@ -28,16 +28,19 @@
 
 package org.opennms.ng.services.capsd.snmp;
 
+import java.net.InetAddress;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Iterator;
+import java.util.Map;
+import java.util.TreeMap;
+
 import org.opennms.netmgt.snmp.AggregateTracker;
 import org.opennms.netmgt.snmp.SnmpInstId;
 import org.opennms.netmgt.snmp.SnmpObjId;
 import org.opennms.netmgt.snmp.SnmpResult;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.net.InetAddress;
-import java.util.*;
-
 
 /**
  * <p>Abstract SnmpTable class.</p>
@@ -46,7 +49,7 @@ import java.util.*;
  * @version $Id: $
  */
 public abstract class SnmpTable<T extends SnmpStore> extends AggregateTracker implements Collection<T> {
-    
+
     private static final Logger LOG = LoggerFactory.getLogger(org.opennms.ng.services.capsd.snmp.SnmpTable.class);
 
     private final Map<SnmpInstId, T> m_results = new TreeMap<SnmpInstId, T>();
@@ -56,10 +59,10 @@ public abstract class SnmpTable<T extends SnmpStore> extends AggregateTracker im
     /**
      * <p>Constructor for SnmpTable.</p>
      *
-     * @param address a {@link java.net.InetAddress} object.
+     * @param address   a {@link java.net.InetAddress} object.
      * @param tableName a {@link String} object.
-     * @param columns an array of {@link NamedSnmpVar} objects.
-     * @param <T> a T object.
+     * @param columns   an array of {@link NamedSnmpVar} objects.
+     * @param <T>       a T object.
      */
     protected SnmpTable(InetAddress address, String tableName, NamedSnmpVar[] columns) {
         super(NamedSnmpVar.getTrackersFor(columns));
@@ -67,7 +70,9 @@ public abstract class SnmpTable<T extends SnmpStore> extends AggregateTracker im
         m_tableName = tableName;
     }
 
-    /** {@inheritDoc} */
+    /**
+     * {@inheritDoc}
+     */
     @Override
     protected void storeResult(SnmpResult res) {
         T entry = m_results.get(res.getInstance());
@@ -83,7 +88,7 @@ public abstract class SnmpTable<T extends SnmpStore> extends AggregateTracker im
      *
      * @param base a {@link org.opennms.netmgt.snmp.SnmpObjId} object.
      * @param inst a {@link org.opennms.netmgt.snmp.SnmpInstId} object.
-     * @param val a {@link Object} object.
+     * @param val  a {@link Object} object.
      * @return a T object.
      */
     protected abstract T createTableEntry(SnmpObjId base, SnmpInstId inst, Object val);
@@ -107,16 +112,20 @@ public abstract class SnmpTable<T extends SnmpStore> extends AggregateTracker im
         return m_results.values().iterator();
     }
 
-    /** {@inheritDoc} */
+    /**
+     * {@inheritDoc}
+     */
     @Override
     protected void reportGenErr(String msg) {
-        LOG.warn("Error retrieving "+m_tableName+" from "+m_address+". "+msg);
+        LOG.warn("Error retrieving " + m_tableName + " from " + m_address + ". " + msg);
     }
 
-    /** {@inheritDoc} */
+    /**
+     * {@inheritDoc}
+     */
     @Override
     protected void reportNoSuchNameErr(String msg) {
-        LOG.info("Error retrieving "+m_tableName+" from "+m_address+". "+msg);
+        LOG.info("Error retrieving " + m_tableName + " from " + m_address + ". " + msg);
     }
 
     @Override

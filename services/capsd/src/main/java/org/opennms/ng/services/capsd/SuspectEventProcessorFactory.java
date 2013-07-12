@@ -42,7 +42,5 @@ public interface SuspectEventProcessorFactory {
      * @param ifAddress a {@link String} object.
      * @return a {@link SuspectEventProcessor} object.
      */
-    public abstract SuspectEventProcessor createSuspectEventProcessor(
-            String ifAddress);
-
+    public abstract SuspectEventProcessor createSuspectEventProcessor(String ifAddress);
 }

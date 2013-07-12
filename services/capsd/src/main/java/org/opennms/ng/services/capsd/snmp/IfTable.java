@@ -28,12 +28,12 @@
 
 package org.opennms.ng.services.capsd.snmp;
 
+import java.net.InetAddress;
+
 import org.opennms.netmgt.snmp.SnmpInstId;
 import org.opennms.netmgt.snmp.SnmpObjId;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.net.InetAddress;
 
 /**
  * <P>
@@ -44,7 +44,7 @@ import java.net.InetAddress;
  * at once. The number of SNMP packets should not exceed the number of interface +
  * 1, assuming no lost packets or error conditions occur.
  * </P>
- *
+ * <p/>
  * <p>
  * <em>Addition by Jon Whetzel</em>
  * </p>
@@ -61,12 +61,11 @@ import java.net.InetAddress;
  * @see <A HREF="http://www.ietf.org/rfc/rfc1213.txt">RFC1213 </A>
  */
 public final class IfTable extends SnmpTable<IfTableEntry> {
-    
-    
+
     private static final Logger LOG = LoggerFactory.getLogger(org.opennms.ng.services.capsd.snmp.IfTable.class);
-    
+
     /**
-     * <P>
+     * <p/>
      * Constructs an IfTable object that is used to collect the interface
      * elements from the remote agent. Once all the interfaces are collected, or
      * there is an error in the collection the signaler object is <EM>notified
@@ -80,12 +79,13 @@ public final class IfTable extends SnmpTable<IfTableEntry> {
         super(address, "ifTable", IfTableEntry.ms_elemList);
     }
 
-    /** {@inheritDoc} */
+    /**
+     * {@inheritDoc}
+     */
     @Override
     protected IfTableEntry createTableEntry(SnmpObjId base, SnmpInstId inst, Object val) {
         return new IfTableEntry();
     }
-
 
     /**
      * <p>getEntry</p>
@@ -94,7 +94,7 @@ public final class IfTable extends SnmpTable<IfTableEntry> {
      * @return a {@link IfTableEntry} object.
      */
     public IfTableEntry getEntry(int ifIndex) {
-        for(IfTableEntry entry : this) {
+        for (IfTableEntry entry : this) {
             Integer ndx = entry.getIfIndex();
             if (ndx != null && ndx.intValue() == ifIndex) {
                 return entry;
@@ -111,15 +111,16 @@ public final class IfTable extends SnmpTable<IfTableEntry> {
      * @return a int.
      */
     public int getOperStatus(int ifIndex) {
-        for(IfTableEntry entry : this) {
+        for (IfTableEntry entry : this) {
             Integer ndx = entry.getIfIndex();
             if (ndx != null && ndx.intValue() == ifIndex) {
                 // found it
                 // extract the admin status
                 //
                 Integer ifStatus = entry.getIfOperStatus();
-                if (ifStatus != null)
+                if (ifStatus != null) {
                     return ifStatus.intValue();
+                }
             }
         }
         return -1;
@@ -132,15 +133,16 @@ public final class IfTable extends SnmpTable<IfTableEntry> {
      * @return a int.
      */
     public int getAdminStatus(int ifIndex) {
-        for(IfTableEntry entry : this) {
+        for (IfTableEntry entry : this) {
             Integer ndx = entry.getIfIndex();
             if (ndx != null && ndx.intValue() == ifIndex) {
                 // found it
                 // extract the admin status
                 //
                 Integer ifStatus = entry.getIfAdminStatus();
-                if (ifStatus != null)
+                if (ifStatus != null) {
                     return ifStatus.intValue();
+                }
             }
         }
         return -1;
@@ -153,15 +155,16 @@ public final class IfTable extends SnmpTable<IfTableEntry> {
      * @return a int.
      */
     public int getIfType(int ifIndex) {
-        for(IfTableEntry entry : this) {
+        for (IfTableEntry entry : this) {
             Integer ndx = entry.getIfIndex();
             if (ndx != null && ndx.intValue() == ifIndex) {
                 // found it
                 // extract the ifType
                 //
                 Integer ifType = entry.getIfType();
-                if (ifType != null)
+                if (ifType != null) {
                     return ifType.intValue();
+                }
             }
         }
         return -1;
@@ -175,7 +178,7 @@ public final class IfTable extends SnmpTable<IfTableEntry> {
      */
     public String getIfDescr(final int ifIndex) {
         String ifDescr = null;
-        for(IfTableEntry entry : this) {
+        for (IfTableEntry entry : this) {
             Integer ndx = entry.getIfIndex();
             if (ndx != null && ndx.intValue() == ifIndex) {
                 ifDescr = entry.getIfDescr();
@@ -192,7 +195,7 @@ public final class IfTable extends SnmpTable<IfTableEntry> {
      */
     public Long getIfSpeed(final int ifIndex) {
         Long ifSpeed = null;
-        for(IfTableEntry entry : this) {
+        for (IfTableEntry entry : this) {
             Integer ndx = entry.getIfIndex();
             if (ndx != null && ndx.intValue() == ifIndex) {
                 ifSpeed = entry.getIfSpeed();
@@ -208,8 +211,8 @@ public final class IfTable extends SnmpTable<IfTableEntry> {
      * @return a {@link String} object.
      */
     public String getPhysAddr(final int ifIndex) {
-        String physAddr = null;   
-        for(IfTableEntry entry : this) {
+        String physAddr = null;
+        for (IfTableEntry entry : this) {
             Integer ndx = entry.getIfIndex();
             if (ndx != null && ndx.intValue() == ifIndex) {
                 physAddr = entry.getPhysAddr();
@@ -217,5 +220,4 @@ public final class IfTable extends SnmpTable<IfTableEntry> {
         }
         return physAddr;
     }
-
 }

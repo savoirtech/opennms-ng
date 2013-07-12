@@ -28,6 +28,16 @@
 
 package org.opennms.ng.services.capsd;
 
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
 import org.apache.commons.lang.builder.HashCodeBuilder;
 import org.opennms.core.utils.DBUtils;
 import org.opennms.netmgt.EventConstants;
@@ -36,10 +46,6 @@ import org.opennms.netmgt.model.events.EventBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.util.*;
 
 import static org.opennms.core.utils.InetAddressUtils.addr;
 
@@ -64,9 +70,11 @@ public final class ReparentViaSmb {
     /**
      * SQL Statements
      */
-    final static String SQL_DB_RETRIEVE_NODES = "SELECT nodeid,nodenetbiosname FROM node WHERE nodeType!='D' AND nodenetbiosname is not null ORDER BY nodeid";
+    final static String SQL_DB_RETRIEVE_NODES = "SELECT nodeid,nodenetbiosname FROM node WHERE nodeType!='D' AND nodenetbiosname is not null ORDER "
+        + "BY nodeid";
 
-    final static String SQL_DB_RETRIEVE_NODE = "SELECT nodesysname,nodesysdescription,nodelabel,nodelabelsource FROM node WHERE nodeid=? AND nodeType!='D'";
+    final static String SQL_DB_RETRIEVE_NODE = "SELECT nodesysname,nodesysdescription,nodelabel,nodelabelsource FROM node WHERE nodeid=? AND "
+        + "nodeType!='D'";
 
     final static String SQL_DB_RETRIEVE_INTERFACES = "SELECT ipaddr,iphostname FROM ipinterface WHERE nodeid=? AND isManaged!='D'";
 
@@ -120,7 +128,7 @@ public final class ReparentViaSmb {
     }
 
     /**
-     * <P>
+     * <p/>
      * LightWeightIfEntry is designed to hold specific information about an IP
      * interface in the database such as its IP address, its parent node id, and
      * its managed status and represents a lighter weight version of the
@@ -137,18 +145,14 @@ public final class ReparentViaSmb {
         private int m_oldNodeId;
 
         /**
-         * <P>
+         * <p/>
          * Constructs a new LightWeightIfEntry object.
          * </P>
-         * 
-         * @param address
-         *            Interface's ip address
-         * @param hostname
-         *            Interface's ip host name
-         * @param nodeId
-         *            Interface's parent node id
-         * @param oldNodeId
-         *            Interface's original parent node id
+         *
+         * @param address   Interface's ip address
+         * @param hostname  Interface's ip host name
+         * @param nodeId    Interface's parent node id
+         * @param oldNodeId Interface's original parent node id
          */
         public LightWeightIfEntry(String address, String hostname, int nodeId, int oldNodeId) {
             m_address = address;
@@ -158,7 +162,7 @@ public final class ReparentViaSmb {
         }
 
         /**
-         * <P>
+         * <p/>
          * Returns the IP address of the interface.
          * </P>
          */
@@ -167,7 +171,7 @@ public final class ReparentViaSmb {
         }
 
         /**
-         * <P>
+         * <p/>
          * Returns the IP hostname of the interface.
          * </P>
          */
@@ -176,7 +180,7 @@ public final class ReparentViaSmb {
         }
 
         /**
-         * <P>
+         * <p/>
          * Returns the parent node id of the interface.
          * </P>
          */
@@ -185,7 +189,7 @@ public final class ReparentViaSmb {
         }
 
         /**
-         * <P>
+         * <p/>
          * Returns the old parent node id of the interface.
          * </P>
          */
@@ -208,27 +212,26 @@ public final class ReparentViaSmb {
         private DbNodeEntry m_hwNodeEntry;
 
         /**
-         * <P>
+         * <p/>
          * Constructs a new LightWeightNodeEntry object.
          * </P>
-         * 
-         * @param nodeID
-         *            Node's identifier
-         * @param netbiosName
-         *            Node's NetBIOS name
+         *
+         * @param nodeID      Node's identifier
+         * @param netbiosName Node's NetBIOS name
          */
         LightWeightNodeEntry(int nodeID, String netbiosName) {
             m_nodeId = nodeID;
-            if (netbiosName != null)
+            if (netbiosName != null) {
                 m_netbiosName = netbiosName.toUpperCase();
-            else
+            } else {
                 m_netbiosName = null;
+            }
             m_duplicate = false;
             m_hwNodeEntry = null;
         }
 
         /**
-         * <P>
+         * <p/>
          * Returns the node identifer.
          * </P>
          */
@@ -237,7 +240,7 @@ public final class ReparentViaSmb {
         }
 
         /**
-         * <P>
+         * <p/>
          * Returns the NetBIOS name of the node.
          * </P>
          */
@@ -246,19 +249,18 @@ public final class ReparentViaSmb {
         }
 
         /**
-         * <P>
+         * <p/>
          * Sets the duplicate flag for the node..
          * </P>
-         * 
-         * @param dupFlag
-         *            the state for the duplicate flag
+         *
+         * @param dupFlag the state for the duplicate flag
          */
         void setDuplicate(boolean dupFlag) {
             m_duplicate = dupFlag;
         }
 
         /**
-         * <P>
+         * <p/>
          * Returns true if this LightWeightNodeEntry object has been marked as a
          * duplicate, false otherwise.
          * </P>
@@ -268,67 +270,69 @@ public final class ReparentViaSmb {
         }
 
         /**
-         * 
+         *
          */
         void setHeavyWeightNodeEntry(DbNodeEntry hwNodeEntry) {
             m_hwNodeEntry = hwNodeEntry;
         }
 
         /**
-         * 
+         *
          */
         DbNodeEntry getHeavyWeightNodeEntry() {
             return m_hwNodeEntry;
         }
 
         /**
-         * 
+         *
          */
         boolean hasHeavyWeightNodeEntry() {
-            if (m_hwNodeEntry == null)
+            if (m_hwNodeEntry == null) {
                 return false;
-            else
+            } else {
                 return true;
+            }
         }
 
         /**
-         * <P>
+         * <p/>
          * Node equality test...currently returns true if the
          * LightWeightNodeEntry objects have the same NetBIOS name.
          * </P>
-         * 
+         *
          * @return true if this and the passed object are equivalent.
          */
         @Override
         public boolean equals(final Object o) {
-            if (o == null) return false;
-            if (!(o instanceof LightWeightNodeEntry)) return false;
+            if (o == null) {
+                return false;
+            }
+            if (!(o instanceof LightWeightNodeEntry)) {
+                return false;
+            }
             LightWeightNodeEntry node = (LightWeightNodeEntry) o;
 
-            if (m_netbiosName == null || node.getNetbiosName() == null)
+            if (m_netbiosName == null || node.getNetbiosName() == null) {
                 return false;
-            else if (node.getNetbiosName().equals(m_netbiosName))
-                return true;
-            else
-                return false;
+            } else {
+                if (node.getNetbiosName().equals(m_netbiosName)) {
+                    return true;
+                } else {
+                    return false;
+                }
+            }
         }
-        
+
         @Override
         public int hashCode() {
-            return new HashCodeBuilder(7, 23)
-                .append(m_nodeId)
-                .append(m_netbiosName)
-                .append(m_duplicate)
-                .append(m_hwNodeEntry)
-                .toHashCode();
+            return new HashCodeBuilder(7, 23).append(m_nodeId).append(m_netbiosName).append(m_duplicate).append(m_hwNodeEntry).toHashCode();
         }
     }
 
     /**
      * Class constructor.
      *
-     * @param connection
-     *            Database connection
+     * @param connection Database connection
      */
     public ReparentViaSmb(java.sql.Connection connection) {
         m_connection = connection;
@@ -345,9 +349,8 @@ public final class ReparentViaSmb {
      * same NetBIOS name with another node. During this processing the reparent
      * node map is built which contains a mapping of reparent nodes to their
      * duplicate node lists.
-     * 
-     * @throws java.sql.SQLException
-     *             if an error occurs querying the database.
+     *
+     * @throws java.sql.SQLException if an error occurs querying the database.
      */
     private void buildNodeLists() throws SQLException {
         m_existingNodeList = new ArrayList<LightWeightNodeEntry>();
@@ -389,12 +392,14 @@ public final class ReparentViaSmb {
             String outerNetbiosName = outerEntry.getNetbiosName();
 
             // Skip this node if NetBIOS name is null or is in list to skip
-            if (outerNetbiosName == null || m_netbiosNamesToSkip.contains(outerNetbiosName))
+            if (outerNetbiosName == null || m_netbiosNamesToSkip.contains(outerNetbiosName)) {
                 continue;
+            }
 
             // If node is already marked as a duplicate just move on
-            if (outerEntry.isDuplicate())
+            if (outerEntry.isDuplicate()) {
                 continue;
+            }
 
             List<LightWeightNodeEntry> duplicateNodeList = null;
 
@@ -406,39 +411,45 @@ public final class ReparentViaSmb {
                 // Skip if inner node id is less than or equal to
                 // the current outer node id (since these have already
                 // been processed as an outer node).
-                if (innerEntry.getNodeId() <= outerEntry.getNodeId())
+                if (innerEntry.getNodeId() <= outerEntry.getNodeId()) {
                     continue;
+                }
 
                 // Skip this node if NetBIOS name is null or is in list to skip
-                if (innerNetbiosName == null || m_netbiosNamesToSkip.contains(innerNetbiosName))
+                if (innerNetbiosName == null || m_netbiosNamesToSkip.contains(innerNetbiosName)) {
                     continue;
+                }
 
                 // Skip if current node is already marked as a duplicate
-                if (innerEntry.isDuplicate())
+                if (innerEntry.isDuplicate()) {
                     continue;
+                }
 
                 if (innerNetbiosName.equals(outerNetbiosName)) {
                     // We've found two nodes with same NetBIOS name
                     // Add innerEntry to duplicate node list
-                    if (duplicateNodeList == null)
+                    if (duplicateNodeList == null) {
                         duplicateNodeList = new ArrayList<LightWeightNodeEntry>();
+                    }
 
                     innerEntry.setDuplicate(true); // mark node as duplicate
                     duplicateNodeList.add(innerEntry); // add to current dup
-                                                        // list
+                    // list
 
-                    LOG.debug("ReparentViaSmb.retrieveNodeData: found that nodeid {} is a duplicate of nodeid {}", outerEntry.getNodeId(), innerEntry.getNodeId());
+                    LOG.debug("ReparentViaSmb.retrieveNodeData: found that nodeid {} is a duplicate of nodeid {}", outerEntry.getNodeId(),
+                        innerEntry.getNodeId());
                 }
             } // end inner while()
 
             // Anything need reparenting?
             if (duplicateNodeList != null) {
                 // We found duplicates...add to reparent map
-                if (m_reparentNodeMap == null)
+                if (m_reparentNodeMap == null) {
                     m_reparentNodeMap = new HashMap<LightWeightNodeEntry, List<LightWeightNodeEntry>>();
+                }
 
-
-                LOG.debug("ReparentViaSmb.retrieveNodeData: adding dup list w/ {} to reparent Map for reparent nodeid {}", outerEntry.getNodeId(), duplicateNodeList.size());
+                LOG.debug("ReparentViaSmb.retrieveNodeData: adding dup list w/ {} to reparent Map for reparent nodeid {}", outerEntry.getNodeId(),
+                    duplicateNodeList.size());
                 m_reparentNodeMap.put(outerEntry, duplicateNodeList);
             }
         }// end outer while()
@@ -448,8 +459,7 @@ public final class ReparentViaSmb {
      * Performs reparenting if necessary and generates appropriate events to
      * inform other OpenNMS processes of any database changes..
      *
-     * @throws java.sql.SQLException
-     *             if error occurs updating the database
+     * @throws java.sql.SQLException if error occurs updating the database
      */
     public void sync() throws SQLException {
         // Build node lists
@@ -460,8 +470,9 @@ public final class ReparentViaSmb {
             reparentInterfaces();
 
             // Generate 'interfaceReparented' events if necessary
-            if (m_reparentedIfMap != null && !m_reparentedIfMap.isEmpty())
+            if (m_reparentedIfMap != null && !m_reparentedIfMap.isEmpty()) {
                 generateEvents();
+            }
         }
     }
 
@@ -472,13 +483,12 @@ public final class ReparentViaSmb {
      * list of reparented interfaces associated with each reparent node. This
      * list will make it possible to generate 'interfaceReparented' events for
      * each reparented interface.
-     *
+     * <p/>
      * During reparenting the 'ipInterface', 'snmpInterface', and 'ifServices'
      * tables are all updated to reflect the new parent node id for the
      * reparented interface.
      *
-     * @throws java.sql.SQLException
-     *             if error occurs updating the database
+     * @throws java.sql.SQLException if error occurs updating the database
      */
     private void reparentInterfaces() throws SQLException {
         List<LightWeightIfEntry> reparentedIfList = null;
@@ -517,7 +527,8 @@ public final class ReparentViaSmb {
 
                     try {
 
-                        LOG.debug("reparentInterfaces: reparenting all interfaces/services for nodeID {} under reparent nodeID {}", reparentNodeID, dupNodeID);
+                        LOG.debug("reparentInterfaces: reparenting all interfaces/services for nodeID {} under reparent nodeID {}", reparentNodeID,
+                            dupNodeID);
 
                         //
                         // Prior to reparenting the interfaces associated with the
@@ -551,10 +562,9 @@ public final class ReparentViaSmb {
                             }
                             reparentedIfList.add(lwIfEntry);
 
-
-                            LOG.debug("reparentInterfaces: will reparent {} : oldNodeId: {} newNodeId: {}", lwIfEntry.getParentNodeId(), lwIfEntry.getAddress(), lwIfEntry.getOldParentNodeId());
+                            LOG.debug("reparentInterfaces: will reparent {} : oldNodeId: {} newNodeId: {}", lwIfEntry.getParentNodeId(),
+                                lwIfEntry.getAddress(), lwIfEntry.getOldParentNodeId());
                         }
-
 
                         // Update the 'ipInterface' table so that all interfaces
                         // associated with the duplicate node are reparented.
@@ -597,7 +607,6 @@ public final class ReparentViaSmb {
 
                     // execute update
                     deleteNodeStmt.executeUpdate();
-
                 } // end while(dupIter.hasNext())
 
                 // Should have a reparented interface list now...add it to
@@ -625,7 +634,6 @@ public final class ReparentViaSmb {
         // iterate through the reparent interface list
         //
 
-
         LOG.debug("generateEvents:  Generating reparent events...reparentedIfMap size: {}", m_reparentedIfMap.size());
 
         Set<LightWeightNodeEntry> keys = m_reparentedIfMap.keySet();
@@ -635,12 +643,13 @@ public final class ReparentViaSmb {
             // Get reparent node object
             LightWeightNodeEntry reparentNode = iter.next();
             if (!reparentNode.hasHeavyWeightNodeEntry()) {
-                LOG.warn("generateEvents:  No valid reparent node entry for node {}. Unable to generate reparenting events.", reparentNode.getNodeId());
+                LOG.warn("generateEvents:  No valid reparent node entry for node {}. Unable to generate reparenting events.",
+                    reparentNode.getNodeId());
                 continue;
             }
 
-
-            LOG.debug("generateEvents: generating events for reparent node w/ id/netbiosName: {}/ {}", reparentNode.getNetbiosName(), reparentNode.getNodeId());
+            LOG.debug("generateEvents: generating events for reparent node w/ id/netbiosName: {}/ {}", reparentNode.getNetbiosName(),
+                reparentNode.getNodeId());
 
             // Get list of interface objects associated with this reparent node
             List<LightWeightIfEntry> ifList = m_reparentedIfMap.get(reparentNode);
@@ -651,14 +660,13 @@ public final class ReparentViaSmb {
                     LightWeightIfEntry lwIfEntry = ifIter.next();
 
                     // Generate interfaceReparented event
-                    sendInterfaceReparentedEvent(lwIfEntry.getAddress(), lwIfEntry.getHostName(), lwIfEntry.getParentNodeId(), lwIfEntry.getOldParentNodeId(), reparentNode.getHeavyWeightNodeEntry());
-
+                    sendInterfaceReparentedEvent(lwIfEntry.getAddress(), lwIfEntry.getHostName(), lwIfEntry.getParentNodeId(),
+                        lwIfEntry.getOldParentNodeId(), reparentNode.getHeavyWeightNodeEntry());
 
                     LOG.debug("generateEvents: sent interfaceReparented event for interface {}", lwIfEntry.getAddress());
                 }
             }
         }
-
 
         LOG.debug("generateEvents: completed all event generation...");
     }
@@ -666,26 +674,23 @@ public final class ReparentViaSmb {
     /**
      * This method is responsible for generating a interfaceReparented event and
      * sending it to Eventd.
-     * 
-     * @param ipAddr
-     *            IP address of interface which was reparented
-     * @param ipHostName
-     *            IP Host Name for the interface
-     * @param newNodeId
-     *            Interface's new nodeID
-     * @param oldNodeId
-     *            Interface's old nodeID
-     * @param reparentNodeEntry
-     *            DbNodeEntry object with all info associated with the reparent
-     *            node
+     *
+     * @param ipAddr            IP address of interface which was reparented
+     * @param ipHostName        IP Host Name for the interface
+     * @param newNodeId         Interface's new nodeID
+     * @param oldNodeId         Interface's old nodeID
+     * @param reparentNodeEntry DbNodeEntry object with all info associated with the reparent
+     *                          node
      */
-    private synchronized void sendInterfaceReparentedEvent(String ipAddr, String ipHostName, int newNodeId, int oldNodeId, DbNodeEntry reparentNodeEntry) {
+    private synchronized void sendInterfaceReparentedEvent(String ipAddr, String ipHostName, int newNodeId, int oldNodeId,
+                                                           DbNodeEntry reparentNodeEntry) {
 
         LOG.debug("sendInterfaceReparentedEvent: ipAddr: {} ipHostName: {} newNodeId: {} oldNodeId: {}", oldNodeId, ipAddr, ipHostName, newNodeId);
 
         // Make sure host name not null
-        if (ipHostName == null)
+        if (ipHostName == null) {
             ipHostName = "";
+        }
 
         // create the event to be sent
         EventBuilder bldr = new EventBuilder(EventConstants.INTERFACE_REPARENTED_EVENT_UEI, "OpenNMS.Capsd");
@@ -693,13 +698,13 @@ public final class ReparentViaSmb {
         bldr.setNodeid(newNodeId);
         bldr.setHost(Capsd.getLocalHostAddress());
         bldr.setInterface(addr(ipAddr));
-        
+
         bldr.addParam(EventConstants.PARM_IP_HOSTNAME, ipHostName);
         bldr.addParam(EventConstants.PARM_OLD_NODEID, oldNodeId);
         bldr.addParam(EventConstants.PARM_NEW_NODEID, newNodeId);
         bldr.addParam(EventConstants.PARM_NODE_LABEL, reparentNodeEntry.getLabel());
         bldr.addParam(EventConstants.PARM_NODE_LABEL_SOURCE, reparentNodeEntry.getLabelSource());
-        
+
         if (reparentNodeEntry.getSystemName() != null) {
             bldr.addParam(EventConstants.PARM_NODE_SYSNAME, reparentNodeEntry.getSystemName());
         }
@@ -710,7 +715,7 @@ public final class ReparentViaSmb {
 
         // Send event to Eventd
         try {
-//            EventIpcManagerFactory.getIpcManager().sendNow(bldr.getEvent());
+            //            EventIpcManagerFactory.getIpcManager().sendNow(bldr.getEvent());
 
         } catch (Throwable t) {
             LOG.warn("run: unexpected throwable exception caught during send to middleware", t);

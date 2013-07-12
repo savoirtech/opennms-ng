@@ -28,14 +28,14 @@
 
 package org.opennms.ng.services.capsd.plugins;
 
+import java.net.InetAddress;
+import java.util.Map;
+
 import org.opennms.core.utils.InetAddressUtils;
 import org.opennms.ng.services.capsd.AbstractPlugin;
 import org.opennms.protocols.jmx.connectors.ConnectionWrapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.net.InetAddress;
-import java.util.Map;
 
 
 /*
@@ -53,16 +53,16 @@ import java.util.Map;
  * @version $Id: $
  */
 public abstract class JMXPlugin extends AbstractPlugin {
-    
-    
+
     private static final Logger LOG = LoggerFactory.getLogger(org.opennms.ng.services.capsd.plugins.JMXPlugin.class);
-    
+
     private String protocolName = null;
 
     /* The subclass can use set the protocol name from the parameters map
      * 
      * @see org.opennms.ng.services.capsd.Plugin#getProtocolName()
      */
+
     /**
      * <p>Getter for the field <code>protocolName</code>.</p>
      *
@@ -74,11 +74,12 @@ public abstract class JMXPlugin extends AbstractPlugin {
     /*
      * The subclass is responsible for getting the connection.
      */
+
     /**
      * <p>getMBeanServerConnection</p>
      *
      * @param parameterMap a {@link java.util.Map} object.
-     * @param address a {@link java.net.InetAddress} object.
+     * @param address      a {@link java.net.InetAddress} object.
      * @return a {@link org.opennms.protocols.jmx.connectors.ConnectionWrapper} object.
      */
     public abstract ConnectionWrapper getMBeanServerConnection(Map<String, Object> parameterMap, InetAddress address);
@@ -86,6 +87,7 @@ public abstract class JMXPlugin extends AbstractPlugin {
     /*
      * @see org.opennms.ng.services.capsd.Plugin#getProtocolName()
      */
+
     /**
      * <p>Getter for the field <code>protocolName</code>.</p>
      *
@@ -100,10 +102,12 @@ public abstract class JMXPlugin extends AbstractPlugin {
      * @see org.opennms.ng.services.capsd.Plugin#isProtocolSupported(java.net.InetAddress, java.util.Map)
      */
 
-    /** {@inheritDoc} */
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public boolean isProtocolSupported(InetAddress address, Map<String, Object> map) {
-        
+
         if (protocolName == null) {
             protocolName = getProtocolName(map);
         }
@@ -111,9 +115,9 @@ public abstract class JMXPlugin extends AbstractPlugin {
         boolean res = false;
         ConnectionWrapper connection = null;
         try {
-            
+
             connection = getMBeanServerConnection(map, address);
-            
+
             Integer result = connection.getMBeanServer().getMBeanCount();
             LOG.debug("isProtocolSupported? " + getProtocolName() + " " + result + " " + connection);
             if (result != null) {
@@ -126,7 +130,7 @@ public abstract class JMXPlugin extends AbstractPlugin {
                 connection.close();
             }
         }
-        
+
         return res;
     }
 }

@@ -44,39 +44,39 @@ public interface CapsdDbSyncer {
     /**
      * This method is responsible for sync'ing the content of the 'service'
      * table with the protocols listed in the caspd-configuration.xml file.
-     *
+     * <p/>
      * First a list of services currently contained in the 'service' table in
      * the database is built.
-     *
+     * <p/>
      * Next, the list of services defined in capsd-configuration.xml is iterated
      * over and if any services are defined but do not yet exist in the
      * 'service' table they are added to the table.
-     *
+     * <p/>
      * Finally, the list of services in the database is iterated over and if any
      * service exists in the database but is no longer listed in the
      * capsd-configuration.xml file then that the following occurs:
-     *
+     * <p/>
      * 1. All 'outage' table entries which refer to the service are deleted. 2.
      * All 'ifServices' table entries which refer to the service are deleted.
-     *
+     * <p/>
      * Note that the 'service' table entry will remain in the database since
      * events most likely exist which refer to the service.
      */
     void syncServices();
-    
+
     /**
      * Synchronize configured services list with the database.
      *
      * @return a {@link java.util.List} object.
      */
     List<String> syncServicesTable();
-    
+
     /**
      * Responsible for syncing up the 'isManaged' field of the ipInterface table
      * and the 'status' field of the ifServices table based on the capsd and
      * poller configurations. Note that the 'sync' only takes place for
      * interfaces and services that are not deleted or force unmanaged.
-     *
+     * <p/>
      * <pre>
      * Here is how the statuses are set:
      *  If an interface is 'unmanaged' based on the capsd configuration,
@@ -91,8 +91,7 @@ public interface CapsdDbSyncer {
      *
      * </pre>
      *
-     * @exception java.sql.SQLException
-     *                Thrown if an error occurs while syncing the database.
+     * @throws java.sql.SQLException Thrown if an error occurs while syncing the database.
      */
     void syncManagementState();
 
@@ -102,8 +101,7 @@ public interface CapsdDbSyncer {
      * 'sync' only takes place for interfaces that are not deleted. Also, it
      * will prefer a loopback interface over other interfaces.
      *
-     * @exception java.sql.SQLException
-     *                Thrown if an error occurs while syncing the database.
+     * @throws java.sql.SQLException Thrown if an error occurs while syncing the database.
      */
     void syncSnmpPrimaryState();
 
@@ -118,14 +116,12 @@ public interface CapsdDbSyncer {
     /**
      * <p>isInterfaceInDB</p>
      *
-     * @param dbConn a {@link java.sql.Connection} object.
+     * @param dbConn    a {@link java.sql.Connection} object.
      * @param ifAddress a {@link java.net.InetAddress} object.
      * @return a boolean.
      * @throws java.sql.SQLException if any.
      */
-    boolean isInterfaceInDB(Connection dbConn,
-                            InetAddress ifAddress) throws SQLException;
-
+    boolean isInterfaceInDB(Connection dbConn, InetAddress ifAddress) throws SQLException;
 
     /**
      * Returns the service ID from the service table that was loaded
@@ -133,7 +129,7 @@ public interface CapsdDbSyncer {
      *
      * @param name the name of the service to look up
      * @return The result of the lookup, or null if a matching service
-     *          name wasn't found
+     *         name wasn't found
      */
     Integer getServiceId(String name);
 
@@ -141,10 +137,9 @@ public interface CapsdDbSyncer {
      * Returns the service name from the service table that was loaded
      * during class initialization for the specified ID.
      *
-     * @return The result of the lookup, or null if a matching service
-     *          ID wasn't found
      * @param id a {@link Integer} object.
+     * @return The result of the lookup, or null if a matching service
+     *         ID wasn't found
      */
     String getServiceName(Integer id);
-
 }

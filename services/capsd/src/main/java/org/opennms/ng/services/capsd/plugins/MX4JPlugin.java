@@ -28,13 +28,13 @@
 
 package org.opennms.ng.services.capsd.plugins;
 
-import org.opennms.core.utils.ParameterMap;
-import org.opennms.protocols.jmx.connectors.ConnectionWrapper;
-import org.opennms.protocols.jmx.connectors.Jsr160ConnectionFactory;
-
 import java.net.InetAddress;
 import java.util.HashMap;
 import java.util.Map;
+
+import org.opennms.core.utils.ParameterMap;
+import org.opennms.protocols.jmx.connectors.ConnectionWrapper;
+import org.opennms.protocols.jmx.connectors.Jsr160ConnectionFactory;
 
 /*
 * This class enables the monitoring of MX4J enabled services.  Since there will potentially be several 
@@ -58,32 +58,41 @@ public class MX4JPlugin extends JMXPlugin {
    * 
    * @see org.opennms.ng.services.capsd.JMXPlugin#getMBeanServer(java.util.Map, java.net.InetAddress)
    */
-  /** {@inheritDoc} */
-  @Override
-  public ConnectionWrapper getMBeanServerConnection(Map<String, Object> parameterMap, InetAddress address) {
-      return Jsr160ConnectionFactory.getMBeanServerConnection(parameterMap, address);
-  }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public ConnectionWrapper getMBeanServerConnection(Map<String, Object> parameterMap, InetAddress address) {
+        return Jsr160ConnectionFactory.getMBeanServerConnection(parameterMap, address);
+    }
   
   /* The protocol name is used to...
    * @see org.opennms.ng.services.capsd.Plugin#getProtocolName()
    */
-  /** {@inheritDoc} */
-  @Override
-  public String getProtocolName(Map<String, Object> map) {
-      return ParameterMap.getKeyedString(map, "friendlyname", "mx4j");
-  }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public String getProtocolName(Map<String, Object> map) {
+        return ParameterMap.getKeyedString(map, "friendlyname", "mx4j");
+    }
   
   /* 
    * @see org.opennms.ng.services.capsd.Plugin#isProtocolSupported(java.net.InetAddress)
    */
-  /** {@inheritDoc} */
-  @Override
-  public boolean isProtocolSupported(InetAddress address) {
-      HashMap<String, Object> map = new HashMap<String, Object>();
-      map.put("port",           "9004");
-      map.put("factory",        "JMXRMI");
-      map.put("friendlyname",   "mx4j");
-  
-      return isProtocolSupported(address, map);
-  }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public boolean isProtocolSupported(InetAddress address) {
+        HashMap<String, Object> map = new HashMap<String, Object>();
+        map.put("port", "9004");
+        map.put("factory", "JMXRMI");
+        map.put("friendlyname", "mx4j");
+
+        return isProtocolSupported(address, map);
+    }
 }

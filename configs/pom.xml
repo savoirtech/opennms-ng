@@ -22,6 +22,7 @@
         <module>event-config</module>
         <module>opennms-server-config</module>
         <module>snmp-config</module>
+        <module>poller-config</module>
     </modules>
 
 </project>

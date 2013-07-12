@@ -28,9 +28,8 @@
 
 package org.opennms.ng.services.capsd.plugins;
 
-
 /**
- * <P>
+ * <p/>
  * This class is designed to be used by the capabilities daemon to test for the
  * existance of an Lotus Notes HTTP server on remote interfaces. The class
  * implements the Plugin interface that allows it to be used along with other

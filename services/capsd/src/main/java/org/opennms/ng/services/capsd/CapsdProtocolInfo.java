@@ -30,7 +30,6 @@ package org.opennms.ng.services.capsd;
 
 import java.util.Map;
 
-
 /**
  * This class is used to encapsulate the basic protocol information read
  * from the config file. The information includes the plugin, the protocol
@@ -40,27 +39,28 @@ import java.util.Map;
  * @author <a href="http://www.opennms.org/">OpenNMS </a>
  */
 public final class CapsdProtocolInfo {
-    public enum Action { 
+    public enum Action {
         /**
          * This is used to represent the protocol scan
          * configuration. If this value is used the the plugin should be used to
          * scan the address.
          */
         SCAN,
-        
+
         /**
          * This is used to represent that the protocol plugin should
          * not be used to scan the interface.
          */
         SKIP,
-        
+
         /**
          * This is used to represent the state when the protocol
          * should be automatically set, with any status checks.
          */
         AUTO_SET
-    };
-    
+    }
+    ;
+
     /**
      * The plugin used to poll the interface
      */
@@ -85,14 +85,10 @@ public final class CapsdProtocolInfo {
     /**
      * Constructs a new protocol information element.
      *
-     * @param proto
-     *            The protocol supported.
-     * @param plugin
-     *            The plugin module
-     * @param params
-     *            The parameters for the plugin.
-     * @param action
-     *            The action to take.
+     * @param proto  The protocol supported.
+     * @param plugin The plugin module
+     * @param params The parameters for the plugin.
+     * @param action The action to take.
      */
     public CapsdProtocolInfo(String proto, Plugin plugin, Map<String, Object> params, org.opennms.ng.services.capsd.CapsdProtocolInfo.Action action) {
         m_plugin = plugin;

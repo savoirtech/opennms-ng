@@ -28,6 +28,17 @@
 
 package org.opennms.ng.services.capsd;
 
+import java.net.InetAddress;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+
 import org.opennms.core.utils.ConfigFileConstants;
 import org.opennms.core.utils.DBUtils;
 import org.opennms.core.utils.InetAddressUtils;
@@ -45,13 +56,6 @@ import org.springframework.jdbc.core.ConnectionCallback;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.util.Assert;
 
-import java.net.InetAddress;
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.util.*;
-
 /**
  * <p>JdbcCapsdDbSyncer class.</p>
  *
@@ -59,11 +63,11 @@ import java.util.*;
  * @version $Id: $
  */
 public class JdbcCapsdDbSyncer implements InitializingBean, CapsdDbSyncer {
-    
+
     private static final Logger LOG = LoggerFactory.getLogger(org.opennms.ng.services.capsd.JdbcCapsdDbSyncer.class);
-    
+
     /**
-     * <P>
+     * <p/>
      * LightWeightIfEntry is designed to hold specific information about an IP
      * interface in the database such as its IP address, its parent node id, and
      * its managed status and represents a lighter weight version of the
@@ -95,22 +99,16 @@ public class JdbcCapsdDbSyncer implements InitializingBean, CapsdDbSyncer {
         private boolean m_primaryStateChanged;
 
         /**
-         * <P>
+         * <p/>
          * Constructs a new LightWeightIfEntry object.
          * </P>
-         * 
-         * @param nodeId
-         *            Interface's parent node id
-         * @param ifIndex
-         *            Interface's index
-         * @param address
-         *            Interface's ip address
-         * @param managementState
-         *            Interface's management state
-         * @param snmpPrimaryState
-         *            Interface's primary snmp interface state
-         * @param ifType
-         *            Interface's type as determined via SNMP
+         *
+         * @param nodeId           Interface's parent node id
+         * @param ifIndex          Interface's index
+         * @param address          Interface's ip address
+         * @param managementState  Interface's management state
+         * @param snmpPrimaryState Interface's primary snmp interface state
+         * @param ifType           Interface's type as determined via SNMP
          */
         public LightWeightIfEntry(int nodeId, int ifIndex, String address, char managementState, char snmpPrimaryState, int ifType) {
             m_nodeId = nodeId;
@@ -123,7 +121,7 @@ public class JdbcCapsdDbSyncer implements InitializingBean, CapsdDbSyncer {
         }
 
         /**
-         * <P>
+         * <p/>
          * Returns the IP address of the interface.
          * </P>
          */
@@ -132,7 +130,7 @@ public class JdbcCapsdDbSyncer implements InitializingBean, CapsdDbSyncer {
         }
 
         /**
-         * <P>
+         * <p/>
          * Returns the parent node id of the interface.
          * </P>
          */
@@ -141,7 +139,7 @@ public class JdbcCapsdDbSyncer implements InitializingBean, CapsdDbSyncer {
         }
 
         /**
-         * <P>
+         * <p/>
          * Returns the ifIndex of the interface.
          * </P>
          */
@@ -150,7 +148,7 @@ public class JdbcCapsdDbSyncer implements InitializingBean, CapsdDbSyncer {
         }
 
         /**
-         * <P>
+         * <p/>
          * Returns the ifType of the interface.
          * </P>
          */
@@ -159,21 +157,21 @@ public class JdbcCapsdDbSyncer implements InitializingBean, CapsdDbSyncer {
         }
 
         /**
-         * 
+         *
          */
         public char getManagementState() {
             return m_managementState;
         }
 
         /**
-         * 
+         *
          */
         public char getSnmpPrimaryState() {
             return m_snmpPrimaryState;
         }
 
         /**
-         * 
+         *
          */
         public void setSnmpPrimaryState(char state) {
             if (state != m_snmpPrimaryState) {
@@ -183,7 +181,7 @@ public class JdbcCapsdDbSyncer implements InitializingBean, CapsdDbSyncer {
         }
 
         /**
-         * 
+         *
          */
         public boolean hasSnmpPrimaryStateChanged() {
             return m_primaryStateChanged;
@@ -194,96 +192,101 @@ public class JdbcCapsdDbSyncer implements InitializingBean, CapsdDbSyncer {
      * The SQL statement used to retrieve all non-deleted/non-forced unamanaged
      * IP interfaces from the 'ipInterface' table.
      */
-    private static final String SQL_DB_RETRIEVE_IP_INTERFACE = 
-        "SELECT ip.nodeid, ip.ipaddr, ip.ismanaged " +
+    private static final String SQL_DB_RETRIEVE_IP_INTERFACE = "SELECT ip.nodeid, ip.ipaddr, ip.ismanaged " +
         "FROM ipinterface as ip " +
         "JOIN node as n ON ip.nodeid = n.nodeid " +
         "WHERE ip.ipaddr!='0.0.0.0' " +
         "AND ip.isManaged!='D' " +
         "AND ip.isManaged!='F' " +
         "AND n.foreignSource is null";
-    
+
     /**
      * The SQL statement used to retrieve all non-deleted/non-forced unamanaged
      * IP interfaces from the 'ipInterface' table with the local OpenNMS server
      * restriction.
      */
-    private static final String SQL_DB_RETRIEVE_IP_INTERFACE_IN_LOCAL_SERVER = 
-        "SELECT ip.nodeid, ip.ipaddr, ip.ismanaged " + 
+    private static final String SQL_DB_RETRIEVE_IP_INTERFACE_IN_LOCAL_SERVER = "SELECT ip.nodeid, ip.ipaddr, ip.ismanaged " +
         "FROM ipinterface as ip " +
         "JOIN node as n ON n.nodeid = ip.nodeid " +
-        "JOIN servermap as s ON ip.ipaddr = s.ipaddr " + 
-        "WHERE ip.ipaddr!='0.0.0.0' " + 
-        "AND ip.isManaged!='D' " + 
-        "AND ip.isManaged!='F' " + 
+        "JOIN servermap as s ON ip.ipaddr = s.ipaddr " +
+        "WHERE ip.ipaddr!='0.0.0.0' " +
+        "AND ip.isManaged!='D' " +
+        "AND ip.isManaged!='F' " +
         "AND s.servername = ? " +
         "AND n.foreignSource is null";
-    
+
     /**
      * SQL statement to retrieve all non-deleted IP addresses from the
      * ipInterface table which support SNMP.
      */
-    private static final String SQL_DB_RETRIEVE_SNMP_IP_INTERFACES = 
-        "SELECT DISTINCT ipinterface.nodeid,ipinterface.ipaddr,ipinterface.ifindex,ipinterface.issnmpprimary,snmpinterface.snmpiftype,snmpinterface.snmpifindex " +
-        "FROM ipinterface " +
-        "JOIN node ON node.nodeid = ipinterface.nodeid " +
-        "JOIN snmpinterface ON ipinterface.snmpinterfaceid = snmpinterface.id " +
-        "JOIN ifservices ON ifservices.ipinterfaceid = ipinterface.id " +
-        "JOIN service ON ifservices.serviceid = service.serviceid " +
-        "WHERE ipinterface.ismanaged!='D' " +
-        "AND ifservices.status != 'D' " +
-        "AND service.servicename='SNMP' " +
-        "AND node.foreignSource is null";
-    
+    private static final String SQL_DB_RETRIEVE_SNMP_IP_INTERFACES =
+        "SELECT DISTINCT ipinterface.nodeid,ipinterface.ipaddr,ipinterface.ifindex,ipinterface.issnmpprimary,snmpinterface.snmpiftype,"
+            + "snmpinterface.snmpifindex "
+            +
+            "FROM ipinterface " +
+            "JOIN node ON node.nodeid = ipinterface.nodeid " +
+            "JOIN snmpinterface ON ipinterface.snmpinterfaceid = snmpinterface.id " +
+            "JOIN ifservices ON ifservices.ipinterfaceid = ipinterface.id " +
+            "JOIN service ON ifservices.serviceid = service.serviceid " +
+            "WHERE ipinterface.ismanaged!='D' " +
+            "AND ifservices.status != 'D' " +
+            "AND service.servicename='SNMP' " +
+            "AND node.foreignSource is null";
+
     /**
      * SQL statement used to update the 'isSnmpPrimary' field of the ipInterface
      * table.
      */
-    private static final String SQL_DB_UPDATE_SNMP_PRIMARY_STATE = "UPDATE ipinterface SET issnmpprimary=? WHERE nodeid=? AND ipaddr=? AND ismanaged!='D'";
+    private static final String SQL_DB_UPDATE_SNMP_PRIMARY_STATE = "UPDATE ipinterface SET issnmpprimary=? WHERE nodeid=? AND ipaddr=? AND "
+        + "ismanaged!='D'";
 
     /**
      * The SQL statement used to retrieve all non-deleted/non-forced unamanaged
      * services for a nodeid/ip from the 'ifservices' table.
      */
-    private static final String SQL_DB_RETRIEVE_IF_SERVICES = "SELECT serviceid, status FROM ifservices WHERE nodeid=? AND ipaddr=? AND status!='D' AND status!='F'";
+    private static final String SQL_DB_RETRIEVE_IF_SERVICES = "SELECT serviceid, status FROM ifservices WHERE nodeid=? AND ipaddr=? AND status!='D'"
+        + " AND status!='F'";
 
     /**
      * The SQL statement which updates the 'isManaged' field in the ipInterface
      * table for a specific node/ipAddr pair
      */
-    private static final String SQL_DB_UPDATE_IP_INTERFACE = "UPDATE ipinterface SET ismanaged=? WHERE nodeid=? AND ipaddr=? AND isManaged!='D' AND isManaged!='F'";
+    private static final String SQL_DB_UPDATE_IP_INTERFACE = "UPDATE ipinterface SET ismanaged=? WHERE nodeid=? AND ipaddr=? AND isManaged!='D' AND"
+        + " isManaged!='F'";
 
     /**
      * The SQL statement which updates the 'status' field in the ifServices
      * table for a specific node/ipAddr pair
      */
-    private static final String SQL_DB_UPDATE_ALL_SERVICES_FOR_NIP = "UPDATE ifservices SET status=? WHERE nodeid=? AND ipaddr=? AND status!='D' AND status!='F'";
+    private static final String SQL_DB_UPDATE_ALL_SERVICES_FOR_NIP = "UPDATE ifservices SET status=? WHERE nodeid=? AND ipaddr=? AND status!='D' "
+        + "AND status!='F'";
 
-    private static final String SQL_DB_UPDATE_SERVICE_FOR_NIP = "UPDATE ifservices SET status=? WHERE nodeid=? AND ipaddr=? AND serviceid=? AND status!='D' AND status!='F'";
+    private static final String SQL_DB_UPDATE_SERVICE_FOR_NIP = "UPDATE ifservices SET status=? WHERE nodeid=? AND ipaddr=? AND serviceid=? AND "
+        + "status!='D' AND status!='F'";
 
-//    /**
-//     * The SQL statement used to determine if an IP address is already in the
-//     * ipInterface table and there is known.
-//     */
-//    private static final String RETRIEVE_IPADDR_SQL = 
-//        "SELECT ip.ipaddr " +
-//        "FROM ipinterface as ip " +
-//        "JOIN node as n ON ip.nodeid = n.nodeid " +
-//        "WHERE ip.ipaddr=? " +
-//        "AND ip.ismanaged!='D'" +
-//        "AND n.foreignSource is null";
-//
-//    /**
-//     * The SQL statement used to determine if an IP address is already in the
-//     * ipInterface table and if so what its parent nodeid is.
-//     */
-//    private static final String RETRIEVE_IPADDR_NODEID_SQL = 
-//        "SELECT ip.nodeid " +
-//        "FROM ipinterface as ip " +
-//        "JOIN node as n ON ip.nodeid = n.nodeid " +
-//        "WHERE ip.ipaddr=? " +
-//        "AND ip.ismanaged!='D' " +
-//        "AND n.foreignSource is null";
+    //    /**
+    //     * The SQL statement used to determine if an IP address is already in the
+    //     * ipInterface table and there is known.
+    //     */
+    //    private static final String RETRIEVE_IPADDR_SQL =
+    //        "SELECT ip.ipaddr " +
+    //        "FROM ipinterface as ip " +
+    //        "JOIN node as n ON ip.nodeid = n.nodeid " +
+    //        "WHERE ip.ipaddr=? " +
+    //        "AND ip.ismanaged!='D'" +
+    //        "AND n.foreignSource is null";
+    //
+    //    /**
+    //     * The SQL statement used to determine if an IP address is already in the
+    //     * ipInterface table and if so what its parent nodeid is.
+    //     */
+    //    private static final String RETRIEVE_IPADDR_NODEID_SQL =
+    //        "SELECT ip.nodeid " +
+    //        "FROM ipinterface as ip " +
+    //        "JOIN node as n ON ip.nodeid = n.nodeid " +
+    //        "WHERE ip.ipaddr=? " +
+    //        "AND ip.ismanaged!='D' " +
+    //        "AND n.foreignSource is null";
 
     /**
      * The SQL statement used to load the currenly defined service table.
@@ -299,19 +302,17 @@ public class JdbcCapsdDbSyncer implements InitializingBean, CapsdDbSyncer {
      * The SQL statement used to mark all ifservices table entries which refer
      * to the specified serviceId as deleted.
      */
-    private static final String DELETE_IFSERVICES_SQL = 
-            "update ifservices " + 
-            "   set status = 'D' " + 
-            " where serviceid = ?" +
-            "   and id in (" + 
-            "   select svc.id" + 
-            "     from ifservices as svc" + 
-            "     join ipinterface as ip" + 
-            "       on (ip.id = svc.ipinterfaceid)" + 
-            "     join node as n" + 
-            "       on (n.nodeid = ip.nodeid)" + 
-            "    where n.foreignsource is null)"; 
-    
+    private static final String DELETE_IFSERVICES_SQL = "update ifservices " +
+        "   set status = 'D' " +
+        " where serviceid = ?" +
+        "   and id in (" +
+        "   select svc.id" +
+        "     from ifservices as svc" +
+        "     join ipinterface as ip" +
+        "       on (ip.id = svc.ipinterfaceid)" +
+        "     join node as n" +
+        "       on (n.nodeid = ip.nodeid)" +
+        "    where n.foreignsource is null)";
 
     /**
      * The SQL statement used to get the next value for a service identifier.
@@ -319,41 +320,36 @@ public class JdbcCapsdDbSyncer implements InitializingBean, CapsdDbSyncer {
      */
     private static final String DEFAULT_NEXT_SVC_ID_SQL = "SELECT nextval('serviceNxtId')";
 
-
     /**
      * The SQL statement used to determine if an IP address is already in the
      * ipInterface table and if so what its parent nodeid is.
      */
-    public static final String RETRIEVE_IPADDR_NODEID_SQL = 
-        "SELECT ip.nodeid " +
+    public static final String RETRIEVE_IPADDR_NODEID_SQL = "SELECT ip.nodeid " +
         "FROM ipinterface as ip " +
         "JOIN node as n ON ip.nodeid = n.nodeid " +
         "WHERE ip.ipaddr=? " +
         "AND ip.ismanaged!='D' " +
         "AND n.foreignSource is null";
-    
+
     /**
      * The SQL statement used to determine if an IP address is already in the
      * ipInterface table and there is known.
      */
-    public static final String RETRIEVE_IPADDR_SQL = 
-        "SELECT ip.ipaddr " +
+    public static final String RETRIEVE_IPADDR_SQL = "SELECT ip.ipaddr " +
         "FROM ipinterface as ip " +
         "JOIN node as n ON ip.nodeid = n.nodeid " +
         "WHERE ip.ipaddr=? " +
         "AND ip.ismanaged!='D'" +
         "AND n.foreignSource is null";
 
-
-    
     private CapsdConfig m_capsdConfig;
-    
+
     /**
      * The map of service identifiers, mapped by the service id to the service
      * name.
      */
-    private Map<Integer, String> m_serviceIdToName = new HashMap<Integer,String>();
-    
+    private Map<Integer, String> m_serviceIdToName = new HashMap<Integer, String>();
+
     /**
      * The map of service identifiers, mapped by the service name to the service
      * id.
@@ -367,20 +363,19 @@ public class JdbcCapsdDbSyncer implements InitializingBean, CapsdDbSyncer {
     private PollerConfig m_pollerConfig;
 
     private String m_nextSvcIdSql = DEFAULT_NEXT_SVC_ID_SQL;
-    
+
     private JdbcTemplate m_jdbcTemplate;
 
     /**
      * <p>Constructor for JdbcCapsdDbSyncer.</p>
      */
     public JdbcCapsdDbSyncer() {
-        
+
     }
-    
-    
+
     /**
      * {@inheritDoc}
-     *
+     * <p/>
      * Returns the service ID from the service table that was loaded
      * during class initialization for the specified name.
      */
@@ -392,7 +387,7 @@ public class JdbcCapsdDbSyncer implements InitializingBean, CapsdDbSyncer {
 
     /**
      * {@inheritDoc}
-     *
+     * <p/>
      * Returns the service name from the service table that was loaded
      * during class initialization for the specified ID.
      */
@@ -406,6 +401,7 @@ public class JdbcCapsdDbSyncer implements InitializingBean, CapsdDbSyncer {
     /* (non-Javadoc)
      * @see org.opennms.ng.services.capsd.CapsdDbSyncerI#syncServices()
      */
+
     /**
      * <p>syncServices</p>
      */
@@ -417,11 +413,9 @@ public class JdbcCapsdDbSyncer implements InitializingBean, CapsdDbSyncer {
                 syncServices(con);
                 return null;
             }
-            
         });
     }
-    
-    
+
     /**
      * <p>syncServices</p>
      *
@@ -429,13 +423,13 @@ public class JdbcCapsdDbSyncer implements InitializingBean, CapsdDbSyncer {
      * @throws java.sql.SQLException if any.
      */
     public void syncServices(Connection conn) throws SQLException {
-        
+
         List<String> serviceNames = syncServicesTable(conn);
-    
+
         PreparedStatement delFromIfServicesStmt = null;
         final DBUtils d = new DBUtils(getClass());
-        try { 
-            
+        try {
+
             List<String> protocols = getCapsdConfig().getConfiguredProtocols();
             
             /*
@@ -443,12 +437,12 @@ public class JdbcCapsdDbSyncer implements InitializingBean, CapsdDbSyncer {
              * and determine if any no longer exist in the list of
              * configured protocols
              */
-           for(String service : serviceNames) {
+            for (String service : serviceNames) {
                 if (!protocols.contains(service)) {
                     LOG.debug("syncServices: service " + service + " exists in the database but not in the Capsd config file.");
-    
+
                     Integer id = m_serviceNameToId.get(service);
-    
+
                     // Delete 'ifServices' table entries which refer to the
                     // service
                     LOG.debug("syncServices: deleting all references to service id " + id + " from the IfServices table.");
@@ -462,12 +456,12 @@ public class JdbcCapsdDbSyncer implements InitializingBean, CapsdDbSyncer {
         } finally {
             d.cleanUp();
         }
-        
     }
 
     /* (non-Javadoc)
      * @see org.opennms.ng.services.capsd.CapsdDbSyncerI#syncServicesTable()
      */
+
     /**
      * <p>syncServicesTable</p>
      *
@@ -481,10 +475,9 @@ public class JdbcCapsdDbSyncer implements InitializingBean, CapsdDbSyncer {
             public List<String> doInConnection(Connection con) throws SQLException, DataAccessException {
                 return syncServicesTable(con);
             }
-            
         });
     }
-    
+
     /**
      * <p>syncServicesTable</p>
      *
@@ -494,7 +487,7 @@ public class JdbcCapsdDbSyncer implements InitializingBean, CapsdDbSyncer {
      */
     public List<String> syncServicesTable(Connection conn) throws SQLException {
         LOG.debug("syncServicesTable: synchronizing services list with the database");
-        
+
         List<String> serviceNames;
         final DBUtils d = new DBUtils(getClass());
 
@@ -513,7 +506,7 @@ public class JdbcCapsdDbSyncer implements InitializingBean, CapsdDbSyncer {
             while (rs.next()) {
                 Integer id = Integer.valueOf(rs.getInt(1));
                 String name = rs.getString(2);
-    
+
                 m_serviceIdToName.put(id, name);
                 m_serviceNameToId.put(name, id);
                 serviceNames.add(name);
@@ -527,25 +520,25 @@ public class JdbcCapsdDbSyncer implements InitializingBean, CapsdDbSyncer {
                 LOG.debug("syncServicesTable: checking protocol '" + protocol + "'.");
                 if (!serviceNames.contains(protocol)) {
                     LOG.debug("syncServicesTable: protocol '" + protocol + "' is not in the database... adding.");
-                    
+
                     // get the next identifier
                     rs = nxtStmt.executeQuery();
                     d.watch(rs);
                     rs.next();
                     int id = rs.getInt(1);
                     rs.close();
-                    
+
                     LOG.debug("syncServicesTable: using id " + id + " for protocol '" + protocol + "'.");
-    
+
                     insStmt.setInt(1, id);
                     insStmt.setString(2, protocol);
                     insStmt.executeUpdate();
-    
+
                     m_serviceIdToName.put(id, protocol);
                     m_serviceNameToId.put(protocol, id);
-    
+
                     serviceNames.add(protocol);
-                    
+
                     LOG.info("syncServicesTable: added service entry to the database for protocol '" + protocol + "' with id of  " + id);
                 }
             }
@@ -558,6 +551,7 @@ public class JdbcCapsdDbSyncer implements InitializingBean, CapsdDbSyncer {
     /* (non-Javadoc)
      * @see org.opennms.ng.services.capsd.CapsdDbSyncerI#syncManagementState()
      */
+
     /**
      * <p>syncManagementState</p>
      */
@@ -570,7 +564,6 @@ public class JdbcCapsdDbSyncer implements InitializingBean, CapsdDbSyncer {
                 syncManagementState(con);
                 return null;
             }
-            
         });
     }
 
@@ -583,20 +576,20 @@ public class JdbcCapsdDbSyncer implements InitializingBean, CapsdDbSyncer {
     public void syncManagementState(Connection conn) throws SQLException {
         boolean verifyServer = getOpennmsServerConfig().verifyServer();
         String localServer = getOpennmsServerConfig().getServerName();
-    
+
         LOG.debug("syncManagementState: local server: " + localServer + " verify server: " + verifyServer);
-    
+
         if (conn == null) {
             LOG.error("CapsdConfigFactory.syncManagementState: Sync failed...must have valid database connection.");
             return;
         }
-    
+
         // Get default management state.
         //
         String managementPolicy = getCapsdConfig().getConfiguration().getManagementPolicy();
         boolean managedByDefault = (managementPolicy == null || managementPolicy.equalsIgnoreCase("managed"));
         LOG.debug("syncManagementState: managed_by_default: {}", managedByDefault);
-    
+
         //
         // Retrieve list of interfaces and their managed status from the
         // database
@@ -606,7 +599,7 @@ public class JdbcCapsdDbSyncer implements InitializingBean, CapsdDbSyncer {
         // retrieved from the database. Likewise, interfaces with IP address of
         // '0.0.0.0' will also be excluded by the SQL query.
         //
-    
+
         // prepare the SQL statement to query the database
         PreparedStatement ipRetStmt = null;
         final DBUtils d = new DBUtils(getClass());
@@ -621,34 +614,35 @@ public class JdbcCapsdDbSyncer implements InitializingBean, CapsdDbSyncer {
                 ipRetStmt = conn.prepareStatement(SQL_DB_RETRIEVE_IP_INTERFACE);
                 d.watch(ipRetStmt);
             }
-        
+
             ResultSet result = null;
-            
+
             // run the statement
             result = ipRetStmt.executeQuery();
             d.watch(result);
-    
+
             // Build array list of CapsdInterface objects representing each
             // of the interfaces retrieved from the database
             while (result.next()) {
                 // Node Id
                 int nodeId = result.getInt(1);
-    
+
                 // IP address
                 String address = result.getString(2);
                 if (address == null) {
                     LOG.warn("invalid ipInterface table entry, no IP address, skipping...");
                     continue;
                 }
-    
+
                 // Management State
                 char managedState = DbIpInterfaceEntry.STATE_UNKNOWN;
                 String str = result.getString(3);
                 if (str != null) {
                     managedState = str.charAt(0);
                 }
-    
-                ifList.add(new LightWeightIfEntry(nodeId, LightWeightIfEntry.NULL_IFINDEX, address, managedState, DbIpInterfaceEntry.SNMP_UNKNOWN, LightWeightIfEntry.NULL_IFTYPE));
+
+                ifList.add(new LightWeightIfEntry(nodeId, LightWeightIfEntry.NULL_IFINDEX, address, managedState, DbIpInterfaceEntry.SNMP_UNKNOWN,
+                    LightWeightIfEntry.NULL_IFTYPE));
             }
         } finally {
             d.cleanUp();
@@ -672,41 +666,42 @@ public class JdbcCapsdDbSyncer implements InitializingBean, CapsdDbSyncer {
              */
             for (LightWeightIfEntry ifEntry : ifList) {
                 String ipaddress = ifEntry.getAddress();
-    
+
                 // Convert to InetAddress object
                 InetAddress ifAddress = null;
                 ifAddress = InetAddressUtils.addr(ipaddress);
-            	if (ifAddress == null) {
+                if (ifAddress == null) {
                     LOG.warn("Failed converting ip address " + ipaddress + " to InetAddress.");
                     continue;
                 }
-    
+
                 // Check interface address against Capsd config information to
                 // determine
                 // if interface management state should be managed or unmanaged.
                 boolean address_is_unmanaged = getCapsdConfig().isAddressUnmanaged(ifAddress);
                 LOG.debug("syncManagementState: " + ipaddress + " unmanaged based on capsd config?: " + address_is_unmanaged);
-    
+
                 if (address_is_unmanaged) {
                     // Interface not managed, check current
                     // management state for this interface.
                     if (ifEntry.getManagementState() != DbIpInterfaceEntry.STATE_UNMANAGED) {
                         // Update management state to unmanaged for the
                         // interface as well as for its services.
-    
+
                         // Update the 'ipInterface' table
-                        ifUpdateStmt.setString(1, new String(new char[] { DbIpInterfaceEntry.STATE_UNMANAGED }));
+                        ifUpdateStmt.setString(1, new String(new char[]{DbIpInterfaceEntry.STATE_UNMANAGED}));
                         ifUpdateStmt.setInt(2, ifEntry.getNodeId());
                         ifUpdateStmt.setString(3, ipaddress);
                         ifUpdateStmt.executeUpdate();
-    
+
                         // Update the 'ifServices' table
-                        allSvcUpdateStmt.setString(1, new String(new char[] { DbIfServiceEntry.STATUS_UNMANAGED }));
+                        allSvcUpdateStmt.setString(1, new String(new char[]{DbIfServiceEntry.STATUS_UNMANAGED}));
                         allSvcUpdateStmt.setInt(2, ifEntry.getNodeId());
                         allSvcUpdateStmt.setString(3, ipaddress);
                         allSvcUpdateStmt.executeUpdate();
-    
-                        LOG.debug("syncManagementState: update completed for node/interface: " + ifEntry.getNodeId() + "/" + ipaddress + " to unmanaged");
+
+                        LOG.debug(
+                            "syncManagementState: update completed for node/interface: " + ifEntry.getNodeId() + "/" + ipaddress + " to unmanaged");
                     }
                 } else {
                     /*
@@ -725,41 +720,42 @@ public class JdbcCapsdDbSyncer implements InitializingBean, CapsdDbSyncer {
                         if (ipPkg != null) {
                             ipToBePolled = true;
                         }
-        
+
                         LOG.debug("syncManagementState: " + ipaddress + " to be polled based on poller config?: " + ipToBePolled);
-        
-                        if ((ifEntry.getManagementState() == DbIpInterfaceEntry.STATE_MANAGED && ipToBePolled) || (ifEntry.getManagementState() == DbIpInterfaceEntry.STATE_NOT_POLLED && !ipToBePolled)) {
+
+                        if ((ifEntry.getManagementState() == DbIpInterfaceEntry.STATE_MANAGED && ipToBePolled) || (
+                            ifEntry.getManagementState() == DbIpInterfaceEntry.STATE_NOT_POLLED && !ipToBePolled)) {
                             // current status is right
                             LOG.debug("syncManagementState: " + ipaddress + " - no change in status");
                         } else {
                             if (ipToBePolled) {
-                                ifUpdateStmt.setString(1, new String(new char[] { DbIpInterfaceEntry.STATE_MANAGED }));
+                                ifUpdateStmt.setString(1, new String(new char[]{DbIpInterfaceEntry.STATE_MANAGED}));
                             } else {
-                                ifUpdateStmt.setString(1, new String(new char[] { DbIpInterfaceEntry.STATE_NOT_POLLED }));
+                                ifUpdateStmt.setString(1, new String(new char[]{DbIpInterfaceEntry.STATE_NOT_POLLED}));
                             }
-        
+
                             ifUpdateStmt.setInt(2, ifEntry.getNodeId());
                             ifUpdateStmt.setString(3, ipaddress);
                             ifUpdateStmt.executeUpdate();
-        
+
                             LOG.debug("syncManagementState: update completed for node/interface: " + ifEntry.getNodeId() + "/" + ipaddress);
                         }
-        
+
                         // get services for this nodeid/ip and update
                         svcRetStmt.setInt(1, ifEntry.getNodeId());
                         svcRetStmt.setString(2, ipaddress);
-        
+
                         ResultSet svcRS = svcRetStmt.executeQuery();
                         d.watch(svcRS);
                         while (svcRS.next()) {
                             int svcId = svcRS.getInt(1);
-        
+
                             char svcStatus = DbIfServiceEntry.STATUS_UNKNOWN;
                             String str = svcRS.getString(2);
                             if (str != null) {
                                 svcStatus = str.charAt(0);
                             }
-        
+
                             String svcName = getServiceName(svcId);
                             /*
                              * try the first package that had the ip first, if
@@ -769,35 +765,43 @@ public class JdbcCapsdDbSyncer implements InitializingBean, CapsdDbSyncer {
                             char newStatus = 'U';
                             boolean svcToBePolledLocally = isServicePolledLocally(ipaddress, svcName, ipPkg);
                             boolean svcToBePolledRemotely = isServicePolled(ipaddress, svcName, ipPkg);
-                            
-                            LOG.debug("syncManagementState: " + ipaddress + "/" + svcName + " to be polled based on poller config?: " + svcToBePolledLocally);
-        
-                            if ((svcStatus == DbIfServiceEntry.STATUS_ACTIVE && svcToBePolledLocally) || (svcStatus == DbIfServiceEntry.STATUS_NOT_POLLED && !ipToBePolled)) {
+
+                            LOG.debug("syncManagementState: " + ipaddress + "/" + svcName + " to be polled based on poller config?: "
+                                + svcToBePolledLocally);
+
+                            if ((svcStatus == DbIfServiceEntry.STATUS_ACTIVE && svcToBePolledLocally) || (
+                                svcStatus == DbIfServiceEntry.STATUS_NOT_POLLED && !ipToBePolled)) {
                                 // current status is right
-                                LOG.debug("syncManagementState: " + ifEntry.getNodeId() + "/" + ipaddress + "/" + svcName + " status = " + svcStatus + " - no change in status");
+                                LOG.debug("syncManagementState: " + ifEntry.getNodeId() + "/" + ipaddress + "/" + svcName + " status = " + svcStatus
+                                    + " - no change in status");
                             } else {
                                 // Update the 'ifServices' table
                                 if (svcStatus == DbIfServiceEntry.STATUS_SUSPEND && svcToBePolledLocally) {
-                                    svcUpdateStmt.setString(1, new String(new char[] { DbIfServiceEntry.STATUS_FORCED }));
+                                    svcUpdateStmt.setString(1, new String(new char[]{DbIfServiceEntry.STATUS_FORCED}));
                                     newStatus = 'F';
-                                } else if (svcToBePolledLocally) {
-                                    svcUpdateStmt.setString(1, new String(new char[] { DbIfServiceEntry.STATUS_ACTIVE }));
-                                    newStatus = 'A';
-                                } else if (svcToBePolledRemotely) {
-                                    svcUpdateStmt.setString(1, new String(new char[] { DbIfServiceEntry.STATUS_REMOTE }));
-                                    newStatus = 'X';
                                 } else {
-                                    svcUpdateStmt.setString(1, new String(new char[] { DbIfServiceEntry.STATUS_NOT_POLLED }));
-                                    newStatus = 'N';
+                                    if (svcToBePolledLocally) {
+                                        svcUpdateStmt.setString(1, new String(new char[]{DbIfServiceEntry.STATUS_ACTIVE}));
+                                        newStatus = 'A';
+                                    } else {
+                                        if (svcToBePolledRemotely) {
+                                            svcUpdateStmt.setString(1, new String(new char[]{DbIfServiceEntry.STATUS_REMOTE}));
+                                            newStatus = 'X';
+                                        } else {
+                                            svcUpdateStmt.setString(1, new String(new char[]{DbIfServiceEntry.STATUS_NOT_POLLED}));
+                                            newStatus = 'N';
+                                        }
+                                    }
                                 }
                                 svcUpdateStmt.setInt(2, ifEntry.getNodeId());
                                 svcUpdateStmt.setString(3, ipaddress);
                                 svcUpdateStmt.setInt(4, svcId);
                                 svcUpdateStmt.executeUpdate();
-        
-                                LOG.debug("syncManagementState: update completed for node/interface/svc: " + ifEntry.getNodeId() + "/" + ipaddress + "/" + svcName + " status changed from " + oldStatus + " to " + newStatus);
+
+                                LOG.debug(
+                                    "syncManagementState: update completed for node/interface/svc: " + ifEntry.getNodeId() + "/" + ipaddress + "/"
+                                        + svcName + " status changed from " + oldStatus + " to " + newStatus);
                             }
-        
                         } // end ifservices result
                     } finally {
                         pollerConfig.getReadLock().unlock();
@@ -808,19 +812,21 @@ public class JdbcCapsdDbSyncer implements InitializingBean, CapsdDbSyncer {
             d.cleanUp();
         }
     }
-    
+
     private boolean isServicePolled(final String ifAddr, final String svcName, final org.opennms.netmgt.config.poller.Package ipPkg) {
         boolean svcToBePolled = false;
-            if (ipPkg != null) {
-                final PollerConfig pollerConfig = getPollerConfig();
-                pollerConfig.getReadLock().lock();
-                try {
-                    svcToBePolled = pollerConfig.isPolled(svcName, ipPkg);
-                    if (!svcToBePolled) svcToBePolled = pollerConfig.isPolled(ifAddr, svcName);
-                } finally {
-                    pollerConfig.getReadLock().unlock();
+        if (ipPkg != null) {
+            final PollerConfig pollerConfig = getPollerConfig();
+            pollerConfig.getReadLock().lock();
+            try {
+                svcToBePolled = pollerConfig.isPolled(svcName, ipPkg);
+                if (!svcToBePolled) {
+                    svcToBePolled = pollerConfig.isPolled(ifAddr, svcName);
                 }
+            } finally {
+                pollerConfig.getReadLock().unlock();
             }
+        }
         return svcToBePolled;
     }
 
@@ -831,7 +837,9 @@ public class JdbcCapsdDbSyncer implements InitializingBean, CapsdDbSyncer {
             pollerConfig.getReadLock().lock();
             try {
                 svcToBePolled = pollerConfig.isPolled(svcName, ipPkg);
-                if (!svcToBePolled) svcToBePolled = pollerConfig.isPolledLocally(ifAddr, svcName);
+                if (!svcToBePolled) {
+                    svcToBePolled = pollerConfig.isPolledLocally(ifAddr, svcName);
+                }
             } finally {
                 pollerConfig.getReadLock().unlock();
             }
@@ -844,6 +852,7 @@ public class JdbcCapsdDbSyncer implements InitializingBean, CapsdDbSyncer {
     /* (non-Javadoc)
      * @see org.opennms.ng.services.capsd.CapsdDbSyncerI#syncSnmpPrimaryState()
      */
+
     /**
      * <p>syncSnmpPrimaryState</p>
      */
@@ -856,7 +865,6 @@ public class JdbcCapsdDbSyncer implements InitializingBean, CapsdDbSyncer {
                 syncSnmpPrimaryState(con);
                 return null;
             }
-            
         });
     }
 
@@ -876,7 +884,7 @@ public class JdbcCapsdDbSyncer implements InitializingBean, CapsdDbSyncer {
          * ipInterface table and build a map of nodes to interface entry list
          */
         LOG.debug("syncSnmpPrimaryState: building map of nodes to interfaces...");
-    
+
         Map<Integer, List<LightWeightIfEntry>> nodes = new HashMap<Integer, List<LightWeightIfEntry>>();
 
         final DBUtils d = new DBUtils(getClass());
@@ -886,56 +894,58 @@ public class JdbcCapsdDbSyncer implements InitializingBean, CapsdDbSyncer {
             d.watch(ipRetStmt);
             ResultSet result = ipRetStmt.executeQuery();
             d.watch(result);
-    
+
             // Iterate over result set and build map of interface
             // entries keyed by node id.
             List<LightWeightIfEntry> ifList = new ArrayList<LightWeightIfEntry>();
             while (result.next()) {
                 // Node Id
                 int nodeId = result.getInt(1);
-    
+
                 // IP address
                 String address = result.getString(2);
                 if (address == null) {
                     LOG.warn("invalid ipInterface table entry, no IP address, skipping...");
                     continue;
                 }
-    
+
                 // ifIndex
                 int ifIndex = result.getInt(6);
                 if (result.wasNull()) {
                     LOG.debug("ipInterface table entry for address " + address + " does not have a valid ifIndex ");
                     ifIndex = LightWeightIfEntry.NULL_IFINDEX;
-                } else if (ifIndex < 1) {
-                    if (ifIndex == CapsdConfig.LAME_SNMP_HOST_IFINDEX) {
-                        LOG.debug("Using ifIndex = " + CapsdConfig.LAME_SNMP_HOST_IFINDEX + " for address " + address);
-                    } else {
-                        LOG.debug("ipInterface table entry for address " + address + " does not have a valid ifIndex ");
-                        ifIndex = LightWeightIfEntry.NULL_IFINDEX;
-                    } 
+                } else {
+                    if (ifIndex < 1) {
+                        if (ifIndex == CapsdConfig.LAME_SNMP_HOST_IFINDEX) {
+                            LOG.debug("Using ifIndex = " + CapsdConfig.LAME_SNMP_HOST_IFINDEX + " for address " + address);
+                        } else {
+                            LOG.debug("ipInterface table entry for address " + address + " does not have a valid ifIndex ");
+                            ifIndex = LightWeightIfEntry.NULL_IFINDEX;
+                        }
+                    }
                 }
-    
+
                 // Primary SNMP State
                 char primarySnmpState = DbIpInterfaceEntry.SNMP_UNKNOWN;
                 String str = result.getString(4);
                 if (str != null) {
                     primarySnmpState = str.charAt(0);
                 }
-    
+
                 // ifType
                 int ifType = result.getInt(5);
                 if (result.wasNull()) {
                     LOG.debug("snmpInterface table entry for address " + address + " does not have a valid ifType");
                     ifType = LightWeightIfEntry.NULL_IFTYPE;
                 }
-    
+
                 // New node or existing node?
                 ifList = nodes.get(Integer.valueOf(nodeId));
                 if (ifList == null) {
                     // Create new interface entry list
                     ifList = new ArrayList<LightWeightIfEntry>();
                     ifList.add(new LightWeightIfEntry(nodeId, ifIndex, address, DbIpInterfaceEntry.STATE_UNKNOWN, primarySnmpState, ifType));
-    
+
                     // Add interface entry list to the map
                     nodes.put(nodeId, ifList);
                 } else {
@@ -960,7 +970,7 @@ public class JdbcCapsdDbSyncer implements InitializingBean, CapsdDbSyncer {
             // Get the nodeid (key)
             Integer nId = niter.next();
             LOG.debug("building SNMP address list for node {}", nId);
-    
+
             // Lookup the interface list (value)
             List<LightWeightIfEntry> ifEntries = nodes.get(nId);
     
@@ -981,7 +991,7 @@ public class JdbcCapsdDbSyncer implements InitializingBean, CapsdDbSyncer {
                     LOG.debug("skipping address " + lwIf.getAddress() + ": does not have a valid ifIndex.");
                     continue;
                 }
-    
+
                 InetAddress addr = InetAddressUtils.addr(lwIf.getAddress());
                 addressList.add(addr);
                 if (lwIf.getIfType() == LightWeightIfEntry.LOOPBACK_IFTYPE) {
@@ -1007,7 +1017,7 @@ public class JdbcCapsdDbSyncer implements InitializingBean, CapsdDbSyncer {
                 psiType = ConfigFileConstants.getFileName(ConfigFileConstants.COLLECTD_CONFIG_FILE_NAME) + " addresses";
             }
             strict = false;
-            if ((primarySnmpIf == null) && (lbAddressList != null)){
+            if ((primarySnmpIf == null) && (lbAddressList != null)) {
                 primarySnmpIf = getCapsdConfig().determinePrimarySnmpInterface(lbAddressList, strict);
                 psiType = "DB loopback addresses";
             }
@@ -1015,12 +1025,13 @@ public class JdbcCapsdDbSyncer implements InitializingBean, CapsdDbSyncer {
                 primarySnmpIf = getCapsdConfig().determinePrimarySnmpInterface(addressList, strict);
                 psiType = "DB addresses";
             }
-    
+
             if (LOG.isDebugEnabled()) {
-                if(primarySnmpIf == null) {
+                if (primarySnmpIf == null) {
                     LOG.debug("syncSnmpPrimaryState: No primary SNMP interface found for node {}", nId);
                 } else {
-                    LOG.debug("syncSnmpPrimaryState: primary SNMP interface for node " + nId + " is: " + primarySnmpIf + ", selected from " + psiType);
+                    LOG.debug(
+                        "syncSnmpPrimaryState: primary SNMP interface for node " + nId + " is: " + primarySnmpIf + ", selected from " + psiType);
                 }
             }
     
@@ -1032,28 +1043,31 @@ public class JdbcCapsdDbSyncer implements InitializingBean, CapsdDbSyncer {
             for (LightWeightIfEntry lwIf : ifEntries) {
                 if (lwIf.getIfIndex() == LightWeightIfEntry.NULL_IFINDEX) {
                     lwIf.setSnmpPrimaryState(DbIpInterfaceEntry.SNMP_NOT_ELIGIBLE);
-                } else if (primarySnmpIf == null || !lwIf.getAddress().equals(InetAddressUtils.str(primarySnmpIf))) {
-                    if (getCollectdConfig().isServiceCollectionEnabled(lwIf.getAddress(), "SNMP")) {
-                        lwIf.setSnmpPrimaryState(DbIpInterfaceEntry.SNMP_SECONDARY);
-                    } else {
-                        lwIf.setSnmpPrimaryState(DbIpInterfaceEntry.SNMP_NOT_ELIGIBLE);
-                    }
                 } else {
-                    lwIf.setSnmpPrimaryState(DbIpInterfaceEntry.SNMP_PRIMARY);
+                    if (primarySnmpIf == null || !lwIf.getAddress().equals(InetAddressUtils.str(primarySnmpIf))) {
+                        if (getCollectdConfig().isServiceCollectionEnabled(lwIf.getAddress(), "SNMP")) {
+                            lwIf.setSnmpPrimaryState(DbIpInterfaceEntry.SNMP_SECONDARY);
+                        } else {
+                            lwIf.setSnmpPrimaryState(DbIpInterfaceEntry.SNMP_NOT_ELIGIBLE);
+                        }
+                    } else {
+                        lwIf.setSnmpPrimaryState(DbIpInterfaceEntry.SNMP_PRIMARY);
+                    }
                 }
-    
+
                 // Has SNMP primary state changed?
                 if (lwIf.hasSnmpPrimaryStateChanged()) {
-                    LOG.debug("syncSnmpPrimaryState: updating " + lwIf.getNodeId() + "/" + lwIf.getAddress() + ", marking with state: " + lwIf.getSnmpPrimaryState());
+                    LOG.debug("syncSnmpPrimaryState: updating " + lwIf.getNodeId() + "/" + lwIf.getAddress() + ", marking with state: " + lwIf
+                        .getSnmpPrimaryState());
 
                     try {
                         // prepare the SQL statement to query the database
                         PreparedStatement updateStmt = conn.prepareStatement(SQL_DB_UPDATE_SNMP_PRIMARY_STATE);
                         d.watch(updateStmt);
-                        updateStmt.setString(1, new String(new char[] { lwIf.getSnmpPrimaryState() }));
+                        updateStmt.setString(1, new String(new char[]{lwIf.getSnmpPrimaryState()}));
                         updateStmt.setInt(2, lwIf.getNodeId());
                         updateStmt.setString(3, lwIf.getAddress());
-    
+
                         updateStmt.executeUpdate();
                     } finally {
                         d.cleanUp();
@@ -1061,10 +1075,9 @@ public class JdbcCapsdDbSyncer implements InitializingBean, CapsdDbSyncer {
                 }
             }
         }
-    
+
         LOG.debug("syncSnmpPrimaryState: sync completed.");
     }
-
 
     /**
      * <p>getCapsdConfig</p>
@@ -1092,7 +1105,7 @@ public class JdbcCapsdDbSyncer implements InitializingBean, CapsdDbSyncer {
     public OpennmsServerConfigFactory getOpennmsServerConfig() {
         return m_opennmsServerConfig;
     }
-    
+
     /**
      * <p>setOpennmsServerConfig</p>
      *
@@ -1101,7 +1114,7 @@ public class JdbcCapsdDbSyncer implements InitializingBean, CapsdDbSyncer {
     public void setOpennmsServerConfig(OpennmsServerConfigFactory serverConfigFactory) {
         m_opennmsServerConfig = serverConfigFactory;
     }
-    
+
     /**
      * <p>getPollerConfig</p>
      *
@@ -1110,7 +1123,7 @@ public class JdbcCapsdDbSyncer implements InitializingBean, CapsdDbSyncer {
     public PollerConfig getPollerConfig() {
         return m_pollerConfig;
     }
-    
+
     /**
      * <p>setPollerConfig</p>
      *
@@ -1137,7 +1150,7 @@ public class JdbcCapsdDbSyncer implements InitializingBean, CapsdDbSyncer {
     public void setCollectdConfig(CollectdConfigFactory collectdConfigFactory) {
         m_collectdConfig = collectdConfigFactory;
     }
-    
+
     /**
      * <p>afterPropertiesSet</p>
      */
@@ -1153,38 +1166,40 @@ public class JdbcCapsdDbSyncer implements InitializingBean, CapsdDbSyncer {
     /* (non-Javadoc)
      * @see org.opennms.ng.services.capsd.CapsdDbSyncerI#getInterfaceDbNodeId(java.sql.Connection, java.net.InetAddress, int)
      */
+
     /**
      * <p>getInterfaceDbNodeId</p>
      *
-     * @param dbConn a {@link java.sql.Connection} object.
+     * @param dbConn    a {@link java.sql.Connection} object.
      * @param ifAddress a {@link java.net.InetAddress} object.
-     * @param ifIndex a int.
+     * @param ifIndex   a int.
      * @return a int.
      * @throws java.sql.SQLException if any.
      */
     public int getInterfaceDbNodeId(Connection dbConn, InetAddress ifAddress, int ifIndex) throws SQLException {
-        LOG.debug("getInterfaceDbNodeId: attempting to lookup interface " + InetAddressUtils.str(ifAddress) + "/ifindex: " + ifIndex + " in the database.");
-    
+        LOG.debug("getInterfaceDbNodeId: attempting to lookup interface " + InetAddressUtils.str(ifAddress) + "/ifindex: " + ifIndex
+            + " in the database.");
+
         // Set connection as read-only
         // dbConn.setReadOnly(true);
-    
+
         StringBuffer qs = new StringBuffer(RETRIEVE_IPADDR_NODEID_SQL);
         if (ifIndex != -1) {
             qs.append(" AND ifindex=?");
         }
-        
+
         int nodeid = -1;
-    
+
         final DBUtils d = new DBUtils(getClass());
         try {
             PreparedStatement s = dbConn.prepareStatement(qs.toString());
             d.watch(s);
             s.setString(1, InetAddressUtils.str(ifAddress));
-    
+
             if (ifIndex != -1) {
                 s.setInt(2, ifIndex);
             }
-    
+
             ResultSet rs = s.executeQuery();
             d.watch(rs);
             if (rs.next()) {
@@ -1193,7 +1208,7 @@ public class JdbcCapsdDbSyncer implements InitializingBean, CapsdDbSyncer {
         } finally {
             d.cleanUp();
         }
-    
+
         return nodeid;
     }
 
@@ -1201,45 +1216,49 @@ public class JdbcCapsdDbSyncer implements InitializingBean, CapsdDbSyncer {
 	/* (non-Javadoc)
      * @see org.opennms.ng.services.capsd.CapsdDbSyncerI#isInterfaceInDB(java.sql.Connection, java.net.InetAddress)
      */
-    /** {@inheritDoc} */
+
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public boolean isInterfaceInDB(final InetAddress ifAddress) {
         return m_jdbcTemplate.execute(new ConnectionCallback<Boolean>() {
 
             @Override
             public Boolean doInConnection(Connection con) throws SQLException, DataAccessException {
-                    return isInterfaceInDB(con, ifAddress) ? Boolean.TRUE : Boolean.FALSE;
+                return isInterfaceInDB(con, ifAddress) ? Boolean.TRUE : Boolean.FALSE;
             }
-            
         }).booleanValue();
     }
-    
-    /** {@inheritDoc} */
+
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public boolean isInterfaceInDB(Connection dbConn, InetAddress ifAddress) throws SQLException {
         boolean result = false;
-    
+
         LOG.debug("isInterfaceInDB: attempting to lookup interface " + InetAddressUtils.str(ifAddress) + " in the database.");
-    
+
         // Set connection as read-only
         //
         // dbConn.setReadOnly(true);
-    
+
         ResultSet rs = null;
         final DBUtils d = new DBUtils(getClass());
-        
+
         try {
             PreparedStatement s = dbConn.prepareStatement(RETRIEVE_IPADDR_SQL);
             d.watch(s);
             s.setString(1, InetAddressUtils.str(ifAddress));
-    
+
             rs = s.executeQuery();
             d.watch(rs);
             result = rs.next();
         } finally {
             d.cleanUp();
         }
-    
+
         return result;
     }
 
@@ -1258,7 +1277,7 @@ public class JdbcCapsdDbSyncer implements InitializingBean, CapsdDbSyncer {
      * @return a {@link String} object.
      */
     public String getNextSvcIdSql() {
-       return m_nextSvcIdSql;
+        return m_nextSvcIdSql;
     }
 
     /**
@@ -1269,6 +1288,4 @@ public class JdbcCapsdDbSyncer implements InitializingBean, CapsdDbSyncer {
     public void setJdbcTemplate(JdbcTemplate jdbcTemplate) {
         m_jdbcTemplate = jdbcTemplate;
     }
-    
-
 }

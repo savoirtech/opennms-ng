@@ -28,14 +28,13 @@
 
 package org.opennms.ng.services.capsd.plugins;
 
-import org.opennms.core.utils.ParameterMap;
-
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.Map;
 
+import org.opennms.core.utils.ParameterMap;
 
 /**
  * <p>JDBCQueryPlugin class.</p>
@@ -44,37 +43,35 @@ import java.util.Map;
  * @version $Id: $
  */
 public class JDBCQueryPlugin extends JDBCPlugin {
-    
-    /** {@inheritDoc} */
+
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public boolean checkStatus(Connection con, Map<String, Object> qualifiers) {
-        Statement st = null; 
+        Statement st = null;
         String query = ParameterMap.getKeyedString(qualifiers, "query", null);
-        
-        if(query == null) return false;
-        
-        try {   
+
+        if (query == null) {
+            return false;
+        }
+
+        try {
             st = con.createStatement(ResultSet.TYPE_SCROLL_SENSITIVE, ResultSet.CONCUR_READ_ONLY);
             ResultSet rs = st.executeQuery(query);
             rs.first();
-            
-            if (rs.getRow() == 1)
+
+            if (rs.getRow() == 1) {
                 return true;
-            
-        }
-        catch(SQLException exp) {
+            }
+        } catch (SQLException exp) {
             return false;
-            
-        }
-        
-        catch (Throwable exp) {
+        } catch (Throwable exp) {
             return false;
-        }
-        finally {
+        } finally {
             closeStmt(st);
         }
-        
+
         return false;
     }
-    
 }

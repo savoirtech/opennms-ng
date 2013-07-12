@@ -28,14 +28,19 @@
 
 package org.opennms.ng.services.capsd.snmp;
 
-import org.opennms.netmgt.snmp.*;
+import org.opennms.netmgt.snmp.Collectable;
+import org.opennms.netmgt.snmp.CollectionTracker;
+import org.opennms.netmgt.snmp.ColumnTracker;
+import org.opennms.netmgt.snmp.SingleInstanceTracker;
+import org.opennms.netmgt.snmp.SnmpInstId;
+import org.opennms.netmgt.snmp.SnmpObjId;
 
 /**
  * The NamedSnmpVar class is used to associate a name for a particular snmp
  * instance with its object identifier. Common names often include ifIndex,
  * sysObjectId, etc al. These names are the names of particular variables as
  * defined by the SMI.
- *
+ * <p/>
  * Should the instance also be part of a table, then the column number of the
  * instance is also stored in the object.
  */
@@ -75,49 +80,79 @@ public final class NamedSnmpVar implements Collectable {
     //
     // Class strings for valid SNMP data types
     // 
-    /** Constant <code>SNMPINT32="org.opennms.protocols.snmp.SnmpInt32"</code> */
+    /**
+     * Constant <code>SNMPINT32="org.opennms.protocols.snmp.SnmpInt32"</code>
+     */
     public static final String SNMPINT32 = "org.opennms.protocols.snmp.SnmpInt32";
 
-    /** Constant <code>SNMPUINT32="org.opennms.protocols.snmp.SnmpUInt32"</code> */
+    /**
+     * Constant <code>SNMPUINT32="org.opennms.protocols.snmp.SnmpUInt32"</code>
+     */
     public static final String SNMPUINT32 = "org.opennms.protocols.snmp.SnmpUInt32";
 
-    /** Constant <code>SNMPCOUNTER32="org.opennms.protocols.snmp.SnmpCounter3"{trunked}</code> */
+    /**
+     * Constant <code>SNMPCOUNTER32="org.opennms.protocols.snmp.SnmpCounter3"{trunked}</code>
+     */
     public static final String SNMPCOUNTER32 = "org.opennms.protocols.snmp.SnmpCounter32";
 
-    /** Constant <code>SNMPCOUNTER64="org.opennms.protocols.snmp.SnmpCounter6"{trunked}</code> */
+    /**
+     * Constant <code>SNMPCOUNTER64="org.opennms.protocols.snmp.SnmpCounter6"{trunked}</code>
+     */
     public static final String SNMPCOUNTER64 = "org.opennms.protocols.snmp.SnmpCounter64";
 
-    /** Constant <code>SNMPGAUGE32="org.opennms.protocols.snmp.SnmpGauge32"</code> */
+    /**
+     * Constant <code>SNMPGAUGE32="org.opennms.protocols.snmp.SnmpGauge32"</code>
+     */
     public static final String SNMPGAUGE32 = "org.opennms.protocols.snmp.SnmpGauge32";
 
-    /** Constant <code>SNMPTIMETICKS="org.opennms.protocols.snmp.SnmpTimeTick"{trunked}</code> */
+    /**
+     * Constant <code>SNMPTIMETICKS="org.opennms.protocols.snmp.SnmpTimeTick"{trunked}</code>
+     */
     public static final String SNMPTIMETICKS = "org.opennms.protocols.snmp.SnmpTimeTicks";
 
-    /** Constant <code>SNMPOCTETSTRING="org.opennms.protocols.snmp.SnmpOctetStr"{trunked}</code> */
+    /**
+     * Constant <code>SNMPOCTETSTRING="org.opennms.protocols.snmp.SnmpOctetStr"{trunked}</code>
+     */
     public static final String SNMPOCTETSTRING = "org.opennms.protocols.snmp.SnmpOctetString";
 
-    /** Constant <code>SNMPOPAQUE="org.opennms.protocols.snmp.SnmpOpaque"</code> */
+    /**
+     * Constant <code>SNMPOPAQUE="org.opennms.protocols.snmp.SnmpOpaque"</code>
+     */
     public static final String SNMPOPAQUE = "org.opennms.protocols.snmp.SnmpOpaque";
 
-    /** Constant <code>SNMPIPADDRESS="org.opennms.protocols.snmp.SnmpIPAddres"{trunked}</code> */
+    /**
+     * Constant <code>SNMPIPADDRESS="org.opennms.protocols.snmp.SnmpIPAddres"{trunked}</code>
+     */
     public static final String SNMPIPADDRESS = "org.opennms.protocols.snmp.SnmpIPAddress";
 
-    /** Constant <code>SNMPOBJECTID="org.opennms.protocols.snmp.SnmpObjectId"</code> */
+    /**
+     * Constant <code>SNMPOBJECTID="org.opennms.protocols.snmp.SnmpObjectId"</code>
+     */
     public static final String SNMPOBJECTID = "org.opennms.protocols.snmp.SnmpObjectId";
 
-    /** Constant <code>SNMPV2PARTYCLOCK="org.opennms.protocols.snmp.SnmpV2PartyC"{trunked}</code> */
+    /**
+     * Constant <code>SNMPV2PARTYCLOCK="org.opennms.protocols.snmp.SnmpV2PartyC"{trunked}</code>
+     */
     public static final String SNMPV2PARTYCLOCK = "org.opennms.protocols.snmp.SnmpV2PartyClock";
 
-    /** Constant <code>SNMPNOSUCHINSTANCE="org.opennms.protocols.snmp.SnmpNoSuchIn"{trunked}</code> */
+    /**
+     * Constant <code>SNMPNOSUCHINSTANCE="org.opennms.protocols.snmp.SnmpNoSuchIn"{trunked}</code>
+     */
     public static final String SNMPNOSUCHINSTANCE = "org.opennms.protocols.snmp.SnmpNoSuchInstance";
 
-    /** Constant <code>SNMPNOSUCHOBJECT="org.opennms.protocols.snmp.SnmpNoSuchOb"{trunked}</code> */
+    /**
+     * Constant <code>SNMPNOSUCHOBJECT="org.opennms.protocols.snmp.SnmpNoSuchOb"{trunked}</code>
+     */
     public static final String SNMPNOSUCHOBJECT = "org.opennms.protocols.snmp.SnmpNoSuchObject";
 
-    /** Constant <code>SNMPENDOFMIBVIEW="org.opennms.protocols.snmp.SnmpEndOfMib"{trunked}</code> */
+    /**
+     * Constant <code>SNMPENDOFMIBVIEW="org.opennms.protocols.snmp.SnmpEndOfMib"{trunked}</code>
+     */
     public static final String SNMPENDOFMIBVIEW = "org.opennms.protocols.snmp.SnmpEndOfMibView";
 
-    /** Constant <code>SNMPNULL="org.opennms.protocols.snmp.SnmpNull"</code> */
+    /**
+     * Constant <code>SNMPNULL="org.opennms.protocols.snmp.SnmpNull"</code>
+     */
     public static final String SNMPNULL = "org.opennms.protocols.snmp.SnmpNull";
 
     /**
@@ -125,12 +160,9 @@ public final class NamedSnmpVar implements Collectable {
      * and object identifier. The instance is not considered to be part of a
      * table.
      *
-     * @param type
-     *            The expected SNMP data type of this object.
-     * @param alias
-     *            The alias for the object identifier.
-     * @param oid
-     *            The object identifier for the instance.
+     * @param type  The expected SNMP data type of this object.
+     * @param alias The alias for the object identifier.
+     * @param oid   The object identifier for the instance.
      */
     public NamedSnmpVar(final String type, final String alias, final String oid) {
         m_type = type;
@@ -147,14 +179,10 @@ public final class NamedSnmpVar implements Collectable {
      * considered to be part of a table and the column is the "instance" number
      * for the table.
      *
-     * @param type
-     *            The expected SNMP data type of this object.
-     * @param alias
-     *            The alias for the object identifier.
-     * @param oid
-     *            The object identifier for the instance.
-     * @param column
-     *            The column entry for its table.
+     * @param type   The expected SNMP data type of this object.
+     * @param alias  The alias for the object identifier.
+     * @param oid    The object identifier for the instance.
+     * @param column The column entry for its table.
      */
     public NamedSnmpVar(final String type, final String alias, final String oid, final int column) {
         m_type = type;
@@ -178,9 +206,8 @@ public final class NamedSnmpVar implements Collectable {
     /**
      * Returns the class object associated with the class name stored in m_type.
      *
-     * @exception ClassNotFoundException
-     *                Thrown from this method if forName() fails.
      * @return a {@link Class} object.
+     * @throws ClassNotFoundException Thrown from this method if forName() fails.
      * @throws ClassNotFoundException if any.
      */
     public Class<?> getTypeClass() throws ClassNotFoundException {
@@ -207,7 +234,7 @@ public final class NamedSnmpVar implements Collectable {
     public String getOid() {
         return m_oid;
     }
-    
+
     /**
      * <p>getSnmpObjId</p>
      *
@@ -225,7 +252,7 @@ public final class NamedSnmpVar implements Collectable {
     public boolean isTableEntry() {
         return m_isTabular;
     }
-    
+
     /**
      * <p>getCollectionTracker</p>
      *
@@ -233,8 +260,8 @@ public final class NamedSnmpVar implements Collectable {
      */
     @Override
     public CollectionTracker getCollectionTracker() {
-        return m_isTabular ? (CollectionTracker)new ColumnTracker(getSnmpObjId()) : 
-                             (CollectionTracker)new SingleInstanceTracker(getSnmpObjId(), SnmpInstId.INST_ZERO);
+        return m_isTabular ? (CollectionTracker) new ColumnTracker(getSnmpObjId()) : (CollectionTracker) new SingleInstanceTracker(getSnmpObjId(),
+            SnmpInstId.INST_ZERO);
     }
 
     /**
@@ -258,10 +285,10 @@ public final class NamedSnmpVar implements Collectable {
             return new CollectionTracker[0];
         }
         CollectionTracker[] trackers = new CollectionTracker[columns.length];
-        for(int i = 0; i < columns.length; i++)
+        for (int i = 0;i < columns.length;i++) {
             trackers[i] = columns[i].getCollectionTracker();
-        
-         return trackers;
-    }
+        }
 
+        return trackers;
+    }
 }

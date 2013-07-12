@@ -28,12 +28,11 @@
 
 package org.opennms.ng.services.capsd.plugins;
 
-import org.opennms.core.utils.ParameterMap;
-import org.opennms.ng.services.capsd.AbstractPlugin;
-
 import java.net.InetAddress;
 import java.util.Map;
 
+import org.opennms.core.utils.ParameterMap;
+import org.opennms.ng.services.capsd.AbstractPlugin;
 
 /**
  * This plugin does nothing more than return true for all
@@ -68,7 +67,7 @@ public class K5Plugin extends AbstractPlugin {
 
     /**
      * {@inheritDoc}
-     *
+     * <p/>
      * Returns true if the protocol defined by this plugin is supported. If the
      * protocol is not supported then a false value is returned to the caller.
      * Default to returning false unless K5 is set as active.
@@ -80,7 +79,7 @@ public class K5Plugin extends AbstractPlugin {
 
     /**
      * {@inheritDoc}
-     *
+     * <p/>
      * Returns true if the protocol defined by this plugin is supported. If the
      * protocol is not supported then a false value is returned to the caller.
      * The qualifier map passed to the method is used by the plugin to return

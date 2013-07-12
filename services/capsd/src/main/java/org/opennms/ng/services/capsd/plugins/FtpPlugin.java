@@ -28,16 +28,16 @@
 
 package org.opennms.ng.services.capsd.plugins;
 
-import org.opennms.ng.services.capsd.AbstractTcpPlugin;
-import org.opennms.ng.services.capsd.ConnectionConfig;
-
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.Socket;
 
+import org.opennms.ng.services.capsd.AbstractTcpPlugin;
+import org.opennms.ng.services.capsd.ConnectionConfig;
+
 /**
- * <P>
+ * <p/>
  * This class is designed to be used by the capabilities daemon to test for the
  * existance of an FTP server on remote interfaces. The class implements the
  * Plugin interface that allows it to be used along with other plugins by the
@@ -90,23 +90,25 @@ public final class FtpPlugin extends AbstractTcpPlugin {
         super(PROTOCOL_NAME, DEFAULT_PORT, DEFAULT_TIMEOUT, DEFAULT_RETRY);
     }
 
-    /** {@inheritDoc} */
+    /**
+     * {@inheritDoc}
+     */
     @Override
     protected boolean checkProtocol(Socket socket, ConnectionConfig config) throws IOException {
         BufferedReader rdr = new BufferedReader(new InputStreamReader(socket.getInputStream()));
-  
+
         FtpResponse connectResponse = FtpResponse.readResponse(rdr);
         if (!connectResponse.isCodeValid()) {
             return false;
         }
-        
+
         FtpResponse.sendCommand(socket, "QUIT");
 
         FtpResponse quitResponse = FtpResponse.readResponse(rdr);
         if (!quitResponse.isCodeValid()) {
             return false;
         }
-        
+
         return true;
     }
 }

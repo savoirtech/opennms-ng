@@ -28,6 +28,19 @@
 
 package org.opennms.ng.services.capsd;
 
+import java.net.InetAddress;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.Collections;
+import java.util.Date;
+import java.util.HashSet;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Set;
+import java.util.concurrent.ExecutorService;
+
 import org.opennms.core.db.DataSourceFactory;
 import org.opennms.core.utils.DBUtils;
 import org.opennms.core.utils.InetAddressUtils;
@@ -44,23 +57,15 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.util.Assert;
 
-import java.net.InetAddress;
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.util.*;
-import java.util.concurrent.ExecutorService;
-
 /**
  * <p>BroadcastEventProcessor class.</p>
  *
  * @author <a href="mailto:matt@opennms.org">Matt Brozowski </a>
  * @author <a href="http://www.opennms.org/">OpenNMS </a>
  */
-@EventListener(name="Capsd:BroadcastEventProcessor", logPrefix="capsd")
+@EventListener(name = "Capsd:BroadcastEventProcessor", logPrefix = "capsd")
 public class BroadcastEventProcessor implements InitializingBean {
-    
+
     private static final Logger LOG = LoggerFactory.getLogger(org.opennms.ng.services.capsd.BroadcastEventProcessor.class);
 
     /**
@@ -101,7 +106,8 @@ public class BroadcastEventProcessor implements InitializingBean {
      * SQL statement used to query the 'node' and 'ipinterface' tables to verify
      * if a specified ipaddr and node label have already exist in the database.
      */
-    private static String SQL_QUERY_IPINTERFACE_EXIST = "SELECT nodelabel, ipaddr FROM node, ipinterface WHERE node.nodeid = ipinterface.nodeid AND node.nodelabel = ? AND ipinterface.ipaddr = ? AND isManaged !='D' AND nodeType !='D'";
+    private static String SQL_QUERY_IPINTERFACE_EXIST = "SELECT nodelabel, ipaddr FROM node, ipinterface WHERE node.nodeid = ipinterface.nodeid AND"
+        + " node.nodelabel = ? AND ipinterface.ipaddr = ? AND isManaged !='D' AND nodeType !='D'";
 
     /**
      * SQL statement used to query if a node with the specified nodelabel exist
@@ -113,7 +119,8 @@ public class BroadcastEventProcessor implements InitializingBean {
      * SQL statement used to verify if an ifservice with the specified ip
      * address and service name exists in the database.
      */
-    private static String SQL_QUERY_SERVICE_EXIST = "SELECT nodeid FROM ifservices, service WHERE ifservices.serviceid = service.serviceid AND ipaddr = ? AND servicename = ? AND status !='D'";
+    private static String SQL_QUERY_SERVICE_EXIST = "SELECT nodeid FROM ifservices, service WHERE ifservices.serviceid = service.serviceid AND "
+        + "ipaddr = ? AND servicename = ? AND status !='D'";
 
     /**
      * SQL statement used to query if an interface/service mapping already
@@ -164,21 +171,17 @@ public class BroadcastEventProcessor implements InitializingBean {
      * The location where suspectInterface events are enqueued for processing.
      */
     private ExecutorService m_suspectQ;
-    
+
     private SuspectEventProcessorFactory m_suspectEventProcessorFactory;
 
     /**
      * Counts the number of interfaces on the node other than a given interface
-     * 
-     * @param dbConn
-     *            the database connection
-     * @param nodeId
-     *            the node to check interfaces for
-     * @param ipAddr
-     *            the interface not to include in the count
+     *
+     * @param dbConn the database connection
+     * @param nodeId the node to check interfaces for
+     * @param ipAddr the interface not to include in the count
      * @return the numer of interfaces other than the given one
-     * @throws java.sql.SQLException
-     *             if an error occurs talking to the database
+     * @throws java.sql.SQLException if an error occurs talking to the database
      */
     private int countOtherInterfacesOnNode(Connection dbConn, long nodeId, String ipAddr) throws SQLException {
         final String DB_COUNT_OTHER_INTERFACES_ON_NODE = "SELECT count(*) FROM ipinterface WHERE nodeID=? and ipAddr != ? and isManaged != 'D'";
@@ -211,19 +214,17 @@ public class BroadcastEventProcessor implements InitializingBean {
      * Counts the number of other non deleted services associated with the
      * interface defined by nodeid/ipAddr
      *
-     * @param dbConn
-     *            the database connection
-     * @param nodeId
-     *            the node to chck
-     * @param ipAddr
-     *            the interface to check
-     * @param service
-     *            the name of the service not to include
+     * @param dbConn  the database connection
+     * @param nodeId  the node to chck
+     * @param ipAddr  the interface to check
+     * @param service the name of the service not to include
      * @return the number of non deleted services, other than serviceId
      */
     private int countOtherServicesOnInterface(Connection dbConn, long nodeId, String ipAddr, String service) throws SQLException {
 
-        final String DB_COUNT_OTHER_SERVICES_ON_IFACE = "SELECT count(*) FROM ifservices, service " + "WHERE ifservices.serviceId = service.serviceId AND ifservices.status != 'D' " + "AND ifservices.nodeID=? AND ifservices.ipAddr=? AND service.servicename != ?";
+        final String DB_COUNT_OTHER_SERVICES_ON_IFACE =
+            "SELECT count(*) FROM ifservices, service " + "WHERE ifservices.serviceId = service.serviceId AND ifservices.status != 'D' "
+                + "AND ifservices.nodeID=? AND ifservices.ipAddr=? AND service.servicename != ?";
 
         PreparedStatement stmt = null;
         ResultSet rs = null;
@@ -254,12 +255,9 @@ public class BroadcastEventProcessor implements InitializingBean {
      * Counts the number of non deleted services on a node on interfaces other
      * than a given interface
      *
-     * @param dbConn
-     *            the database connection
-     * @param nodeId
-     *            the nodeid to check
-     * @param ipAddr
-     *            the address of the interface not to include
+     * @param dbConn the database connection
+     * @param nodeId the nodeid to check
+     * @param ipAddr the address of the interface not to include
      * @return the number of non deleted services on other interfaces
      */
     private int countServicesOnOtherInterfaces(Connection dbConn, long nodeId, String ipAddr) throws SQLException {
@@ -325,11 +323,11 @@ public class BroadcastEventProcessor implements InitializingBean {
                 // Node already exists. Add the ipaddess to the ipinterface
                 // table
                 InetAddress ifaddr;
-				try {
-					ifaddr = InetAddressUtils.addr(ipaddr);
-				} catch (final IllegalArgumentException e) {
-					throw new FailedOperationException("unable to resolve host " + ipaddr + ": " + e.getMessage(), e);
-				}
+                try {
+                    ifaddr = InetAddressUtils.addr(ipaddr);
+                } catch (final IllegalArgumentException e) {
+                    throw new FailedOperationException("unable to resolve host " + ipaddr + ": " + e.getMessage(), e);
+                }
                 int nodeId = rs.getInt(1);
                 String dpName = rs.getString(2);
 
@@ -343,7 +341,6 @@ public class BroadcastEventProcessor implements InitializingBean {
                 DbNodeEntry nodeEntry = DbNodeEntry.get(nodeId, dpName);
                 Event newEvent = EventUtils.createNodeGainedInterfaceEvent(nodeEntry, ifaddr);
                 eventsToSend.add(newEvent);
-
             }
             return eventsToSend;
         } finally {
@@ -356,20 +353,16 @@ public class BroadcastEventProcessor implements InitializingBean {
      * also adds in interface with the given ipaddress to the node, if the
      * ipaddr is not null
      *
-     * @param conn
-     *            The JDBC Database connection.
-     * @param nodeLabel
-     *            the node label to identify the node to create.
-     * @param ipaddr
-     *            the ipaddress to be added into the ipinterface table.
-     * @throws java.sql.SQLException
-     *             if a database error occurs
-     * @throws org.opennms.ng.services.capsd.FailedOperationException
-     *             if the ipaddr is not resolvable
+     * @param conn      The JDBC Database connection.
+     * @param nodeLabel the node label to identify the node to create.
+     * @param ipaddr    the ipaddress to be added into the ipinterface table.
+     * @throws java.sql.SQLException                                  if a database error occurs
+     * @throws org.opennms.ng.services.capsd.FailedOperationException if the ipaddr is not resolvable
      */
     private List<Event> createNodeWithInterface(Connection conn, String nodeLabel, String ipaddr) throws SQLException, FailedOperationException {
-        if (nodeLabel == null)
+        if (nodeLabel == null) {
             return Collections.emptyList();
+        }
 
         LOG.debug("addNode:  Add a node " + nodeLabel + " to the database");
 
@@ -385,24 +378,25 @@ public class BroadcastEventProcessor implements InitializingBean {
         Event newEvent = EventUtils.createNodeAddedEvent(node);
         eventsToSend.add(newEvent);
 
-        if (ipaddr != null)
+        if (ipaddr != null) {
             LOG.debug("addNode:  Add an IP Address " + ipaddr + " to the database");
+        }
 
-            // add the ipaddess to the database
-            InetAddress ifaddress;
-			try {
-				ifaddress = InetAddressUtils.addr(ipaddr);
-			} catch (final IllegalArgumentException e) {
-				throw new FailedOperationException("unable to resolve host " + ipaddr + ": " + e.getMessage(), e);
-			}
-            DbIpInterfaceEntry ipInterface = DbIpInterfaceEntry.create(node.getNodeId(), ifaddress);
-            ipInterface.setHostname(ifaddress.getHostName());
-            ipInterface.setManagedState(DbIpInterfaceEntry.STATE_MANAGED);
-            ipInterface.setPrimaryState(DbIpInterfaceEntry.SNMP_NOT_ELIGIBLE);
-            ipInterface.store(conn);
+        // add the ipaddess to the database
+        InetAddress ifaddress;
+        try {
+            ifaddress = InetAddressUtils.addr(ipaddr);
+        } catch (final IllegalArgumentException e) {
+            throw new FailedOperationException("unable to resolve host " + ipaddr + ": " + e.getMessage(), e);
+        }
+        DbIpInterfaceEntry ipInterface = DbIpInterfaceEntry.create(node.getNodeId(), ifaddress);
+        ipInterface.setHostname(ifaddress.getHostName());
+        ipInterface.setManagedState(DbIpInterfaceEntry.STATE_MANAGED);
+        ipInterface.setPrimaryState(DbIpInterfaceEntry.SNMP_NOT_ELIGIBLE);
+        ipInterface.store(conn);
 
-            Event gainIfEvent = EventUtils.createNodeGainedInterfaceEvent(node, ifaddress);
-            eventsToSend.add(gainIfEvent);
+        Event gainIfEvent = EventUtils.createNodeGainedInterfaceEvent(node, ifaddress);
+        eventsToSend.add(gainIfEvent);
         return eventsToSend;
     }
 
@@ -413,7 +407,7 @@ public class BroadcastEventProcessor implements InitializingBean {
      * @param nodeLabel
      * @param ipaddr
      * @return eventsToSend
-     *          A List Object containing events to be sent
+     *         A List Object containing events to be sent
      * @throws java.sql.SQLException
      * @throws org.opennms.ng.services.capsd.FailedOperationException
      */
@@ -422,14 +416,14 @@ public class BroadcastEventProcessor implements InitializingBean {
         if (interfaceExists(dbConn, nodeLabel, ipaddr)) {
             LOG.debug("addInterfaceHandler: node " + nodeLabel + " with IPAddress " + ipaddr + " already exist in the database.");
             eventsToSend = Collections.emptyList();
-        }
-
-        else if (nodeExists(dbConn, nodeLabel)) {
-            eventsToSend = createInterfaceOnNode(dbConn, nodeLabel, ipaddr);
         } else {
-            // The node does not exist in the database, add the node and
-            // the ipinterface into the database.
-            eventsToSend = createNodeWithInterface(dbConn, nodeLabel, ipaddr);
+            if (nodeExists(dbConn, nodeLabel)) {
+                eventsToSend = createInterfaceOnNode(dbConn, nodeLabel, ipaddr);
+            } else {
+                // The node does not exist in the database, add the node and
+                // the ipinterface into the database.
+                eventsToSend = createNodeWithInterface(dbConn, nodeLabel, ipaddr);
+            }
         }
         return eventsToSend;
     }
@@ -437,19 +431,14 @@ public class BroadcastEventProcessor implements InitializingBean {
     /**
      * Perform the buld of the work for processing an addNode event
      *
-     * @param dbConn
-     *            the database connection
-     * @param nodeLabel
-     *            the label for the node to add
-     * @param ipaddr
-     *            an interface on the node (may be null if no interface is
-     *            supplied)
+     * @param dbConn    the database connection
+     * @param nodeLabel the label for the node to add
+     * @param ipaddr    an interface on the node (may be null if no interface is
+     *                  supplied)
      * @return a list of events that need to be sent in response to these
      *         changes
-     * @throws java.sql.SQLException
-     *             if a database error occurrs
-     * @throws org.opennms.ng.services.capsd.FailedOperationException
-     *             if other errors occur
+     * @throws java.sql.SQLException                                  if a database error occurrs
+     * @throws org.opennms.ng.services.capsd.FailedOperationException if other errors occur
      */
     private List<Event> doAddNode(Connection dbConn, String nodeLabel, String ipaddr) throws SQLException, FailedOperationException {
         List<Event> eventsToSend;
@@ -477,7 +466,8 @@ public class BroadcastEventProcessor implements InitializingBean {
      * @throws java.sql.SQLException
      * @throws org.opennms.ng.services.capsd.FailedOperationException
      */
-    private List<Event> doAddServiceMapping(Connection dbConn, String ipaddr, String serviceName, long txNo) throws SQLException, FailedOperationException {
+    private List<Event> doAddServiceMapping(Connection dbConn, String ipaddr, String serviceName,
+                                            long txNo) throws SQLException, FailedOperationException {
         PreparedStatement stmt = null;
         final DBUtils d = new DBUtils(getClass());
         try {
@@ -507,7 +497,8 @@ public class BroadcastEventProcessor implements InitializingBean {
      * @throws java.sql.SQLException
      * @throws org.opennms.ng.services.capsd.FailedOperationException
      */
-    private List<Event> doAddServiceToInterface(Connection dbConn, String ipaddr, String serviceName, int serviceId, long txNo) throws SQLException, FailedOperationException {
+    private List<Event> doAddServiceToInterface(Connection dbConn, String ipaddr, String serviceName, int serviceId,
+                                                long txNo) throws SQLException, FailedOperationException {
 
         PreparedStatement stmt = null;
         ResultSet rs = null;
@@ -524,14 +515,14 @@ public class BroadcastEventProcessor implements InitializingBean {
                 LOG.debug("changeServiceHandler: add service " + serviceName + " to interface: " + ipaddr);
 
                 InetAddress inetAddr;
-				try {
-					inetAddr = InetAddressUtils.addr(ipaddr);
-				} catch (final IllegalArgumentException e) {
-					throw new FailedOperationException("unable to resolve host " + ipaddr + ": " + e.getMessage(), e);
-				}
+                try {
+                    inetAddr = InetAddressUtils.addr(ipaddr);
+                } catch (final IllegalArgumentException e) {
+                    throw new FailedOperationException("unable to resolve host " + ipaddr + ": " + e.getMessage(), e);
+                }
                 final int nodeId = rs.getInt(1);
                 // insert service
-				DbIfServiceEntry service = DbIfServiceEntry.create(nodeId, inetAddr, serviceId);
+                DbIfServiceEntry service = DbIfServiceEntry.create(nodeId, inetAddr, serviceId);
                 service.setSource(DbIfServiceEntry.SOURCE_PLUGIN);
                 service.setStatus(DbIfServiceEntry.STATUS_ACTIVE);
                 service.setNotify(DbIfServiceEntry.NOTIFY_ON);
@@ -559,7 +550,8 @@ public class BroadcastEventProcessor implements InitializingBean {
      * @throws java.sql.SQLException
      * @throws org.opennms.ng.services.capsd.FailedOperationException
      */
-    private List<Event> doChangeService(Connection dbConn, String ipaddr, String serviceName, String action, long txNo) throws SQLException, FailedOperationException {
+    private List<Event> doChangeService(Connection dbConn, String ipaddr, String serviceName, String action,
+                                        long txNo) throws SQLException, FailedOperationException {
         List<Event> eventsToSend = null;
         int serviceId = verifyServiceExists(dbConn, serviceName);
 
@@ -567,15 +559,17 @@ public class BroadcastEventProcessor implements InitializingBean {
             eventsToSend = new LinkedList<Event>();
             // find the node Id associated with the serviceName and interface
             int[] nodeIds = findNodeIdForServiceAndInterface(dbConn, ipaddr, serviceName);
-            for (int i = 0; i < nodeIds.length; i++) {
+            for (int i = 0;i < nodeIds.length;i++) {
                 int nodeId = nodeIds[i];
                 // delete the service from the database
                 eventsToSend.addAll(doDeleteService(dbConn, "OpenNMS.Capsd", nodeId, ipaddr, serviceName, txNo));
             }
-        } else if (action.equalsIgnoreCase("ADD")) {
-            eventsToSend = doAddServiceToInterface(dbConn, ipaddr, serviceName, serviceId, txNo);
         } else {
-            eventsToSend = Collections.emptyList();
+            if (action.equalsIgnoreCase("ADD")) {
+                eventsToSend = doAddServiceToInterface(dbConn, ipaddr, serviceName, serviceId, txNo);
+            } else {
+                eventsToSend = Collections.emptyList();
+            }
         }
         return eventsToSend;
     }
@@ -592,7 +586,8 @@ public class BroadcastEventProcessor implements InitializingBean {
      *         A List containing event(s) to send.
      * @throws java.sql.SQLException
      */
-    private List<Event> doCreateInterfaceMappings(Connection dbConn, String nodeLabel, String ipaddr, String hostName, long txNo) throws SQLException {
+    private List<Event> doCreateInterfaceMappings(Connection dbConn, String nodeLabel, String ipaddr, String hostName,
+                                                  long txNo) throws SQLException {
         PreparedStatement stmt = null;
         final DBUtils d = new DBUtils(getClass());
         try {
@@ -619,23 +614,17 @@ public class BroadcastEventProcessor implements InitializingBean {
      * delete propagation is enable and the interface is the only one on the
      * node, delete the node as well.
      *
-     * @param dbConn
-     *            the database connection
-     * @param source
-     *            the source for any events that must be sent
-     * @param nodeid
-     *            the id of the node the interface resides on
-     * @param ipAddr
-     *            the ip address of the interface to be deleted
-     * @param txNo
-     *            a transaction number to associate with the deletion
+     * @param dbConn the database connection
+     * @param source the source for any events that must be sent
+     * @param nodeid the id of the node the interface resides on
+     * @param ipAddr the ip address of the interface to be deleted
+     * @param txNo   a transaction number to associate with the deletion
      * @return a list of events that need to be sent w.r.t. this deletion
-     * @throws java.sql.SQLException
-     *             if any database errors occur
+     * @throws java.sql.SQLException if any database errors occur
      */
 
     private List<Event> doDeleteInterface(Connection dbConn, String source, long nodeid, String ipAddr, long txNo) throws SQLException {
-        return doDeleteInterface( dbConn, source, nodeid, ipAddr, -1, txNo);
+        return doDeleteInterface(dbConn, source, nodeid, ipAddr, -1, txNo);
     }
 
     /**
@@ -643,21 +632,14 @@ public class BroadcastEventProcessor implements InitializingBean {
      * also the snmpinterface, if it exists. If delete propagation is enabled and
      * the interface is the only one on the node, delete the node as well.
      *
-     * @param dbConn
-     *            the database connection
-     * @param source
-     *            the source for any events that must be sent
-     * @param nodeid
-     *            the id of the node the interface resides on
-     * @param ipAddr
-     *            the ip address of the interface to be deleted
-     * @param ifIndex
-     *             the ifIndex of the interface to be deleted
-     * @param txNo
-     *            a transaction number to associate with the deletion
+     * @param dbConn  the database connection
+     * @param source  the source for any events that must be sent
+     * @param nodeid  the id of the node the interface resides on
+     * @param ipAddr  the ip address of the interface to be deleted
+     * @param ifIndex the ifIndex of the interface to be deleted
+     * @param txNo    a transaction number to associate with the deletion
      * @return a list of events that need to be sent w.r.t. this deletion
-     * @throws java.sql.SQLException
-     *             if any database errors occur
+     * @throws java.sql.SQLException if any database errors occur
      */
     private List<Event> doDeleteInterface(Connection dbConn, String source, long nodeid, String ipAddr, int ifIndex, long txNo) throws SQLException {
         List<Event> eventsToSend = new LinkedList<Event>();
@@ -692,7 +674,8 @@ public class BroadcastEventProcessor implements InitializingBean {
      *         a list of events to be sent.
      * @throws java.sql.SQLException
      */
-    private List<Event> doDeleteInterfaceMappings(Connection dbConn, String nodeLabel, String ipaddr, String hostName, long txNo) throws SQLException {
+    private List<Event> doDeleteInterfaceMappings(Connection dbConn, String nodeLabel, String ipaddr, String hostName,
+                                                  long txNo) throws SQLException {
         PreparedStatement stmt = null;
         final DBUtils d = new DBUtils(getClass());
         try {
@@ -717,7 +700,7 @@ public class BroadcastEventProcessor implements InitializingBean {
 
             // Now mark the interface as deleted (and its services as well)
             long[] nodeIds = findNodeIdsForInterfaceAndLabel(dbConn, nodeLabel, ipaddr);
-            for (int i = 0; i < nodeIds.length; i++) {
+            for (int i = 0;i < nodeIds.length;i++) {
                 long nodeId = nodeIds[i];
                 eventsToSend.addAll(doDeleteInterface(dbConn, "OpenNMS.Capsd", nodeId, ipaddr, txNo));
             }
@@ -731,19 +714,13 @@ public class BroadcastEventProcessor implements InitializingBean {
      * Mark as deleted the specified node, its associated interfaces and
      * services.
      *
-     * @param dbConn
-     *            the connection to the database
-     * @param source
-     *            the source for any events to send
-     * @param nodeid
-     *            the nodeid to be deleted
-     * @param txNo
-     *            a transaction id to associate with this deletion
-     *
+     * @param dbConn the connection to the database
+     * @param source the source for any events to send
+     * @param nodeid the nodeid to be deleted
+     * @param txNo   a transaction id to associate with this deletion
      * @return the list of events that need to be sent in response to the node
      *         being deleted
-     * @throws java.sql.SQLException
-     *             if any exception occurs communicating with the database
+     * @throws java.sql.SQLException if any exception occurs communicating with the database
      */
     private List<Event> doDeleteNode(Connection dbConn, String source, long nodeid, long txNo) throws SQLException {
         List<Event> eventsToSend = new LinkedList<Event>();
@@ -767,8 +744,7 @@ public class BroadcastEventProcessor implements InitializingBean {
             stmt.setLong(1, nodeId);
             int count = stmt.executeUpdate();
 
-            LOG.debug("deleteAlarmsForNode: deleted: "+count+" alarms for node: "+nodeId);
-
+            LOG.debug("deleteAlarmsForNode: deleted: " + count + " alarms for node: " + nodeId);
         } finally {
             d.cleanUp();
         }
@@ -784,8 +760,7 @@ public class BroadcastEventProcessor implements InitializingBean {
             stmt.setString(2, ipAddr);
             int count = stmt.executeUpdate();
 
-            LOG.debug("deleteAlarmsForInterace: deleted: "+count+" alarms for interface: "+ipAddr);
-
+            LOG.debug("deleteAlarmsForInterace: deleted: " + count + " alarms for interface: " + ipAddr);
         } finally {
             d.cleanUp();
         }
@@ -794,14 +769,10 @@ public class BroadcastEventProcessor implements InitializingBean {
     /**
      * Delete alarms for the specified snmp interface
      *
-     * @param dbConn
-     *            the connection to the database
-     * @param nodeId
-     *            the nodeid for the interface to be deleted
-     * @param ifIndex
-     *            the ifIndex for the interface to be deleted
-     * @throws java.sql.SQLException
-     *             if any exception occurs communicating with the database
+     * @param dbConn  the connection to the database
+     * @param nodeId  the nodeid for the interface to be deleted
+     * @param ifIndex the ifIndex for the interface to be deleted
+     * @throws java.sql.SQLException if any exception occurs communicating with the database
      */
     private void deleteAlarmsForSnmpInterface(Connection dbConn, long nodeId, int ifIndex) throws SQLException {
         PreparedStatement stmt = null;
@@ -813,8 +784,7 @@ public class BroadcastEventProcessor implements InitializingBean {
             stmt.setInt(2, ifIndex);
             int count = stmt.executeUpdate();
 
-            LOG.debug("deleteAlarmsForSnmpInterace: deleted: "+count+" alarms for node " + nodeId + "ifIndex: "+ifIndex);
-
+            LOG.debug("deleteAlarmsForSnmpInterace: deleted: " + count + " alarms for node " + nodeId + "ifIndex: " + ifIndex);
         } finally {
             d.cleanUp();
         }
@@ -826,20 +796,19 @@ public class BroadcastEventProcessor implements InitializingBean {
 
         try {
             stmt = dbConn.prepareStatement("DELETE FROM alarms " +
-                                            "WHERE nodeid = ? " +
-                                             " AND ipaddr = ? " +
-                                             " AND serviceid " +
-                                             "  IN (SELECT serviceid " +
-                                             "FROM service " +
-                                            "WHERE servicename = ?)");
+                "WHERE nodeid = ? " +
+                " AND ipaddr = ? " +
+                " AND serviceid " +
+                "  IN (SELECT serviceid " +
+                "FROM service " +
+                "WHERE servicename = ?)");
             d.watch(stmt);
             stmt.setLong(1, nodeId);
             stmt.setString(2, ipAddr);
             stmt.setString(3, service);
             int count = stmt.executeUpdate();
 
-            LOG.debug("deleteAlarmsForService: deleted: "+count+" alarms for service: "+service);
-
+            LOG.debug("deleteAlarmsForService: deleted: " + count + " alarms for service: " + service);
         } finally {
             d.cleanUp();
         }
@@ -850,23 +819,15 @@ public class BroadcastEventProcessor implements InitializingBean {
      * interface or node and deletePropagation is enabled, the interface or node
      * is marked as deleted as well.
      *
-     * @param dbConn
-     *            the connection to the database
-     * @param source
-     *            the source for any events to send
-     * @param nodeid
-     *            the nodeid that the service resides on
-     * @param ipAddr
-     *            the interface that the service resides on
-     * @param service
-     *            the name of the service
-     * @param txNo
-     *            a transaction id to associate with this deletion
-     *
+     * @param dbConn  the connection to the database
+     * @param source  the source for any events to send
+     * @param nodeid  the nodeid that the service resides on
+     * @param ipAddr  the interface that the service resides on
+     * @param service the name of the service
+     * @param txNo    a transaction id to associate with this deletion
      * @return the list of events that need to be sent in response to the
      *         service being deleted
-     * @throws java.sql.SQLException
-     *             if any exception occurs communicating with the database
+     * @throws java.sql.SQLException if any exception occurs communicating with the database
      */
     private List<Event> doDeleteService(Connection dbConn, String source, long nodeid, String ipAddr, String service, long txNo) throws SQLException {
         List<Event> eventsToSend = new LinkedList<Event>();
@@ -882,15 +843,17 @@ public class BroadcastEventProcessor implements InitializingBean {
                 // node
                 LOG.debug("Propagating service delete to node {}", nodeid);
                 eventsToSend.addAll(doDeleteNode(dbConn, source, nodeid, txNo));
-            } else if (otherSvcsOnIfCnt == 0) {
-                // no services on this interface so delete interface
-                LOG.debug("Propagting service delete to interface " + nodeid + "/" + ipAddr);
-                eventsToSend.addAll(doDeleteInterface(dbConn, source, nodeid, ipAddr, txNo));
             } else {
-                LOG.debug("No need to Propagate service delete " + nodeid + "/" + ipAddr + "/" + service);
-                // otherwise just mark the service as deleted and send a
-                // serviceDeleted event
-                eventsToSend.addAll(markServiceDeleted(dbConn, source, nodeid, ipAddr, service, txNo));
+                if (otherSvcsOnIfCnt == 0) {
+                    // no services on this interface so delete interface
+                    LOG.debug("Propagting service delete to interface " + nodeid + "/" + ipAddr);
+                    eventsToSend.addAll(doDeleteInterface(dbConn, source, nodeid, ipAddr, txNo));
+                } else {
+                    LOG.debug("No need to Propagate service delete " + nodeid + "/" + ipAddr + "/" + service);
+                    // otherwise just mark the service as deleted and send a
+                    // serviceDeleted event
+                    eventsToSend.addAll(markServiceDeleted(dbConn, source, nodeid, ipAddr, service, txNo));
+                }
             }
         } else {
             LOG.debug("Propagation disabled:  deleting only service " + nodeid + "/" + ipAddr + "/" + service);
@@ -914,7 +877,8 @@ public class BroadcastEventProcessor implements InitializingBean {
      * @throws java.sql.SQLException
      * @throws org.opennms.ng.services.capsd.FailedOperationException
      */
-    private List<Event> doDeleteServiceMapping(Connection dbConn, String ipaddr, String serviceName, long txNo) throws SQLException, FailedOperationException {
+    private List<Event> doDeleteServiceMapping(Connection dbConn, String ipaddr, String serviceName,
+                                               long txNo) throws SQLException, FailedOperationException {
         PreparedStatement stmt = null;
         final DBUtils d = new DBUtils(getClass());
         try {
@@ -933,21 +897,27 @@ public class BroadcastEventProcessor implements InitializingBean {
         }
     }
 
-    private List<Event> doUpdateServer(Connection dbConn, String nodeLabel, String ipaddr, String action, String hostName, long txNo) throws SQLException, FailedOperationException {
+    private List<Event> doUpdateServer(Connection dbConn, String nodeLabel, String ipaddr, String action, String hostName,
+                                       long txNo) throws SQLException, FailedOperationException {
 
         boolean exists = existsInServerMap(dbConn, hostName, ipaddr);
 
         //TODO: this logic changed from stable, verify that it should not be backported
         if ("DELETE".equalsIgnoreCase(action)) {
             return doDeleteInterfaceMappings(dbConn, nodeLabel, ipaddr, hostName, txNo);
-        } else if ("ADD".equalsIgnoreCase(action)) {
-            if (exists)
-                throw new FailedOperationException("Could not add interface "+ipaddr+" to NMS server: "+hostName+" because it already exists!");
-            else
-                return doCreateInterfaceMappings(dbConn, nodeLabel, ipaddr, hostName, txNo);
         } else {
-            LOG.error("updateServerHandler: could not process interface: " + ipaddr + " on NMS server: " + hostName+": action "+action+" unknown");
-            throw new FailedOperationException("Undefined operation "+action+" for updateServer event!");
+            if ("ADD".equalsIgnoreCase(action)) {
+                if (exists) {
+                    throw new FailedOperationException(
+                        "Could not add interface " + ipaddr + " to NMS server: " + hostName + " because it already exists!");
+                } else {
+                    return doCreateInterfaceMappings(dbConn, nodeLabel, ipaddr, hostName, txNo);
+                }
+            } else {
+                LOG.error("updateServerHandler: could not process interface: " + ipaddr + " on NMS server: " + hostName + ": action " + action
+                    + " unknown");
+                throw new FailedOperationException("Undefined operation " + action + " for updateServer event!");
+            }
         }
     }
 
@@ -964,7 +934,8 @@ public class BroadcastEventProcessor implements InitializingBean {
      * @throws java.sql.SQLException
      * @throws org.opennms.ng.services.capsd.FailedOperationException
      */
-    private List<Event> doUpdateService(Connection dbConn, String nodeLabel, String ipaddr, String serviceName, String action, long txNo) throws SQLException, FailedOperationException {
+    private List<Event> doUpdateService(Connection dbConn, String nodeLabel, String ipaddr, String serviceName, String action,
+                                        long txNo) throws SQLException, FailedOperationException {
         List<Event> eventsToSend;
         verifyServiceExists(dbConn, serviceName);
         verifyInterfaceExists(dbConn, nodeLabel, ipaddr);
@@ -974,18 +945,20 @@ public class BroadcastEventProcessor implements InitializingBean {
         if (mapExists && "DELETE".equalsIgnoreCase(action)) {
             // the mapping exists and should be deleted
             eventsToSend = doDeleteServiceMapping(dbConn, ipaddr, serviceName, txNo);
-        } else if (!mapExists && "ADD".equalsIgnoreCase(action)) {
-            // we need to add the mapping, it doesn't exist
-            eventsToSend = doAddServiceMapping(dbConn, ipaddr, serviceName, txNo);
         } else {
-            eventsToSend = Collections.emptyList();
+            if (!mapExists && "ADD".equalsIgnoreCase(action)) {
+                // we need to add the mapping, it doesn't exist
+                eventsToSend = doAddServiceMapping(dbConn, ipaddr, serviceName, txNo);
+            } else {
+                eventsToSend = Collections.emptyList();
+            }
         }
         return eventsToSend;
     }
 
     /**
      * Helper method to check if a service exists for a host and IP address.
-     *
+     * <p/>
      * FIXME: Very inconsistent naming in the current "model": nodelabel, hostname, servername, etc.
      * right here this simple method indicates a problem with the model.
      *
@@ -1058,7 +1031,7 @@ public class BroadcastEventProcessor implements InitializingBean {
             }
             nodeIds = new int[nodeIdList.size()];
             int i = 0;
-            for(Integer n : nodeIdList) {
+            for (Integer n : nodeIdList) {
                 nodeIds[i++] = n.intValue();
             }
             return nodeIds;
@@ -1082,7 +1055,9 @@ public class BroadcastEventProcessor implements InitializingBean {
         final DBUtils d = new DBUtils(getClass());
 
         try {
-            stmt = dbConn.prepareStatement("SELECT node.nodeid FROM node, ipinterface WHERE node.nodeid = ipinterface.nodeid AND node.nodelabel = ? AND ipinterface.ipaddr = ? AND isManaged !='D' AND nodeType !='D'");
+            stmt = dbConn.prepareStatement(
+                "SELECT node.nodeid FROM node, ipinterface WHERE node.nodeid = ipinterface.nodeid AND node.nodelabel = ? AND ipinterface.ipaddr = ?"
+                    + " AND isManaged !='D' AND nodeType !='D'");
             d.watch(stmt);
             stmt.setString(1, nodeLabel);
             stmt.setString(2, ipAddr);
@@ -1096,7 +1071,7 @@ public class BroadcastEventProcessor implements InitializingBean {
 
             long[] nodeIds = new long[nodeIdList.size()];
             int i = 0;
-            for(Long nodeId : nodeIdList) {
+            for (Long nodeId : nodeIdList) {
                 nodeIds[i++] = nodeId.longValue();
             }
             return nodeIds;
@@ -1104,9 +1079,6 @@ public class BroadcastEventProcessor implements InitializingBean {
             d.cleanUp();
         }
     }
-
-
-
 
     /**
      * Return an id for this event listener
@@ -1122,20 +1094,18 @@ public class BroadcastEventProcessor implements InitializingBean {
      * associated node does not exist in the database yet, add a node into the
      * database.
      *
-     * @param event
-     *            The event to process.
-     * @throws InsufficientInformationException
-     *             if the event is missing essential information
-     * @throws FailedOperationException
-     *             if the operation fails (because of database error for
-     *             example)
+     * @param event The event to process.
+     * @throws InsufficientInformationException if the event is missing essential information
+     * @throws FailedOperationException         if the operation fails (because of database error for
+     *                                          example)
      */
-    @EventHandler(uei=EventConstants.ADD_INTERFACE_EVENT_UEI)
+    @EventHandler(uei = EventConstants.ADD_INTERFACE_EVENT_UEI)
     public void handleAddInterface(Event event) throws InsufficientInformationException, FailedOperationException {
         EventUtils.checkInterface(event);
         EventUtils.requireParm(event, EventConstants.PARM_NODE_LABEL);
-        if (isXmlRpcEnabled())
+        if (isXmlRpcEnabled()) {
             EventUtils.requireParm(event, EventConstants.PARM_TRANSACTION_NO);
+        }
         LOG.debug("addInterfaceHandler:  processing addInterface event for {}", event.getInterface());
 
         String nodeLabel = EventUtils.getParm(event, EventConstants.PARM_NODE_LABEL);
@@ -1155,11 +1125,11 @@ public class BroadcastEventProcessor implements InitializingBean {
             LOG.error("addInterfaceHandler: SQLException during add node and ipaddress to the database.", sqlE);
             throw new FailedOperationException("Database error: " + sqlE.getMessage(), sqlE);
         } finally {
-            if (dbConn != null)
+            if (dbConn != null) {
                 try {
                     if (eventsToSend != null) {
                         dbConn.commit();
-                        for(Event e : eventsToSend) {
+                        for (Event e : eventsToSend) {
                             EventUtils.sendEvent(e, event.getUei(), txNo, isXmlRpcEnabled());
                         }
                     } else {
@@ -1169,14 +1139,16 @@ public class BroadcastEventProcessor implements InitializingBean {
                     LOG.error("handleAddInterface: Threw Exception during commit: ", ex);
                     throw new FailedOperationException("Database error: " + ex.getMessage(), ex);
                 } finally {
-                    if (dbConn != null)
+                    if (dbConn != null) {
                         try {
                             dbConn.setAutoCommit(true); //TODO:verify this
                             dbConn.close();
                         } catch (SQLException ex) {
                             LOG.error("handleAddInterface: Threw Exception during close: ", ex);
                         }
+                    }
                 }
+            }
         }
     }
 
@@ -1187,14 +1159,11 @@ public class BroadcastEventProcessor implements InitializingBean {
     /**
      * Process an addNode event.
      *
-     * @param event
-     *            The event to process.
-     * @throws InsufficientInformationException
-     *             if the event is missing information
-     * @throws FailedOperationException
-     *             if an error occurs during processing
+     * @param event The event to process.
+     * @throws InsufficientInformationException if the event is missing information
+     * @throws FailedOperationException         if an error occurs during processing
      */
-    @EventHandler(uei=EventConstants.ADD_NODE_EVENT_UEI)
+    @EventHandler(uei = EventConstants.ADD_NODE_EVENT_UEI)
     public void handleAddNode(Event event) throws InsufficientInformationException, FailedOperationException {
 
         EventUtils.requireParm(event, EventConstants.PARM_NODE_LABEL);
@@ -1217,11 +1186,11 @@ public class BroadcastEventProcessor implements InitializingBean {
             LOG.error("addNodeHandler: SQLException during add node and ipaddress to tables", sqlE);
             throw new FailedOperationException("database error: " + sqlE.getMessage(), sqlE);
         } finally {
-            if (dbConn != null)
+            if (dbConn != null) {
                 try {
                     if (eventsToSend != null) {
                         dbConn.commit();
-                        for(Event e : eventsToSend) {
+                        for (Event e : eventsToSend) {
                             EventUtils.sendEvent(e, event.getUei(), txNo, isXmlRpcEnabled());
                         }
                     } else {
@@ -1231,15 +1200,16 @@ public class BroadcastEventProcessor implements InitializingBean {
                     LOG.error("handleAddNode: Threw Exception during commit: ", ex);
                     throw new FailedOperationException("database error: " + ex.getMessage(), ex);
                 } finally {
-                    if (dbConn != null)
+                    if (dbConn != null) {
                         try {
                             dbConn.close();
                         } catch (SQLException ex) {
                             LOG.error("handleAddNode: Threw Exception during close: ", ex);
                         }
+                    }
                 }
+            }
         }
-
     }
 
     /**
@@ -1247,12 +1217,11 @@ public class BroadcastEventProcessor implements InitializingBean {
      * An 'action' parameter wraped in the event will tell which action to take
      * to the service.
      *
-     * @param event
-     *            The event to process.
-     * @throws FailedOperationException if any.
+     * @param event The event to process.
+     * @throws FailedOperationException         if any.
      * @throws InsufficientInformationException if any.
      */
-    @EventHandler(uei=EventConstants.CHANGE_SERVICE_EVENT_UEI)
+    @EventHandler(uei = EventConstants.CHANGE_SERVICE_EVENT_UEI)
     public void handleChangeService(Event event) throws InsufficientInformationException, FailedOperationException {
         EventUtils.checkInterface(event);
         EventUtils.checkService(event);
@@ -1277,11 +1246,11 @@ public class BroadcastEventProcessor implements InitializingBean {
             LOG.error("SQLException during changeService on database.", sqlE);
             throw new FailedOperationException("exeption processing changeService: " + sqlE.getMessage(), sqlE);
         } finally {
-            if (dbConn != null)
+            if (dbConn != null) {
                 try {
                     if (eventsToSend != null) {
                         dbConn.commit();
-                        for(Event e : eventsToSend) {
+                        for (Event e : eventsToSend) {
                             EventUtils.sendEvent(e, event.getUei(), txNo, isXmlRpcEnabled());
                         }
                     } else {
@@ -1291,42 +1260,45 @@ public class BroadcastEventProcessor implements InitializingBean {
                     LOG.error("handleChangeService: Exception thrown during commit/rollback: ", ex);
                     throw new FailedOperationException("exeption processing changeService: " + ex.getMessage(), ex);
                 } finally {
-                    if (dbConn != null)
+                    if (dbConn != null) {
                         try {
                             dbConn.close();
                         } catch (SQLException ex) {
                             LOG.error("handleChangeService: Exception thrown closing connection: {}", ex);
                         }
+                    }
                 }
+            }
         }
-
     }
 
     /**
      * Handle a deleteInterface Event. Here we process the event by marking all
      * the appropriate data rows as deleted.
      *
-     * @param event
-     *            The event indicating what interface to delete
-     * @throws InsufficientInformationException
-     *             if the required information is not part of the event
-     * @throws FailedOperationException if any.
+     * @param event The event indicating what interface to delete
+     * @throws InsufficientInformationException if the required information is not part of the event
+     * @throws FailedOperationException         if any.
      */
-    @EventHandler(uei=EventConstants.DELETE_INTERFACE_EVENT_UEI)
+    @EventHandler(uei = EventConstants.DELETE_INTERFACE_EVENT_UEI)
     public void handleDeleteInterface(Event event) throws InsufficientInformationException, FailedOperationException {
         // validate event
         EventUtils.checkEventId(event);
         EventUtils.checkInterfaceOrIfIndex(event);
         EventUtils.checkNodeId(event);
         int ifIndex = -1;
-        if(event.hasIfIndex()) {
+        if (event.hasIfIndex()) {
             ifIndex = event.getIfIndex();
         }
-        if (isXmlRpcEnabled())
+        if (isXmlRpcEnabled()) {
             EventUtils.requireParm(event, EventConstants.PARM_TRANSACTION_NO);
+        }
 
         // log the event
-        LOG.debug("handleDeleteInterface: Event\n" + "uei\t\t" + event.getUei() + "\neventid\t\t" + event.getDbid() + "\nnodeId\t\t" + event.getNodeid() + "\nipaddr\t\t" + (event.getInterface() != null ? event.getInterface() : "N/A" ) + "\nifIndex\t\t" + (ifIndex > -1 ? ifIndex : "N/A" ) + "\neventtime\t" + (event.getTime() != null ? event.getTime() : "<null>"));
+        LOG.debug(
+            "handleDeleteInterface: Event\n" + "uei\t\t" + event.getUei() + "\neventid\t\t" + event.getDbid() + "\nnodeId\t\t" + event.getNodeid()
+                + "\nipaddr\t\t" + (event.getInterface() != null ? event.getInterface() : "N/A") + "\nifIndex\t\t" + (ifIndex > -1 ? ifIndex : "N/A")
+                + "\neventtime\t" + (event.getTime() != null ? event.getTime() : "<null>"));
 
         long txNo = EventUtils.getLongParm(event, EventConstants.PARM_TRANSACTION_NO, -1L);
 
@@ -1340,16 +1312,17 @@ public class BroadcastEventProcessor implements InitializingBean {
             String source = (event.getSource() == null ? "OpenNMS.Capsd" : event.getSource());
 
             eventsToSend = doDeleteInterface(dbConn, source, event.getNodeid(), event.getInterface(), ifIndex, txNo);
-
         } catch (SQLException ex) {
-            LOG.error("handleDeleteInterface:  Database error deleting interface on node " + event.getNodeid() + " with ip address " + (event.getInterface() != null ? event.getInterface() : "null") + " and ifIndex "+ (event.hasIfIndex() ? event.getIfIndex() : "null"), ex);
+            LOG.error("handleDeleteInterface:  Database error deleting interface on node " + event.getNodeid() + " with ip address " + (
+                event.getInterface() != null ? event.getInterface() : "null") + " and ifIndex " + (event.hasIfIndex() ? event.getIfIndex() : "null"),
+                ex);
             throw new FailedOperationException("database error: " + ex.getMessage(), ex);
         } finally {
-            if (dbConn != null)
+            if (dbConn != null) {
                 try {
                     if (eventsToSend != null) {
                         dbConn.commit();
-                        for(Event e : eventsToSend) {
+                        for (Event e : eventsToSend) {
                             EventUtils.sendEvent(e, event.getUei(), txNo, isXmlRpcEnabled());
                         }
                     } else {
@@ -1359,13 +1332,15 @@ public class BroadcastEventProcessor implements InitializingBean {
                     LOG.error("handleDeleteInterface: Exception thrown during commit/rollback: ", ex);
                     throw new FailedOperationException("exeption processing delete interface: " + ex.getMessage(), ex);
                 } finally {
-                    if (dbConn != null)
+                    if (dbConn != null) {
                         try {
                             dbConn.close();
                         } catch (SQLException ex) {
                             LOG.error("handleDeleteInterface: Exception thrown closing connection: ", ex);
                         }
+                    }
                 }
+            }
         }
     }
 
@@ -1373,23 +1348,24 @@ public class BroadcastEventProcessor implements InitializingBean {
      * Handle a deleteNode Event. Here we process the event by marking all the
      * appropriate data rows as deleted.
      *
-     * @param event
-     *            The event indicating what node to delete
-     * @throws InsufficientInformationException
-     *             if the required information is not part of the event
-     * @throws FailedOperationException if any.
+     * @param event The event indicating what node to delete
+     * @throws InsufficientInformationException if the required information is not part of the event
+     * @throws FailedOperationException         if any.
      */
-    @EventHandler(uei=EventConstants.DELETE_NODE_EVENT_UEI)
+    @EventHandler(uei = EventConstants.DELETE_NODE_EVENT_UEI)
     public void handleDeleteNode(Event event) throws InsufficientInformationException, FailedOperationException {
         // validate event
         EventUtils.checkEventId(event);
         EventUtils.checkNodeId(event);
-        if (isXmlRpcEnabled())
+        if (isXmlRpcEnabled()) {
             EventUtils.requireParm(event, EventConstants.PARM_TRANSACTION_NO);
+        }
 
         // log the event
         long nodeid = event.getNodeid();
-        LOG.debug("handleDeleteNode: Event\n" + "uei\t\t" + event.getUei() + "\neventid\t\t" + event.getDbid() + "\nnodeId\t\t" + nodeid + "\neventtime\t" + (event.getTime() != null ? event.getTime() : "<null>"));
+        LOG.debug(
+            "handleDeleteNode: Event\n" + "uei\t\t" + event.getUei() + "\neventid\t\t" + event.getDbid() + "\nnodeId\t\t" + nodeid + "\neventtime\t"
+                + (event.getTime() != null ? event.getTime() : "<null>"));
 
         long txNo = EventUtils.getLongParm(event, EventConstants.PARM_TRANSACTION_NO, -1L);
 
@@ -1404,16 +1380,17 @@ public class BroadcastEventProcessor implements InitializingBean {
 
             eventsToSend = doDeleteNode(dbConn, source, nodeid, txNo);
         } catch (SQLException ex) {
-            LOG.error("handleDeleteService:  Database error deleting service " + event.getService() + " on ipAddr " + event.getInterface() + " for node " + nodeid, ex);
+            LOG.error(
+                "handleDeleteService:  Database error deleting service " + event.getService() + " on ipAddr " + event.getInterface() + " for node "
+                    + nodeid, ex);
             throw new FailedOperationException("database error: " + ex.getMessage(), ex);
-
         } finally {
 
-            if (dbConn != null)
+            if (dbConn != null) {
                 try {
                     if (eventsToSend != null) {
                         dbConn.commit();
-                        for(Event e : eventsToSend) {
+                        for (Event e : eventsToSend) {
                             EventUtils.sendEvent(e, event.getUei(), txNo, isXmlRpcEnabled());
                         }
                     } else {
@@ -1423,13 +1400,15 @@ public class BroadcastEventProcessor implements InitializingBean {
                     LOG.error("handleDeleteNode: Exception thrown during commit/rollback: ", ex);
                     throw new FailedOperationException("exeption processing deleteNode: " + ex.getMessage(), ex);
                 } finally {
-                    if (dbConn != null)
+                    if (dbConn != null) {
                         try {
                             dbConn.close();
                         } catch (SQLException ex) {
-                            LOG.error("handleDeleteNode: Exception thrown closing connection: ",ex);
+                            LOG.error("handleDeleteNode: Exception thrown closing connection: ", ex);
                         }
+                    }
                 }
+            }
         }
     }
 
@@ -1437,13 +1416,11 @@ public class BroadcastEventProcessor implements InitializingBean {
      * Handle a deleteService Event. Here we process the event by marking all
      * the appropriate data rows as deleted.
      *
-     * @param event
-     *            The event indicating what service to delete
-     * @throws InsufficientInformationException
-     *             if the required information is not part of the event
-     * @throws FailedOperationException if any.
+     * @param event The event indicating what service to delete
+     * @throws InsufficientInformationException if the required information is not part of the event
+     * @throws FailedOperationException         if any.
      */
-    @EventHandler(uei=EventConstants.DELETE_SERVICE_EVENT_UEI)
+    @EventHandler(uei = EventConstants.DELETE_SERVICE_EVENT_UEI)
     public void handleDeleteService(Event event) throws InsufficientInformationException, FailedOperationException {
 
         // validate event
@@ -1453,7 +1430,9 @@ public class BroadcastEventProcessor implements InitializingBean {
         EventUtils.checkService(event);
 
         // log the event
-        LOG.debug("handleDeleteService: Event\nuei\t\t" + event.getUei() + "\neventid\t\t" + event.getDbid() + "\nnodeid\t\t" + event.getNodeid() + "\nipaddr\t\t" + event.getInterface() + "\nservice\t\t" + event.getService() + "\neventtime\t" + (event.getTime() != null ? event.getTime() : "<null>"));
+        LOG.debug("handleDeleteService: Event\nuei\t\t" + event.getUei() + "\neventid\t\t" + event.getDbid() + "\nnodeid\t\t" + event.getNodeid()
+            + "\nipaddr\t\t" + event.getInterface() + "\nservice\t\t" + event.getService() + "\neventtime\t" + (event.getTime() != null ? event
+            .getTime() : "<null>"));
 
         long txNo = EventUtils.getLongParm(event, EventConstants.PARM_TRANSACTION_NO, -1L);
 
@@ -1466,15 +1445,17 @@ public class BroadcastEventProcessor implements InitializingBean {
             String source = (event.getSource() == null ? "OpenNMS.Capsd" : event.getSource());
             eventsToSend = doDeleteService(dbConn, source, event.getNodeid(), event.getInterface(), event.getService(), txNo);
         } catch (SQLException ex) {
-            LOG.error("handleDeleteService:  Database error deleting service " + event.getService() + " on ipAddr " + event.getInterface() + " for node " + event.getNodeid(), ex);
+            LOG.error(
+                "handleDeleteService:  Database error deleting service " + event.getService() + " on ipAddr " + event.getInterface() + " for node "
+                    + event.getNodeid(), ex);
             throw new FailedOperationException("database error: " + ex.getMessage(), ex);
         } finally {
 
-            if (dbConn != null)
+            if (dbConn != null) {
                 try {
                     if (eventsToSend != null) {
                         dbConn.commit();
-                        for(Event e : eventsToSend) {
+                        for (Event e : eventsToSend) {
                             EventUtils.sendEvent(e, event.getUei(), txNo, isXmlRpcEnabled());
                         }
                     } else {
@@ -1484,13 +1465,15 @@ public class BroadcastEventProcessor implements InitializingBean {
                     LOG.error("handleDeleteService: Exception thrown during commit/rollback: ", ex);
                     throw new FailedOperationException("exeption processing deleteService: " + ex.getMessage(), ex);
                 } finally {
-                    if (dbConn != null)
+                    if (dbConn != null) {
                         try {
                             dbConn.close();
                         } catch (SQLException ex) {
                             LOG.error("handleDeleteService: Exception thrown closing connection: ", ex);
                         }
+                    }
                 }
+            }
         }
     }
 
@@ -1501,7 +1484,7 @@ public class BroadcastEventProcessor implements InitializingBean {
      * @param event a {@link org.opennms.netmgt.xml.event.Event} object.
      * @throws InsufficientInformationException if any.
      */
-    @EventHandler(uei=EventConstants.DUP_NODE_DELETED_EVENT_UEI)
+    @EventHandler(uei = EventConstants.DUP_NODE_DELETED_EVENT_UEI)
     public void handleDupNodeDeleted(Event event) throws InsufficientInformationException {
 
         EventUtils.checkNodeId(event);
@@ -1518,16 +1501,16 @@ public class BroadcastEventProcessor implements InitializingBean {
      * @param event a {@link org.opennms.netmgt.xml.event.Event} object.
      * @throws InsufficientInformationException if any.
      */
-    @EventHandler(uei=EventConstants.FORCE_RESCAN_EVENT_UEI)
+    @EventHandler(uei = EventConstants.FORCE_RESCAN_EVENT_UEI)
     public void handleForceRescan(Event event) throws InsufficientInformationException {
         // If the event has a node identifier use it otherwise
         // will need to use the interface to lookup the node id
         // from the database
-    	Long nodeid = -1L;
+        Long nodeid = -1L;
 
-        if (event.hasNodeid())
+        if (event.hasNodeid()) {
             nodeid = event.getNodeid();
-        else {
+        } else {
             // Extract interface from the event and use it to
             // lookup the node identifier associated with the
             // interface from the database.
@@ -1559,7 +1542,6 @@ public class BroadcastEventProcessor implements InitializingBean {
             } finally {
                 d.cleanUp();
             }
-
         }
 
         if (nodeid == null || nodeid == -1) {
@@ -1583,7 +1565,7 @@ public class BroadcastEventProcessor implements InitializingBean {
      * @param event a {@link org.opennms.netmgt.xml.event.Event} object.
      * @throws InsufficientInformationException if any.
      */
-    @EventHandler(uei=EventConstants.NEW_SUSPECT_INTERFACE_EVENT_UEI)
+    @EventHandler(uei = EventConstants.NEW_SUSPECT_INTERFACE_EVENT_UEI)
     public void handleNewSuspect(final Event event) throws InsufficientInformationException {
         // ensure the event has an interface
         EventUtils.checkInterface(event);
@@ -1592,8 +1574,9 @@ public class BroadcastEventProcessor implements InitializingBean {
 
         // discard this newSuspect if one is already enqueued for the same IP address
         if (SuspectEventProcessor.isScanQueuedForAddress(interfaceValue)) {
-        	LOG.info("Ignoring newSuspect event for interface " + interfaceValue + " because a newSuspect scan for that interface already exists in the queue");
-        	return;
+            LOG.info("Ignoring newSuspect event for interface " + interfaceValue
+                + " because a newSuspect scan for that interface already exists in the queue");
+            return;
         }
 
         // new suspect event
@@ -1611,7 +1594,7 @@ public class BroadcastEventProcessor implements InitializingBean {
      * @param event a {@link org.opennms.netmgt.xml.event.Event} object.
      * @throws InsufficientInformationException if any.
      */
-    @EventHandler(uei=EventConstants.NODE_ADDED_EVENT_UEI)
+    @EventHandler(uei = EventConstants.NODE_ADDED_EVENT_UEI)
     public void handleNodeAdded(Event event) throws InsufficientInformationException {
         EventUtils.checkNodeId(event);
 
@@ -1629,7 +1612,7 @@ public class BroadcastEventProcessor implements InitializingBean {
      * @param event a {@link org.opennms.netmgt.xml.event.Event} object.
      * @throws InsufficientInformationException if any.
      */
-    @EventHandler(uei=EventConstants.NODE_DELETED_EVENT_UEI)
+    @EventHandler(uei = EventConstants.NODE_DELETED_EVENT_UEI)
     public void handleNodeDeleted(Event event) throws InsufficientInformationException {
 
         EventUtils.checkNodeId(event);
@@ -1646,9 +1629,9 @@ public class BroadcastEventProcessor implements InitializingBean {
      *
      * @param event a {@link org.opennms.netmgt.xml.event.Event} object.
      * @throws InsufficientInformationException if any.
-     * @throws FailedOperationException if any.
+     * @throws FailedOperationException         if any.
      */
-    @EventHandler(uei=EventConstants.UPDATE_SERVER_EVENT_UEI)
+    @EventHandler(uei = EventConstants.UPDATE_SERVER_EVENT_UEI)
     public void handleUpdateServer(Event event) throws InsufficientInformationException, FailedOperationException {
         // If there is no interface or NMS server found then it cannot be
         // processed
@@ -1673,16 +1656,15 @@ public class BroadcastEventProcessor implements InitializingBean {
             dbConn.setAutoCommit(false);
 
             eventsToSend = doUpdateServer(dbConn, nodeLabel, event.getInterface(), action, m_localServer, txNo);
-
         } catch (SQLException sqlE) {
             LOG.error("SQLException during updateServer on database.", sqlE);
             throw new FailedOperationException("SQLException during updateServer on database.", sqlE);
         } finally {
-            if (dbConn != null)
+            if (dbConn != null) {
                 try {
                     if (eventsToSend != null) {
                         dbConn.commit();
-                        for(Event e : eventsToSend) {
+                        for (Event e : eventsToSend) {
                             EventUtils.sendEvent(e, event.getUei(), txNo, isXmlRpcEnabled());
                         }
                     } else {
@@ -1692,15 +1674,16 @@ public class BroadcastEventProcessor implements InitializingBean {
                     LOG.error("handleUpdateServer: Exception thrown during commit/rollback: ", ex);
                     throw new FailedOperationException("SQLException during updateServer on database.", ex);
                 } finally {
-                    if (dbConn != null)
+                    if (dbConn != null) {
                         try {
                             dbConn.close();
                         } catch (SQLException ex) {
                             LOG.error("handleUpdateServer: Exception thrown closing connection: ", ex);
                         }
+                    }
                 }
+            }
         }
-
     }
 
     /**
@@ -1711,14 +1694,11 @@ public class BroadcastEventProcessor implements InitializingBean {
      * ipaddress of the interface, the service name must be included in the
      * event.
      *
-     * @param event
-     *            The event to process.
-     * @throws InsufficientInformationException
-     *             if there is missing information in the event
-     * @throws FailedOperationException
-     *             if the operation fails for some reason
+     * @param event The event to process.
+     * @throws InsufficientInformationException if there is missing information in the event
+     * @throws FailedOperationException         if the operation fails for some reason
      */
-    @EventHandler(uei=EventConstants.UPDATE_SERVICE_EVENT_UEI)
+    @EventHandler(uei = EventConstants.UPDATE_SERVICE_EVENT_UEI)
     public void handleUpdateService(Event event) throws InsufficientInformationException, FailedOperationException {
 
         EventUtils.checkInterface(event);
@@ -1742,17 +1722,16 @@ public class BroadcastEventProcessor implements InitializingBean {
             dbConn.setAutoCommit(false);
 
             eventsToSend = doUpdateService(dbConn, nodeLabel, event.getInterface(), event.getService(), action, txNo);
-
         } catch (SQLException sqlE) {
             LOG.error("SQLException during handleUpdateService on database.", sqlE);
             throw new FailedOperationException(sqlE.getMessage());
         } finally {
 
-            if (dbConn != null)
+            if (dbConn != null) {
                 try {
                     if (eventsToSend != null) {
                         dbConn.commit();
-                        for(Event e : eventsToSend) {
+                        for (Event e : eventsToSend) {
                             EventUtils.sendEvent(e, event.getUei(), txNo, isXmlRpcEnabled());
                         }
                     } else {
@@ -1762,30 +1741,27 @@ public class BroadcastEventProcessor implements InitializingBean {
                     LOG.error("handleUpdateService: Exception thrown during commit/rollback: ", ex);
                     throw new FailedOperationException(ex.getMessage());
                 } finally {
-                    if (dbConn != null)
+                    if (dbConn != null) {
                         try {
                             dbConn.close();
                         } catch (SQLException ex) {
-                            LOG.error("handleUpdateService: Exception thrown during close: ",ex);
+                            LOG.error("handleUpdateService: Exception thrown during close: ", ex);
                         }
+                    }
                 }
+            }
         }
-
     }
 
     /**
      * Returns true if and only an interface with the given ipaddr on a node
      * with the give label exists
      *
-     * @param dbConn
-     *            a database connection
-     * @param nodeLabel
-     *            the label of the node the interface must reside on
-     * @param ipaddr
-     *            the ip address the interface should have
+     * @param dbConn    a database connection
+     * @param nodeLabel the label of the node the interface must reside on
+     * @param ipaddr    the ip address the interface should have
      * @return true iff the interface exists
-     * @throws java.sql.SQLException
-     *             if a database error occurs
+     * @throws java.sql.SQLException if a database error occurs
      */
     private boolean interfaceExists(Connection dbConn, String nodeLabel, String ipaddr) throws SQLException {
         PreparedStatement stmt = null;
@@ -1810,26 +1786,24 @@ public class BroadcastEventProcessor implements InitializingBean {
      * Mark all the services associated with a given interface as deleted and
      * create service deleted events for each one that gets deleted
      *
-     * @param dbConn
-     *            the database connection
-     * @param nodeId
-     *            the node that interface resides on
-     * @param ipAddr
-     *            the ipAddress of the interface
-     * @param txNo
-     *            a transaction number that can be associated with this deletion
+     * @param dbConn the database connection
+     * @param nodeId the node that interface resides on
+     * @param ipAddr the ipAddress of the interface
+     * @param txNo   a transaction number that can be associated with this deletion
      * @return a List of serviceDeleted events, one for each service marked
-     * @throws java.sql.SQLException
-     *             if a database error occurs
+     * @throws java.sql.SQLException if a database error occurs
      */
-    private List<Event> markAllServicesForInterfaceDeleted(Connection dbConn, String source, long nodeId, String ipAddr, long txNo) throws SQLException {
+    private List<Event> markAllServicesForInterfaceDeleted(Connection dbConn, String source, long nodeId, String ipAddr,
+                                                           long txNo) throws SQLException {
         PreparedStatement stmt = null;
         ResultSet rs = null;
         final DBUtils d = new DBUtils(getClass());
         try {
             List<Event> eventsToSend = new LinkedList<Event>();
 
-            final String DB_FIND_SERVICES_FOR_INTERFACE = "SELECT DISTINCT service.serviceName FROM ifservices as ifservices, service as service WHERE ifservices.nodeID = ? and ifservices.ipAddr = ? and ifservices.status != 'D' and ifservices.serviceID = service.serviceID";
+            final String DB_FIND_SERVICES_FOR_INTERFACE = "SELECT DISTINCT service.serviceName FROM ifservices as ifservices, "
+                + "service as service WHERE ifservices.nodeID = ? and ifservices.ipAddr = ? and ifservices.status != 'D' and ifservices.serviceID ="
+                + " service.serviceID";
             stmt = dbConn.prepareStatement(DB_FIND_SERVICES_FOR_INTERFACE);
             d.watch(stmt);
             stmt.setLong(1, nodeId);
@@ -1852,7 +1826,7 @@ public class BroadcastEventProcessor implements InitializingBean {
 
             stmt.executeUpdate();
 
-            for(String serviceName : services) {
+            for (String serviceName : services) {
                 LOG.debug("creating event for service " + serviceName + " for ipAddr " + ipAddr + " node " + nodeId);
                 eventsToSend.add(EventUtils.createServiceDeletedEvent(source, nodeId, ipAddr, serviceName, txNo));
             }
@@ -1868,46 +1842,34 @@ public class BroadcastEventProcessor implements InitializingBean {
     /**
      * Mark the given interface deleted
      *
-     * @param dbConn
-     *            the database connection
-     * @param source
-     *            the source for any events set
-     * @param nodeId
-     *            the id the interface resides on
-     * @param ipAddr
-     *            the ipAddress of the interface
-     * @param txNo
-     *            a transaction no to associate with this deletion
+     * @param dbConn the database connection
+     * @param source the source for any events set
+     * @param nodeId the id the interface resides on
+     * @param ipAddr the ipAddress of the interface
+     * @param txNo   a transaction no to associate with this deletion
      * @return a List containing an interfaceDeleted event for the interface if
      *         it was actually marked
-     * @throws java.sql.SQLException
-     *             if a database error occurs
+     * @throws java.sql.SQLException if a database error occurs
      */
     private List<Event> markInterfaceDeleted(Connection dbConn, String source, long nodeId, String ipAddr, long txNo) throws SQLException {
-       return markInterfaceDeleted(dbConn, source, nodeId, ipAddr, -1, txNo);
+        return markInterfaceDeleted(dbConn, source, nodeId, ipAddr, -1, txNo);
     }
 
     /**
      * Mark the given interface deleted
      *
-     * @param dbConn
-     *            the database connection
-     * @param source
-     *            the source for any events set
-     * @param nodeId
-     *            the id the interface resides on
-     * @param ipAddr
-     *            the ipAddress of the interface
-     * @param ifIndex
-     *            the ifIndex of the interface
-     * @param txNo
-     *            a transaction no to associate with this deletion
+     * @param dbConn  the database connection
+     * @param source  the source for any events set
+     * @param nodeId  the id the interface resides on
+     * @param ipAddr  the ipAddress of the interface
+     * @param ifIndex the ifIndex of the interface
+     * @param txNo    a transaction no to associate with this deletion
      * @return a List containing an interfaceDeleted event for the interface if
      *         it was actually marked
-     * @throws java.sql.SQLException
-     *             if a database error occurs
+     * @throws java.sql.SQLException if a database error occurs
      */
-    private List<Event> markInterfaceDeleted(Connection dbConn, String source, long nodeId, String ipAddr, int ifIndex, long txNo) throws SQLException {
+    private List<Event> markInterfaceDeleted(Connection dbConn, String source, long nodeId, String ipAddr, int ifIndex,
+                                             long txNo) throws SQLException {
         final String DB_FIND_INTERFACE = "UPDATE ipinterface SET isManaged = 'D' WHERE nodeid = ? and ipAddr = ? and isManaged != 'D'";
         final String DB_FIND_SNMPINTERFACE = "UPDATE snmpinterface SET snmpcollect = 'D' WHERE nodeid = ? and snmpifindex = ? and snmpcollect != 'D'";
         PreparedStatement stmt = null;
@@ -1916,7 +1878,7 @@ public class BroadcastEventProcessor implements InitializingBean {
         int countsnmp = 0;
         try {
 
-            if(!EventUtils.isNonIpInterface(ipAddr)) {
+            if (!EventUtils.isNonIpInterface(ipAddr)) {
                 stmt = dbConn.prepareStatement(DB_FIND_INTERFACE);
                 d.watch(stmt);
                 stmt.setLong(1, nodeId);
@@ -1940,7 +1902,8 @@ public class BroadcastEventProcessor implements InitializingBean {
             if (countip > 0 || countsnmp > 0) {
                 return Collections.singletonList(EventUtils.createInterfaceDeletedEvent(source, nodeId, ipAddr, ifIndex, txNo));
             } else {
-                LOG.debug("markInterfaceDeleted: Interface not found: node = " + nodeId + ", with ip address " + (ipAddr != null ? ipAddr : "null") + ", and ifIndex " + (ifIndex > -1 ? ifIndex : "N/A"));
+                LOG.debug("markInterfaceDeleted: Interface not found: node = " + nodeId + ", with ip address " + (ipAddr != null ? ipAddr : "null")
+                    + ", and ifIndex " + (ifIndex > -1 ? ifIndex : "N/A"));
                 return Collections.emptyList();
             }
         } finally {
@@ -1954,23 +1917,19 @@ public class BroadcastEventProcessor implements InitializingBean {
      * representing the hierarchy, service events preceed the event for the
      * interface the service is on
      *
-     * @param dbConn
-     *            the database connection
-     * @param source
-     *            the source for use in the constructed events
-     * @param nodeId
-     *            the node whose interfaces and services are to be deleted
-     * @param txNo
-     *            a transaction number to associate with this deletion
+     * @param dbConn the database connection
+     * @param source the source for use in the constructed events
+     * @param nodeId the node whose interfaces and services are to be deleted
+     * @param txNo   a transaction number to associate with this deletion
      * @return a List of events indicating which nodes and services have been
      *         deleted
-     *
      * @throws java.sql.SQLException
      */
     private List<Event> markInterfacesAndServicesDeleted(Connection dbConn, String source, long nodeId, long txNo) throws SQLException {
         List<Event> eventsToSend = new LinkedList<Event>();
 
-        final String DB_FIND_IFS_FOR_NODE = "SELECT ipinterface.ipaddr FROM ipinterface WHERE ipinterface.nodeid = ? and ipinterface.ismanaged != 'D'";
+        final String DB_FIND_IFS_FOR_NODE = "SELECT ipinterface.ipaddr FROM ipinterface WHERE ipinterface.nodeid = ? and ipinterface.ismanaged != "
+            + "'D'";
 
         PreparedStatement stmt = null;
         ResultSet rs = null;
@@ -1989,7 +1948,7 @@ public class BroadcastEventProcessor implements InitializingBean {
                 ipAddrs.add(ipAddr);
             }
 
-            for(String ipAddr : ipAddrs) {
+            for (String ipAddr : ipAddrs) {
                 LOG.debug("deleting interface " + ipAddr + " for node " + nodeId);
                 eventsToSend.addAll(markAllServicesForInterfaceDeleted(dbConn, source, nodeId, ipAddr, txNo));
                 eventsToSend.addAll(markInterfaceDeleted(dbConn, source, nodeId, ipAddr, txNo));
@@ -2004,17 +1963,12 @@ public class BroadcastEventProcessor implements InitializingBean {
     /**
      * Marks a node deleted and creates an event for it if necessary.
      *
-     * @param dbConn
-     *            the database connection
-     * @param source
-     *            the source to use for constructed events
-     * @param nodeId
-     *            the node to delete
-     * @param txNo
-     *            a transaction number to associate with this deletion
+     * @param dbConn the database connection
+     * @param source the source to use for constructed events
+     * @param nodeId the node to delete
+     * @param txNo   a transaction number to associate with this deletion
      * @return a List containing the node deleted event if necessary
-     * @throws java.sql.SQLException
-     *             if a database error occurs
+     * @throws java.sql.SQLException if a database error occurs
      */
     private List<Event> markNodeDeleted(Connection dbConn, String source, long nodeId, long txNo) throws SQLException {
         final String DB_FIND_INTERFACE = "UPDATE node SET nodeType = 'D' WHERE nodeid = ? and nodeType != 'D'";
@@ -2029,10 +1983,11 @@ public class BroadcastEventProcessor implements InitializingBean {
 
             LOG.debug("markServicesDeleted: marked service deleted: {}", nodeId);
 
-            if (count > 0)
+            if (count > 0) {
                 return Collections.singletonList(EventUtils.createNodeDeletedEvent(source, nodeId, txNo));
-            else
+            } else {
                 return Collections.emptyList();
+            }
         } finally {
             d.cleanUp();
         }
@@ -2042,30 +1997,22 @@ public class BroadcastEventProcessor implements InitializingBean {
      * Marks the service deleted in the database and returns a serviceDeleted
      * event for the service, if and only if the service existed
      *
-     * @param dbConn
-     *            the database connection
-     * @param source
-     *            the source for any events sent
-     * @param nodeId
-     *            the node the service resides on
-     * @param ipAddr
-     *            the interface the service resides on
-     * @param service
-     *            the name of the service
-     * @param txNo
-     *            a transaction number to associate with this deletion
+     * @param dbConn  the database connection
+     * @param source  the source for any events sent
+     * @param nodeId  the node the service resides on
+     * @param ipAddr  the interface the service resides on
+     * @param service the name of the service
+     * @param txNo    a transaction number to associate with this deletion
      * @return a List containing a service deleted event.
-     * @throws java.sql.SQLException
-     *             if an error occurs communicating with the database
+     * @throws java.sql.SQLException if an error occurs communicating with the database
      */
-    private List<Event> markServiceDeleted(Connection dbConn, String source, long nodeId, String ipAddr, String service, long txNo) throws SQLException {
+    private List<Event> markServiceDeleted(Connection dbConn, String source, long nodeId, String ipAddr, String service,
+                                           long txNo) throws SQLException {
         PreparedStatement stmt = null;
 
         final String DB_MARK_SERVICE_DELETED =
-            "UPDATE ifservices SET status='D' "
-            + "FROM service "
-            + "WHERE ifservices.serviceID = service.serviceID "
-            + "AND ifservices.nodeID=? AND ifservices.ipAddr=? AND service.serviceName=?";
+            "UPDATE ifservices SET status='D' " + "FROM service " + "WHERE ifservices.serviceID = service.serviceID "
+                + "AND ifservices.nodeID=? AND ifservices.ipAddr=? AND service.serviceName=?";
 
         final DBUtils d = new DBUtils(getClass());
         try {
@@ -2078,10 +2025,11 @@ public class BroadcastEventProcessor implements InitializingBean {
 
             LOG.debug("markServiceDeleted: marked service deleted: " + nodeId + "/" + ipAddr + "/" + service);
 
-            if (count > 0)
+            if (count > 0) {
                 return Collections.singletonList(EventUtils.createServiceDeletedEvent(source, nodeId, ipAddr, service, txNo));
-            else
+            } else {
                 return Collections.emptyList();
+            }
         } finally {
             d.cleanUp();
         }
@@ -2090,13 +2038,10 @@ public class BroadcastEventProcessor implements InitializingBean {
     /**
      * Returns true if and only a node with the give label exists
      *
-     * @param dbConn
-     *            a database connection
-     * @param nodeLabel
-     *            the label to check
+     * @param dbConn    a database connection
+     * @param nodeLabel the label to check
      * @return true iff the node exists
-     * @throws java.sql.SQLException
-     *             if a database error occurs
+     * @throws java.sql.SQLException if a database error occurs
      */
     private boolean nodeExists(Connection dbConn, String nodeLabel) throws SQLException {
         PreparedStatement stmt = null;
@@ -2113,10 +2058,9 @@ public class BroadcastEventProcessor implements InitializingBean {
         } finally {
             d.cleanUp();
         }
-
     }
 
-     /**
+    /**
      * JDBC Query to service map table.  This will soon be cleaned up with Hibernate/DAO code.
      *
      * @param dbConn
@@ -2147,17 +2091,17 @@ public class BroadcastEventProcessor implements InitializingBean {
         } finally {
             d.cleanUp();
         }
-   }
+    }
 
     /**
      * JDBC Query using @param serviceName to determine if the serviceName is indeed as
      * service name in the service table.
-     *
+     * <p/>
      * FIXME: This sucks:
-     *  1) No transaction management
-     *  2) Such a small table should be cached and accessed via a synchronized call.  Quit
-     *  going to the DB for such trivial information.  This is a performance killer.  Especially
-     *  since our current db factory (factories) use the synchonized DriverManager JDBC class.
+     * 1) No transaction management
+     * 2) Such a small table should be cached and accessed via a synchronized call.  Quit
+     * going to the DB for such trivial information.  This is a performance killer.  Especially
+     * since our current db factory (factories) use the synchonized DriverManager JDBC class.
      *
      * @param dbConn
      * @param serviceName
@@ -2195,8 +2139,9 @@ public class BroadcastEventProcessor implements InitializingBean {
     }
 
     private void verifyInterfaceExists(Connection dbConn, String nodeLabel, String ipaddr) throws SQLException, FailedOperationException {
-        if (!interfaceExists(dbConn, nodeLabel, ipaddr))
-            throw new FailedOperationException("Interface "+ipaddr+" does not exist on a node with nodeLabel "+nodeLabel);
+        if (!interfaceExists(dbConn, nodeLabel, ipaddr)) {
+            throw new FailedOperationException("Interface " + ipaddr + " does not exist on a node with nodeLabel " + nodeLabel);
+        }
     }
 
     /**
@@ -2247,6 +2192,4 @@ public class BroadcastEventProcessor implements InitializingBean {
         Assert.state(m_suspectQ != null, "The suspectQueue must be set");
         Assert.state(m_localServer != null, "The localServer must be set");
     }
-
-
 }

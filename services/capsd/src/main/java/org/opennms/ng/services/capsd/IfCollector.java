@@ -28,17 +28,23 @@
 
 package org.opennms.ng.services.capsd;
 
+import java.lang.reflect.UndeclaredThrowableException;
+import java.net.InetAddress;
+import java.net.NoRouteToHostException;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.TreeMap;
+
 import org.opennms.core.utils.InetAddressComparator;
 import org.opennms.core.utils.InetAddressUtils;
 import org.opennms.ng.services.capsd.snmp.IfTableEntry;
 import org.opennms.ng.services.capsdconfig.CapsdConfigFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.lang.reflect.UndeclaredThrowableException;
-import java.net.InetAddress;
-import java.net.NoRouteToHostException;
-import java.util.*;
 
 /**
  * This class is designed to collect all the relevant information from the
@@ -53,11 +59,11 @@ import java.util.*;
  * @author <a href="http://www.opennms.org">OpenNMS </a>
  */
 public final class IfCollector implements Runnable {
-    
+
     private static final Logger LOG = LoggerFactory.getLogger(org.opennms.ng.services.capsd.IfCollector.class);
-    
+
     private PluginManager m_pluginManager;
-    
+
     /**
      * The primary target internet address
      */
@@ -102,9 +108,8 @@ public final class IfCollector implements Runnable {
      * This class is used to encapsulate the supported protocol information
      * discovered for an interface. The is the combination of the protocol name
      * and the in/out qualifiers for the plugin.
-     * 
+     *
      * @author <a href="mailto:weave@oculan.com">Weave </a>
-     * 
      */
     static final class SupportedProtocol {
         /**
@@ -120,11 +125,9 @@ public final class IfCollector implements Runnable {
         /**
          * Creates a new supported protocol based upon the protocol string and
          * the qualifier map.
-         * 
-         * @param protoName
-         *            The name of the protocol.
-         * @param qualifiers
-         *            The protocol qualifiers.
+         *
+         * @param protoName  The name of the protocol.
+         * @param qualifiers The protocol qualifiers.
          */
         SupportedProtocol(String protoName, Map<String, Object> qualifiers) {
             m_name = protoName;
@@ -152,22 +155,19 @@ public final class IfCollector implements Runnable {
      * configured list of protocol specifications from the Configuration
      * Manager. The list of supported protocols are added to the supports list.
      * Any failures in the plugins are logged and discarded.
-     * 
-     * @param target
-     *            The target to probe
-     * @param supports
-     *            The supported protocols (SupportedProtocol)
-     * 
+     *
+     * @param target   The target to probe
+     * @param supports The supported protocols (SupportedProtocol)
      */
     private void probe(InetAddress target, List<SupportedProtocol> supports) {
         String logAddr = InetAddressUtils.str(target);
 
         CapsdProtocolInfo[] plugins = m_pluginManager.getProtocolSpecification(target);
-        
+
         // First run the plugins to find out all the capabilities
         // for the interface
         //
-        for (int i = 0; i < plugins.length; i++) {
+        for (int i = 0;i < plugins.length;i++) {
             LOG.debug("{} testing plugin {}", logAddr, plugins[i].getProtocol());
             if (plugins[i].isAutoEnabled()) {
                 LOG.debug(logAddr + " protocol " + plugins[i].getProtocol() + " is auto enabled");
@@ -195,7 +195,8 @@ public final class IfCollector implements Runnable {
                         LOG.info("IfCollector: No route to host " + logAddr + ", continuing protocol scans.");
                     }
                 } else {
-                    LOG.warn("IfCollector: Caught undeclared throwable exception when testing for protocol " + plugins[i].getProtocol() + " on host " + logAddr, utE);
+                    LOG.warn("IfCollector: Caught undeclared throwable exception when testing for protocol " + plugins[i].getProtocol() + " on host "
+                        + logAddr, utE);
                 }
             } catch (Throwable t) {
                 LOG.warn("IfCollector: Caught an exception when testing for protocol " + plugins[i].getProtocol() + " on host " + logAddr, t);
@@ -210,12 +211,9 @@ public final class IfCollector implements Runnable {
      * in the constructor. The main work of the class is preformed in the
      * {@link #run run}method. This provides a well known interface that can be
      * collected in a thread pool or directly invoked.
-     * 
-     * @param addr
-     *            The target of the poll.
-     * @param doSnmpCollection
-     *            Flag which indicates if SNMP collection should be done.
-     * 
+     *
+     * @param addr             The target of the poll.
+     * @param doSnmpCollection Flag which indicates if SNMP collection should be done.
      */
     IfCollector(PluginManager pluginManager, InetAddress addr, boolean doSnmpCollection) {
         this(pluginManager, addr, doSnmpCollection, new HashSet<InetAddress>());
@@ -258,7 +256,6 @@ public final class IfCollector implements Runnable {
      * Returns the map of additional interface targets. The keys are instances
      * of {@link java.net.InetAddress addresses}and the mapped values are
      * {@link java.util.List lists}of supported protocols.
-     * 
      */
     Map<InetAddress, List<SupportedProtocol>> getAdditionalTargets() {
         return m_subTargets;
@@ -273,7 +270,6 @@ public final class IfCollector implements Runnable {
 
     /**
      * Returns the list of non-IP interfaces..
-     * 
      */
     List<Integer> getNonIpInterfaces() {
         return m_nonIpInterfaces;
@@ -306,7 +302,7 @@ public final class IfCollector implements Runnable {
     IfSnmpCollector getSnmpCollector() {
         return m_snmpCollector;
     }
-    
+
     void deleteSnmpCollector() {
         m_snmpCollector = null;
     }
@@ -339,11 +335,15 @@ public final class IfCollector implements Runnable {
             SupportedProtocol proto = iter.next();
             if (proto.getProtocolName().equalsIgnoreCase("snmp")) {
                 isSnmp = true;
-            } else if (proto.getProtocolName().equalsIgnoreCase("smb")) {
-                isSmb = true;
-            } else if (proto.getProtocolName().equalsIgnoreCase("msexchange")) {
-                isSmb = true;
-                hasExchange = true;
+            } else {
+                if (proto.getProtocolName().equalsIgnoreCase("smb")) {
+                    isSmb = true;
+                } else {
+                    if (proto.getProtocolName().equalsIgnoreCase("msexchange")) {
+                        isSmb = true;
+                        hasExchange = true;
+                    }
+                }
             }
         }
 
@@ -383,8 +383,9 @@ public final class IfCollector implements Runnable {
                         // Get the ifIndex
                         //
                         Integer ifIndex = ifEntry.getIfIndex();
-                        if (ifIndex == null)
+                        if (ifIndex == null) {
                             continue;
+                        }
 
                         // Get list of all IP addresses for the current ifIndex
                         //
@@ -410,8 +411,9 @@ public final class IfCollector implements Runnable {
                             // if the target failed to convert or if it
                             // is equal to the current target then skip it
                             //
-                            if (subtarget == null || subtarget.equals(m_target) || m_previouslyProbed.contains(subtarget))
+                            if (subtarget == null || subtarget.equals(m_target) || m_previouslyProbed.contains(subtarget)) {
                                 continue;
+                            }
 
                             // now find the ifType
                             //
@@ -419,8 +421,9 @@ public final class IfCollector implements Runnable {
 
                             // lookup of if type failed, next!
                             //
-                            if (ifType == null)
+                            if (ifType == null) {
                                 continue;
+                            }
 
                             // now check for loopback
                             if (subtarget.isLoopbackAddress()) {
@@ -447,51 +450,54 @@ public final class IfCollector implements Runnable {
                             probe(subtarget, probelist);
                             m_previouslyProbed.add(subtarget);
 
-                            LOG.debug("ifCollector.run: adding subtarget " + InetAddressUtils.str(subtarget) + " # supported protocols: " + probelist.size());
+                            LOG.debug("ifCollector.run: adding subtarget " + InetAddressUtils.str(subtarget) + " # supported protocols: " + probelist
+                                .size());
                             LOG.debug("----------------------------------------------------------------------------------------");
                             m_subTargets.put(subtarget, probelist);
                         } // end while(more ip addresses)
                     } // end while(more interfaces)
                 } // end if(ipAddrTable and ifTable entries collected)
 
-                else if (m_snmpCollector.hasIpAddrTable()) {
-                    m_subTargets = new TreeMap<InetAddress, List<SupportedProtocol>>(new InetAddressComparator());
+                else {
+                    if (m_snmpCollector.hasIpAddrTable()) {
+                        m_subTargets = new TreeMap<InetAddress, List<SupportedProtocol>>(new InetAddressComparator());
 
-                    List<InetAddress> ipAddrs = m_snmpCollector.getIpAddrTable().getIpAddresses();
-                    // Iterate over this interface's IP address list
-                    //
-                    Iterator<InetAddress> s = ipAddrs.iterator();
-                    while (s.hasNext()) {
-                        InetAddress subtarget = s.next();
-
-                        // if the target failed to convert or if it
-                        // is equal to the current target then skip it
+                        List<InetAddress> ipAddrs = m_snmpCollector.getIpAddrTable().getIpAddresses();
+                        // Iterate over this interface's IP address list
                         //
-                        if (subtarget == null || subtarget.equals(m_target)) {
-                            continue;
-                        }
+                        Iterator<InetAddress> s = ipAddrs.iterator();
+                        while (s.hasNext()) {
+                            InetAddress subtarget = s.next();
 
-                        // now check for loopback
-                        if (subtarget.isLoopbackAddress()) {
-                            // Skip if loopback
-                            LOG.debug("ifCollector.run: Loopback interface: " + InetAddressUtils.str(subtarget) + ", skipping...");
-                            continue;
-                        }
+                            // if the target failed to convert or if it
+                            // is equal to the current target then skip it
+                            //
+                            if (subtarget == null || subtarget.equals(m_target)) {
+                                continue;
+                            }
 
+                            // now check for loopback
+                            if (subtarget.isLoopbackAddress()) {
+                                // Skip if loopback
+                                LOG.debug("ifCollector.run: Loopback interface: " + InetAddressUtils.str(subtarget) + ", skipping...");
+                                continue;
+                            }
 
-                        // ok it appears to be ok, so probe it!
-                        //
-                        List<SupportedProtocol> probelist = new ArrayList<SupportedProtocol>();
-                        LOG.debug("----------------------------------------------------------------------------------------");
-                        LOG.debug("ifCollector.run: probing subtarget {}", InetAddressUtils.str(subtarget));
-                        probe(subtarget, probelist);
-                        m_previouslyProbed.add(subtarget);
-                        
-                        LOG.debug("ifCollector.run: adding subtarget " + InetAddressUtils.str(subtarget) + " # supported protocols: " + probelist.size());
-                        LOG.debug("----------------------------------------------------------------------------------------");
-                        m_subTargets.put(subtarget, probelist);
-                    } // end while(more ip addresses)
-                } // end if(ipAddrTable entries collected)
+                            // ok it appears to be ok, so probe it!
+                            //
+                            List<SupportedProtocol> probelist = new ArrayList<SupportedProtocol>();
+                            LOG.debug("----------------------------------------------------------------------------------------");
+                            LOG.debug("ifCollector.run: probing subtarget {}", InetAddressUtils.str(subtarget));
+                            probe(subtarget, probelist);
+                            m_previouslyProbed.add(subtarget);
+
+                            LOG.debug("ifCollector.run: adding subtarget " + InetAddressUtils.str(subtarget) + " # supported protocols: " + probelist
+                                .size());
+                            LOG.debug("----------------------------------------------------------------------------------------");
+                            m_subTargets.put(subtarget, probelist);
+                        } // end while(more ip addresses)
+                    } // end if(ipAddrTable entries collected)
+                }
             } // end try()
             catch (Throwable t) {
                 m_snmpCollector = null;

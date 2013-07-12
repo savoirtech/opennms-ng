@@ -28,18 +28,18 @@
 
 package org.opennms.ng.services.capsd.plugins;
 
-import org.opennms.core.utils.ParameterMap;
-import org.opennms.ng.services.capsd.AbstractPlugin;
-import org.opennms.protocols.ntp.NtpMessage;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import java.io.IOException;
 import java.io.InterruptedIOException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.util.Map;
+
+import org.opennms.core.utils.ParameterMap;
+import org.opennms.ng.services.capsd.AbstractPlugin;
+import org.opennms.protocols.ntp.NtpMessage;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * This plugin is used to check a host for NTP (Network Time Protocol) support.
@@ -79,14 +79,9 @@ public final class NtpPlugin extends AbstractPlugin {
     private final static int DEFAULT_TIMEOUT = 3000; // in milliseconds
 
     /**
-     * 
-     * @param nserver
-     *            The address for the NTP server test.
-     * @param port
-     *            The port to test for NTP
-     * @param timeout
-     *            Timeout in milliseconds
-     * 
+     * @param nserver The address for the NTP server test.
+     * @param port    The port to test for NTP
+     * @param timeout Timeout in milliseconds
      * @return True if server, false if not.
      */
     private boolean isServer(InetAddress nserver, int port, int retries, int timeout) {
@@ -105,7 +100,7 @@ public final class NtpPlugin extends AbstractPlugin {
             //
             byte[] data = new byte[512];
 
-            for (int count = 0; count < retries && !isAServer; count++) {
+            for (int count = 0;count < retries && !isAServer;count++) {
                 try {
                     // Construct a new DNS Address Request
                     // build the datagram packet used to request the address.
@@ -134,8 +129,9 @@ public final class NtpPlugin extends AbstractPlugin {
         } catch (IOException ex) {
             LOG.warn("isServer: An I/O exception during NTP resolution test.", ex);
         } finally {
-            if (socket != null)
+            if (socket != null) {
                 socket.close();
+            }
         }
 
         return isAServer;
@@ -154,7 +150,7 @@ public final class NtpPlugin extends AbstractPlugin {
 
     /**
      * {@inheritDoc}
-     *
+     * <p/>
      * Returns true if the protocol defined by this plugin is supported. If the
      * protocol is not supported then a false value is returned to the caller.
      */
@@ -165,7 +161,7 @@ public final class NtpPlugin extends AbstractPlugin {
 
     /**
      * {@inheritDoc}
-     *
+     * <p/>
      * <p>
      * Returns true if the protocol defined by this plugin is supported. If the
      * protocol is not supported then a false value is returned to the caller.
@@ -173,7 +169,7 @@ public final class NtpPlugin extends AbstractPlugin {
      * additional information by key-name. These key-value pairs can be added to
      * service events if needed.
      * </p>
-     *
+     * <p/>
      * <p>
      * In addition, the input qualifiers map also provides information about how
      * the plugin should contact the remote server. The plugin may check the
@@ -193,8 +189,9 @@ public final class NtpPlugin extends AbstractPlugin {
         }
 
         boolean result = isServer(address, port, retries, timeout);
-        if (result && qualifiers != null && !qualifiers.containsKey("port"))
+        if (result && qualifiers != null && !qualifiers.containsKey("port")) {
             qualifiers.put("port", port);
+        }
 
         return result;
     }

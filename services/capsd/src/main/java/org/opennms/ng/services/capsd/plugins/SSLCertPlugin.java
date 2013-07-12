@@ -28,6 +28,17 @@
 
 package org.opennms.ng.services.capsd.plugins;
 
+import java.io.IOException;
+import java.io.InterruptedIOException;
+import java.lang.reflect.UndeclaredThrowableException;
+import java.net.ConnectException;
+import java.net.InetAddress;
+import java.net.InetSocketAddress;
+import java.net.NoRouteToHostException;
+import java.net.Socket;
+import java.util.Map;
+import javax.net.ssl.SSLSocket;
+
 import org.opennms.core.utils.InetAddressUtils;
 import org.opennms.core.utils.ParameterMap;
 import org.opennms.core.utils.SocketWrapper;
@@ -36,15 +47,8 @@ import org.opennms.ng.services.capsd.AbstractPlugin;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.net.ssl.SSLSocket;
-import java.io.IOException;
-import java.io.InterruptedIOException;
-import java.lang.reflect.UndeclaredThrowableException;
-import java.net.*;
-import java.util.Map;
-
 /**
- * <P>
+ * <p/>
  * This class is designed to be used by the capabilities daemon to test for the
  * existance of an TCP server on remote interfaces. The class implements the
  * Plugin interface that allows it to be used along with other plugins by the
@@ -54,7 +58,7 @@ import java.util.Map;
  * @author <a href="mailto:ronald.roskens@gmail.com">Ronald Roskens</a>
  */
 public final class SSLCertPlugin extends AbstractPlugin {
-    
+
     private static final Logger LOG = LoggerFactory.getLogger(org.opennms.ng.services.capsd.plugins.SSLCertPlugin.class);
 
     /**
@@ -94,7 +98,7 @@ public final class SSLCertPlugin extends AbstractPlugin {
 
     /**
      * {@inheritDoc}
-     *
+     * <p/>
      * Returns true if the protocol defined by this plugin is supported. If the
      * protocol is not supported then a false value is returned to the caller.
      */
@@ -105,7 +109,7 @@ public final class SSLCertPlugin extends AbstractPlugin {
 
     /**
      * {@inheritDoc}
-     *
+     * <p/>
      * Returns true if the protocol defined by this plugin is supported. If the
      * protocol is not supported then a false value is returned to the caller.
      * The qualifier map passed to the method is used by the plugin to return
@@ -116,7 +120,7 @@ public final class SSLCertPlugin extends AbstractPlugin {
     public boolean isProtocolSupported(InetAddress address, Map<String, Object> qualifiers) {
         int retries = ParameterMap.getKeyedInteger(qualifiers, PARAMETER_RETRY, DEFAULT_RETRY);
         int timeout = ParameterMap.getKeyedInteger(qualifiers, PARAMETER_TIMEOUT, DEFAULT_TIMEOUT);
-        int port    = ParameterMap.getKeyedInteger(qualifiers, PARAMETER_PORT, DEFAULT_PORT);
+        int port = ParameterMap.getKeyedInteger(qualifiers, PARAMETER_PORT, DEFAULT_PORT);
 
         // verify the port
         //
@@ -125,7 +129,7 @@ public final class SSLCertPlugin extends AbstractPlugin {
         }
 
         boolean hasSSLCert = false;
-        for (int attempts = 0; attempts <= retries && !hasSSLCert; attempts++) {
+        for (int attempts = 0;attempts <= retries && !hasSSLCert;attempts++) {
             Socket socket = null;
             try {
                 // create a connected socket

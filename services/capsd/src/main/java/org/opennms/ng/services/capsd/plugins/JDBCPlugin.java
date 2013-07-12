@@ -28,17 +28,22 @@
 
 package org.opennms.ng.services.capsd.plugins;
 
+import java.net.InetAddress;
+import java.sql.Connection;
+import java.sql.DatabaseMetaData;
+import java.sql.Driver;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Properties;
+
 import org.opennms.core.utils.DBTools;
 import org.opennms.core.utils.ParameterMap;
 import org.opennms.ng.services.capsd.AbstractPlugin;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.net.InetAddress;
-import java.sql.*;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Properties;
 
 /**
  * This OpenNMS capsd plugin checks if a given server is running a server that
@@ -60,9 +65,9 @@ import java.util.Properties;
  * @since 0.1
  */
 public class JDBCPlugin extends AbstractPlugin {
-    
+
     private static final Logger LOG = LoggerFactory.getLogger(org.opennms.ng.services.capsd.plugins.JDBCPlugin.class);
-    
+
     /**
      * The protocol supported by the plugin
      */
@@ -84,7 +89,7 @@ public class JDBCPlugin extends AbstractPlugin {
     }
 
     private boolean isServer(String hostname, Map<String, Object> qualifiers) {
-    	
+
         String user = ParameterMap.getKeyedString(qualifiers, "user", DBTools.DEFAULT_DATABASE_USER);
         String password = ParameterMap.getKeyedString(qualifiers, "password", DBTools.DEFAULT_DATABASE_PASSWORD);
         String db_url = ParameterMap.getKeyedString(qualifiers, "url", DBTools.DEFAULT_URL);
@@ -92,18 +97,17 @@ public class JDBCPlugin extends AbstractPlugin {
         int retries = ParameterMap.getKeyedInteger(qualifiers, "retry", DEFAULT_RETRY);
         String db_driver = ParameterMap.getKeyedString(qualifiers, "driver", DBTools.DEFAULT_JDBC_DRIVER);
 
-
         boolean status = false;
         Connection con = null;
         Statement statement = null;
         boolean connected = false;
 
-        for (int attempts = 0; attempts <= retries && !connected;) {
+        for (int attempts = 0;attempts <= retries && !connected;) {
             LOG.info("Trying to detect JDBC server on '{}', attempt #: {}", hostname, (Object) attempts);
 
             try {
                 LOG.info("Loading JDBC driver: '{}'", db_driver);
-                Driver driver = (Driver)Class.forName(db_driver).newInstance();
+                Driver driver = (Driver) Class.forName(db_driver).newInstance();
                 LOG.debug("JDBC driver loaded: '{}'", db_driver);
 
                 String url = DBTools.constructUrl(db_url, hostname);
@@ -112,16 +116,16 @@ public class JDBCPlugin extends AbstractPlugin {
                 Properties props = new Properties();
                 props.setProperty("user", user);
                 props.setProperty("password", password);
-                props.setProperty("timeout", String.valueOf(timeout/1000));
+                props.setProperty("timeout", String.valueOf(timeout / 1000));
                 con = driver.connect(url, props);
                 connected = true;
                 LOG.debug("Got database connection: '{}' ({}, {}, {})", con, url, user, password);
-                
+
                 status = checkStatus(con, qualifiers);
 
-                if (status)
+                if (status) {
                     LOG.info("JDBC server detected on: '{}', attempt #: {}", hostname, (Object) attempts);
-                
+                }
             } catch (final Exception e) {
                 LOG.info("failed to make JDBC connection", e);
             } finally {
@@ -132,76 +136,70 @@ public class JDBCPlugin extends AbstractPlugin {
         }
         return status;
     }
-    
+
     /**
      * <p>checkStatus</p>
      *
-     * @param con a {@link java.sql.Connection} object.
+     * @param con        a {@link java.sql.Connection} object.
      * @param qualifiers a {@link java.util.Map} object.
      * @return a boolean.
      */
-    public boolean checkStatus(Connection con, Map<String, Object> qualifiers )
-    {
-    	boolean status = false;
-    	ResultSet result = null;
-    	try
-    	{
-    		DatabaseMetaData metadata = con.getMetaData();
-    		LOG.debug("Got database metadata");
+    public boolean checkStatus(Connection con, Map<String, Object> qualifiers) {
+        boolean status = false;
+        ResultSet result = null;
+        try {
+            DatabaseMetaData metadata = con.getMetaData();
+            LOG.debug("Got database metadata");
 
-    		result = metadata.getCatalogs();
-    		while (result.next())
-    		{
-    			result.getString(1);
-    			LOG.debug("Metadata catalog: '{}'", result.getString(1));
-    		}
+            result = metadata.getCatalogs();
+            while (result.next()) {
+                result.getString(1);
+                LOG.debug("Metadata catalog: '{}'", result.getString(1));
+            }
 
-    		// The JDBC server was detected using JDBC, update the status
-    		if ( result != null ) status = true;
-    	}
-    	catch ( SQLException sqlException )
-    	{
-    		LOG.warn("error while getting database metadata", sqlException);
-    	}
-    	finally
-    	{
-    		closeResult(result);
-    	}
-    	return status;
+            // The JDBC server was detected using JDBC, update the status
+            if (result != null) {
+                status = true;
+            }
+        } catch (SQLException sqlException) {
+            LOG.warn("error while getting database metadata", sqlException);
+        } finally {
+            closeResult(result);
+        }
+        return status;
     }
 
+    private void closeConn(Connection con) {
+        if (con != null) {
+            try {
+                con.close();
+            } catch (SQLException ignore) {
+            }
+        }
+    }
 
-	private void closeConn(Connection con) {
-		if (con != null) {
-		    try {
-		        con.close();
-		    } catch (SQLException ignore) {
-		    }
-		}
-	}
+    /**
+     * <p>closeStmt</p>
+     *
+     * @param statement a {@link java.sql.Statement} object.
+     */
+    protected void closeStmt(Statement statement) {
+        if (statement != null) {
+            try {
+                statement.close();
+            } catch (SQLException ignore) {
+            }
+        }
+    }
 
-	/**
-	 * <p>closeStmt</p>
-	 *
-	 * @param statement a {@link java.sql.Statement} object.
-	 */
-	protected void closeStmt(Statement statement) {
-		if (statement != null) {
-		    try {
-		        statement.close();
-		    } catch (SQLException ignore) {
-		    }
-		}
-	}
-
-	private void closeResult(ResultSet result) {
-		if (result != null) {
-		    try {
-		        result.close();
-		    } catch (SQLException ignore) {
-		    }
-		}
-	}
+    private void closeResult(ResultSet result) {
+        if (result != null) {
+            try {
+                result.close();
+            } catch (SQLException ignore) {
+            }
+        }
+    }
 
     /**
      * Returns the default protocol name
@@ -215,7 +213,7 @@ public class JDBCPlugin extends AbstractPlugin {
 
     /**
      * {@inheritDoc}
-     *
+     * <p/>
      * Default checking method, asuming all the parameters by default. This
      * method is likely to skip some machines because the default password is
      * empty. is recomended to use the parametric method instead (unless your
@@ -235,7 +233,7 @@ public class JDBCPlugin extends AbstractPlugin {
 
     /**
      * {@inheritDoc}
-     *
+     * <p/>
      * Checking method, receives all the parameters as a Map. Currently
      * supported:
      * <ul>
@@ -267,5 +265,4 @@ public class JDBCPlugin extends AbstractPlugin {
         }
         return status;
     }
-
 } // End of class

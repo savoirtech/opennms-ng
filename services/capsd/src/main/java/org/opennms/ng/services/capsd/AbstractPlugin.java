@@ -32,7 +32,7 @@ import java.net.InetAddress;
 import java.util.Map;
 
 /**
- * <p>
+ * <p/>
  * This class provides a basic implementation for most of the interface methods
  * of the <code>Plugin</code> class. Since most plugins do not do any special
  * initialization, and only require that the interface is an
@@ -55,7 +55,7 @@ public abstract class AbstractPlugin implements Plugin {
 
     /**
      * {@inheritDoc}
-     *
+     * <p/>
      * Returns true if the protocol defined by this plugin is supported. If the
      * protocol is not supported then a false value is returned to the caller.
      */
@@ -64,7 +64,7 @@ public abstract class AbstractPlugin implements Plugin {
 
     /**
      * {@inheritDoc}
-     *
+     * <p/>
      * Returns true if the protocol defined by this plugin is supported. If the
      * protocol is not supported then a false value is returned to the caller.
      * The qualifier map passed to the method is used by the plugin to return
@@ -73,5 +73,4 @@ public abstract class AbstractPlugin implements Plugin {
      */
     @Override
     public abstract boolean isProtocolSupported(InetAddress address, Map<String, Object> qualifiers);
-
 }

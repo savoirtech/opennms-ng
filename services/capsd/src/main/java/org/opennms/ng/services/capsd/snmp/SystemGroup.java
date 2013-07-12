@@ -28,16 +28,15 @@
 
 package org.opennms.ng.services.capsd.snmp;
 
+import java.net.InetAddress;
 
 import org.opennms.netmgt.snmp.AggregateTracker;
 import org.opennms.netmgt.snmp.SnmpResult;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.net.InetAddress;
-
 /**
- * <P>
+ * <p/>
  * SystemGroup holds the system group properties It implements the SnmpHandler
  * to receive notifications when a reply is received/error occurs in the
  * SnmpSession used to send requests /recieve replies.
@@ -52,43 +51,54 @@ import java.net.InetAddress;
  * @author <A HREF="mailto:sowmya@opennms.org">Sowmya </A>
  * @author <A HREF="mailto:weave@oculan.com">Weave </A>
  * @author <A HREF="http://www.opennms.org/">OpenNMS </A>
- * @see <A HREF="http://www.ietf.org/rfc/rfc1213.txt">RFC1213 </A>
  * @version $Id: $
+ * @see <A HREF="http://www.ietf.org/rfc/rfc1213.txt">RFC1213 </A>
  */
 public final class SystemGroup extends AggregateTracker {
-    
-    
+
     private static final Logger LOG = LoggerFactory.getLogger(org.opennms.ng.services.capsd.snmp.SystemGroup.class);
 
     //
     // Lookup strings for specific table entries
     //
-    /** Constant <code>SYS_OBJECTID_ALIAS="sysObjectID"</code> */
+    /**
+     * Constant <code>SYS_OBJECTID_ALIAS="sysObjectID"</code>
+     */
     public final static String SYS_OBJECTID_ALIAS = "sysObjectID";
     private static final String SYS_OBJECTID = ".1.3.6.1.2.1.1.2";
 
-    /** Constant <code>SYS_UPTIME_ALIAS="sysUptime"</code> */
+    /**
+     * Constant <code>SYS_UPTIME_ALIAS="sysUptime"</code>
+     */
     public final static String SYS_UPTIME_ALIAS = "sysUptime";
     private static final String SYS_UPTIME = ".1.3.6.1.2.1.1.3";
 
-    /** Constant <code>SYS_NAME_ALIAS="sysName"</code> */
+    /**
+     * Constant <code>SYS_NAME_ALIAS="sysName"</code>
+     */
     public final static String SYS_NAME_ALIAS = "sysName";
     private static final String SYS_NAME = ".1.3.6.1.2.1.1.5";
 
-    /** Constant <code>SYS_DESCR_ALIAS="sysDescr"</code> */
+    /**
+     * Constant <code>SYS_DESCR_ALIAS="sysDescr"</code>
+     */
     public final static String SYS_DESCR_ALIAS = "sysDescr";
     private static final String SYS_DESCR = ".1.3.6.1.2.1.1.1";
 
-    /** Constant <code>SYS_LOCATION_ALIAS="sysLocation"</code> */
+    /**
+     * Constant <code>SYS_LOCATION_ALIAS="sysLocation"</code>
+     */
     public final static String SYS_LOCATION_ALIAS = "sysLocation";
     private static final String SYS_LOCATION = ".1.3.6.1.2.1.1.6";
 
-    /** Constant <code>SYS_CONTACT_ALIAS="sysContact"</code> */
+    /**
+     * Constant <code>SYS_CONTACT_ALIAS="sysContact"</code>
+     */
     public final static String SYS_CONTACT_ALIAS = "sysContact";
     private static final String SYS_CONTACT = ".1.3.6.1.2.1.1.4";
-    
+
     /**
-     * <P>
+     * <p/>
      * The keys that will be supported by default from the TreeMap base class.
      * Each of the elements in the list are an instance of the SNMP Interface
      * table. Objects in this list should be used by multiple instances of this
@@ -175,7 +185,7 @@ public final class SystemGroup extends AggregateTracker {
          * This is a bit encode integer that allows the management entity to
          * determ if the agent supports the following standards
          * </P>
-         * 
+         *
          * <UL>
          * <LI>physical (e.g. repeaters)</LI>
          * <LI>datalink/subnetwork (e.g. bridges)</LI>
@@ -183,7 +193,7 @@ public final class SystemGroup extends AggregateTracker {
          * <LI>end-to-end (e.g. IP hosts)</LI>
          * <LI>applications (e.g. mail relays)</LI>
          * </UL>
-         * 
+         *
          * <P>
          * To get more information about the encoding see Page 123 of "SNMP,
          * SNMPv2, SNMPv3 and RMON 1 and 2 3rd Ed." by William Stallings [ISBN
@@ -195,7 +205,7 @@ public final class SystemGroup extends AggregateTracker {
     }
 
     /**
-     * <P>
+     * <p/>
      * The SYSTEM_OID is the object identifier that represents the root of the
      * system information in the MIB forest. Each of the system elements can be
      * retreived by adding their specific index to the string, and an additional
@@ -206,9 +216,9 @@ public final class SystemGroup extends AggregateTracker {
 
     private SnmpStore m_store;
     private InetAddress m_address;
-    
+
     /**
-     * <P>
+     * <p/>
      * The class constructor is used to initialize the collector and send out
      * the initial SNMP packet requesting data. The data is then received and
      * store by the object. When all the data has been collected the passed
@@ -222,7 +232,7 @@ public final class SystemGroup extends AggregateTracker {
         m_address = address;
         m_store = new SnmpStore(ms_elemList);
     }
-    
+
     /**
      * <p>getSysName</p>
      *
@@ -268,22 +278,27 @@ public final class SystemGroup extends AggregateTracker {
         return m_store.getDisplayString(SYS_CONTACT);
     }
 
-    /** {@inheritDoc} */
+    /**
+     * {@inheritDoc}
+     */
     @Override
     protected void storeResult(SnmpResult res) {
         m_store.storeResult(res);
     }
 
-    /** {@inheritDoc} */
+    /**
+     * {@inheritDoc}
+     */
     @Override
     protected void reportGenErr(String msg) {
-        LOG.warn("Error retrieving systemGroup from "+m_address+". "+msg);
+        LOG.warn("Error retrieving systemGroup from " + m_address + ". " + msg);
     }
 
-    /** {@inheritDoc} */
+    /**
+     * {@inheritDoc}
+     */
     @Override
     protected void reportNoSuchNameErr(String msg) {
-        LOG.info("Error retrieving systemGroup from "+m_address+". "+msg);
+        LOG.info("Error retrieving systemGroup from " + m_address + ". " + msg);
     }
-
 }

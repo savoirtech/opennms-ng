@@ -28,6 +28,9 @@
 
 package org.opennms.ng.services.capsd;
 
+import java.util.HashSet;
+import java.util.Set;
+
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
@@ -38,9 +41,6 @@ import org.opennms.netmgt.xml.event.Event;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.HashSet;
-import java.util.Set;
-
 /**
  * XmlRpcEventHandlerNotifier
  *
@@ -50,8 +50,7 @@ import java.util.Set;
 
 @Aspect
 public class XmlRpcEventHandlerNotifier {
-    
-    
+
     private static final Logger LOG = LoggerFactory.getLogger(org.opennms.ng.services.capsd.XmlRpcEventHandlerNotifier.class);
 
     /**
@@ -59,23 +58,23 @@ public class XmlRpcEventHandlerNotifier {
      */
     @Pointcut("execution(* org.opennms.ng.services.capsd.BroadcastEventProcessor.*(..))")
     public void capsdMethod() {}
-    
+
     /**
      * <p>eventHandler</p>
      */
     @Pointcut("@annotation(org.opennms.netmgt.model.events.annotations.EventHandler)")
     public void eventHandler() {}
-    
+
     /**
      * <p>capsdEventHandler</p>
      */
     @Pointcut("capsdMethod() && eventHandler()")
     public void capsdEventHandler() {}
-    
+
     /**
      * <p>onEvent</p>
      *
-     * @param pjp a {@link org.aspectj.lang.ProceedingJoinPoint} object.
+     * @param pjp   a {@link org.aspectj.lang.ProceedingJoinPoint} object.
      * @param event a {@link org.opennms.netmgt.xml.event.Event} object.
      * @throws Throwable if any.
      */
@@ -84,29 +83,29 @@ public class XmlRpcEventHandlerNotifier {
         LOG.debug("onEvent({})", event);
 
         notifyEventReceived(event);
-        
+
         try {
             pjp.proceed();
-            
+
             notifyEventSuccess(event);
         } catch (InsufficientInformationException ex) {
             handleInsufficientInformationException(event, ex);
         } catch (FailedOperationException ex) {
             handleFailedOperationException(event, ex);
-        } 
+        }
     }
-    
+
     private Set<String> m_notifySet;
     private boolean m_xmlRpcEnabled;
-    
+
     /**
      * <p>Constructor for XmlRpcEventHandlerNotifier.</p>
      */
     public XmlRpcEventHandlerNotifier() {
         LOG.debug("initialized XML-RPC event handler notifier");
-    	
+
         m_notifySet = new HashSet<String>();
-        
+
         m_notifySet.add(EventConstants.ADD_NODE_EVENT_UEI);
         m_notifySet.add(EventConstants.DELETE_NODE_EVENT_UEI);
         m_notifySet.add(EventConstants.ADD_INTERFACE_EVENT_UEI);
@@ -114,9 +113,8 @@ public class XmlRpcEventHandlerNotifier {
         m_notifySet.add(EventConstants.CHANGE_SERVICE_EVENT_UEI);
         m_notifySet.add(EventConstants.UPDATE_SERVER_EVENT_UEI);
         m_notifySet.add(EventConstants.UPDATE_SERVICE_EVENT_UEI);
-
     }
-    
+
     /**
      * <p>isXmlRpcEnabled</p>
      *
@@ -125,7 +123,7 @@ public class XmlRpcEventHandlerNotifier {
     public boolean isXmlRpcEnabled() {
         return m_xmlRpcEnabled;
     }
-    
+
     /**
      * <p>setXmlRpcEnabled</p>
      *
@@ -134,8 +132,7 @@ public class XmlRpcEventHandlerNotifier {
     public void setXmlRpcEnabled(boolean xmlRpcEnabled) {
         m_xmlRpcEnabled = xmlRpcEnabled;
     }
-    
-    
+
     private void handleFailedOperationException(Event event, FailedOperationException ex) {
         LOG.error("BroadcastEventProcessor: operation failed for event: " + event.getUei() + ", exception: " + ex.getMessage());
         notifyEventError(event, "processing failed: ", ex);
@@ -147,8 +144,9 @@ public class XmlRpcEventHandlerNotifier {
     }
 
     private void notifyEventSuccess(Event event) {
-        if (!isXmlRpcEnabled())
+        if (!isXmlRpcEnabled()) {
             return;
+        }
 
         long txNo = EventUtils.getLongParm(event, EventConstants.PARM_TRANSACTION_NO, -1L);
 
@@ -163,8 +161,9 @@ public class XmlRpcEventHandlerNotifier {
     }
 
     private void notifyEventError(Event event, String msg, Exception ex) {
-        if (!isXmlRpcEnabled())
+        if (!isXmlRpcEnabled()) {
             return;
+        }
 
         long txNo = EventUtils.getLongParm(event, EventConstants.PARM_TRANSACTION_NO, -1L);
         if ((txNo != -1) && m_notifySet.contains(event.getUei())) {
@@ -174,8 +173,9 @@ public class XmlRpcEventHandlerNotifier {
     }
 
     private void notifyEventReceived(Event event) {
-        if (!isXmlRpcEnabled())
+        if (!isXmlRpcEnabled()) {
             return;
+        }
 
         long txNo = EventUtils.getLongParm(event, EventConstants.PARM_TRANSACTION_NO, -1L);
 
@@ -188,11 +188,4 @@ public class XmlRpcEventHandlerNotifier {
             XmlrpcUtil.createAndSendXmlrpcNotificationEvent(txNo, event.getUei(), message.toString(), status, "OpenNMS.Capsd");
         }
     }
-
-
-    
-    
-    
-    
-
 }

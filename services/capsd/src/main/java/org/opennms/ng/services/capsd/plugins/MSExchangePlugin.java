@@ -28,22 +28,26 @@
 
 package org.opennms.ng.services.capsd.plugins;
 
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.InterruptedIOException;
+import java.lang.reflect.UndeclaredThrowableException;
+import java.net.ConnectException;
+import java.net.InetAddress;
+import java.net.InetSocketAddress;
+import java.net.NoRouteToHostException;
+import java.net.Socket;
+import java.util.Map;
+
 import org.opennms.core.utils.InetAddressUtils;
 import org.opennms.core.utils.ParameterMap;
 import org.opennms.ng.services.capsd.AbstractPlugin;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.InterruptedIOException;
-import java.lang.reflect.UndeclaredThrowableException;
-import java.net.*;
-import java.util.Map;
-
 /**
- * <P>
+ * <p/>
  * This class is designed to be used by the capabilities daemon to test for the
  * existance of MS Exchange server on remote interfaces. The class implements
  * the Plugin interface that allows it to be used along with other plugins by
@@ -68,21 +72,21 @@ public final class MSExchangePlugin extends AbstractPlugin {
     private static final String BANNER_STRING = "Microsoft Exchange";
 
     /**
-     * <P>
+     * <p/>
      * The default port on which to check for POP3 service.
      * </P>
      */
     private static final int DEFAULT_POP3_PORT = 110;
 
     /**
-     * <P>
+     * <p/>
      * The default port on which to check for IMAP service.
      * </P>
      */
     private static final int DEFAULT_IMAP_PORT = 143;
 
     /**
-     * <P>
+     * <p/>
      * The default port on which to check for MAPI service. To check for MAPI we
      * check the http-rpc-epmap/ncacn_http service on port 593. This
      * port/service is used by exchange for doing RPC over HTTP.
@@ -113,7 +117,7 @@ public final class MSExchangePlugin extends AbstractPlugin {
     private boolean isServer(InetAddress host, int port, int retries, int timeout) {
 
         boolean isAServer = false;
-        for (int attempts = 0; attempts <= retries && !isAServer; attempts++) {
+        for (int attempts = 0;attempts <= retries && !isAServer;attempts++) {
             Socket socket = null;
             try {
                 socket = new Socket();
@@ -131,8 +135,9 @@ public final class MSExchangePlugin extends AbstractPlugin {
                 String banner = lineRdr.readLine();
                 if (banner != null) {
                     int rc = banner.indexOf(BANNER_STRING);
-                    if (rc > -1)
+                    if (rc > -1) {
                         isAServer = true;
+                    }
                 }
             } catch (ConnectException e) {
                 // Connection refused!! Continue to retry.
@@ -166,21 +171,18 @@ public final class MSExchangePlugin extends AbstractPlugin {
     }
 
     /**
-     * <P>
+     * <p/>
      * Test to see if the passed host is running Microsoft Exchange server. If
      * the remote host is running POP3, IMAP or MAPI and we are able to retreive
      * a banner from any of the ports these services listen on wich include the
      * text "Microsoft Exchange" then this method will return true. Otherwise a
      * false value is returned to the caller.
      * </P>
-     * 
-     * @param host
-     *            The remote host to test.
-     * @param ports
-     *            The remote ports to test. Port value of -1 indicates that all
-     *            ports should be tested, otherwise only the specified
-     *            port/protocol will be tested..
-     * 
+     *
+     * @param host  The remote host to test.
+     * @param ports The remote ports to test. Port value of -1 indicates that all
+     *              ports should be tested, otherwise only the specified
+     *              port/protocol will be tested..
      * @return The array of supported protocols by the exchange server The
      *         values are in the order POP3, IMAP, MAPI in the returned array.
      */
@@ -188,14 +190,16 @@ public final class MSExchangePlugin extends AbstractPlugin {
         boolean isExPop3 = false;
         boolean isExImap = false;
         boolean isExMapi = false; // NOTE: MAPI protocol check currently
-                                    // disabled...see NOTE
+        // disabled...see NOTE
         // below...
 
-        if (ports[POP3_INDEX] > 0)
+        if (ports[POP3_INDEX] > 0) {
             isExPop3 = isServer(host, ports[POP3_INDEX], retries, timeout);
+        }
 
-        if (ports[IMAP_INDEX] > 0)
+        if (ports[IMAP_INDEX] > 0) {
             isExImap = isServer(host, ports[IMAP_INDEX], retries, timeout);
+        }
 
         //
         // NOTE: We aren't able to confirm that MS Exchange uses port 593 for
@@ -209,7 +213,7 @@ public final class MSExchangePlugin extends AbstractPlugin {
         // if(ports[MAPI_INDEX] > 0)
         // isExMapi = isServer(host, ports[MAPI_INDEX], retries, timeout);
 
-        return new boolean[] { isExPop3, isExImap, isExMapi };
+        return new boolean[]{isExPop3, isExImap, isExMapi};
     }
 
     /**
@@ -225,20 +229,20 @@ public final class MSExchangePlugin extends AbstractPlugin {
 
     /**
      * {@inheritDoc}
-     *
+     * <p/>
      * Returns true if the protocol defined by this plugin is supported. If the
      * protocol is not supported then a false value is returned to the caller.
      */
     @Override
     public boolean isProtocolSupported(InetAddress address) {
-        boolean[] result = isServer(address, new int[] { DEFAULT_POP3_PORT, DEFAULT_IMAP_PORT, DEFAULT_MAPI_PORT }, DEFAULT_RETRY, DEFAULT_TIMEOUT);
+        boolean[] result = isServer(address, new int[]{DEFAULT_POP3_PORT, DEFAULT_IMAP_PORT, DEFAULT_MAPI_PORT}, DEFAULT_RETRY, DEFAULT_TIMEOUT);
 
         return (result[0] || result[1] || result[2]);
     }
 
     /**
      * {@inheritDoc}
-     *
+     * <p/>
      * Returns true if the protocol defined by this plugin is supported. If the
      * protocol is not supported then a false value is returned to the caller.
      * The qualifier map passed to the method is used by the plugin to return
@@ -261,16 +265,19 @@ public final class MSExchangePlugin extends AbstractPlugin {
             mapiport = ParameterMap.getKeyedInteger(qualifiers, "mapi port", DEFAULT_MAPI_PORT);
         }
 
-        boolean[] result = isServer(address, new int[] { pop3port, imapport, mapiport }, retries, timeout);
+        boolean[] result = isServer(address, new int[]{pop3port, imapport, mapiport}, retries, timeout);
         if (qualifiers != null) {
-            if (result[0] && !qualifiers.containsKey("pop3 port"))
+            if (result[0] && !qualifiers.containsKey("pop3 port")) {
                 qualifiers.put("pop3 port", pop3port);
+            }
 
-            if (result[1] && !qualifiers.containsKey("imap port"))
+            if (result[1] && !qualifiers.containsKey("imap port")) {
                 qualifiers.put("imap port", imapport);
+            }
 
-            if (result[2] && !qualifiers.containsKey("mapi port"))
+            if (result[2] && !qualifiers.containsKey("mapi port")) {
                 qualifiers.put("mapi port", mapiport);
+            }
         }
 
         return (result[0] || result[1] || result[2]);

@@ -28,20 +28,20 @@
 
 package org.opennms.ng.services.capsd.plugins;
 
-import org.opennms.core.utils.InetAddressUtils;
-import org.opennms.ng.services.capsd.AbstractTcpPlugin;
-import org.opennms.ng.services.capsd.ConnectionConfig;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.net.InetAddress;
 import java.net.Socket;
 import java.util.Map;
 
+import org.opennms.core.utils.InetAddressUtils;
+import org.opennms.ng.services.capsd.AbstractTcpPlugin;
+import org.opennms.ng.services.capsd.ConnectionConfig;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 /**
- * <P>
+ * <p/>
  * This class is designed to be used by the capabilities daemon to test for the
  * existance of an IIOP on a Domino server on remote interfaces. The class
  * implements the Plugin interface that allows it to be used along with other
@@ -53,60 +53,22 @@ import java.util.Map;
  */
 public final class DominoIIOPPlugin extends AbstractTcpPlugin {
     private static final Logger LOG = LoggerFactory.getLogger(org.opennms.ng.services.capsd.plugins.DominoIIOPPlugin.class);
-
-    /**
-     * Encapsulates the configuration characteristics unique to a DominoIIOP
-     * connection
-     * 
-     * @author Matt Brozowski
-     * 
-     */
-    public static class DominoConnectionConfig extends ConnectionConfig {
-
-        int m_iorPort;
-
-        /**
-         * @param inetAddress
-         * @param qualifiers
-         * @param defaultPort
-         * @param defaultTimeout
-         * @param defaultRetries
-         */
-        public DominoConnectionConfig(InetAddress inetAddress, int port) {
-            super(inetAddress, port);
-
-        }
-
-        public int getIorPort() {
-            return m_iorPort;
-        }
-
-        public void setIorPort(int iorPort) {
-            m_iorPort = iorPort;
-        }
-
-    }
-
     /**
      * Default port of where to find the IOR via HTTP
      */
     private static final int DEFAULT_IORPORT = 80;
-
     /**
      * Default port.
      */
     private static final int DEFAULT_PORT = 63148;
-
     /**
      * Default number of retries for TCP requests
      */
     private static final int DEFAULT_RETRY = 0;
-
     /**
      * Default timeout (in milliseconds) for TCP requests
      */
     private static final int DEFAULT_TIMEOUT = 5000; // in milliseconds
-
     /**
      * The protocol supported by the plugin
      */
@@ -119,13 +81,9 @@ public final class DominoIIOPPlugin extends AbstractTcpPlugin {
         super(PROTOCOL_NAME, DEFAULT_PORT, DEFAULT_TIMEOUT, DEFAULT_RETRY);
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see org.opennms.ng.services.capsd.AbstractTcpPlugin#createProtocol(java.net.Socket,
-     *      org.opennms.ng.services.capsd.ConnectonConfig)
+    /**
+     * {@inheritDoc}
      */
-    /** {@inheritDoc} */
     @Override
     protected boolean checkProtocol(Socket socket, ConnectionConfig config) {
         return true;
@@ -134,10 +92,13 @@ public final class DominoIIOPPlugin extends AbstractTcpPlugin {
     /*
      * (non-Javadoc)
      * 
-     * @see org.opennms.ng.services.capsd.AbstractTcpPlugin#createConfig(java.net.InetAddress,
-     *      java.util.Map)
+     * @see org.opennms.ng.services.capsd.AbstractTcpPlugin#createProtocol(java.net.Socket,
+     *      org.opennms.ng.services.capsd.ConnectonConfig)
      */
-    /** {@inheritDoc} */
+
+    /**
+     * {@inheritDoc}
+     */
     @Override
     protected ConnectionConfig createConnectionConfig(InetAddress address, int port) {
         return new DominoConnectionConfig(address, port);
@@ -146,20 +107,31 @@ public final class DominoIIOPPlugin extends AbstractTcpPlugin {
     /*
      * (non-Javadoc)
      * 
-     * @see org.opennms.ng.services.capsd.AbstractTcpPlugin#populateConnectionConfig(org.opennms.ng.services.capsd.ConnectionConfig,
+     * @see org.opennms.ng.services.capsd.AbstractTcpPlugin#createConfig(java.net.InetAddress,
      *      java.util.Map)
      */
-    /** {@inheritDoc} */
+
+    /**
+     * {@inheritDoc}
+     */
     @Override
     protected void populateConnectionConfig(ConnectionConfig connConfig, Map<String, Object> qualifiers) {
         super.populateConnectionConfig(connConfig, qualifiers);
 
         DominoConnectionConfig config = (DominoConnectionConfig) connConfig;
         config.setIorPort(getKeyedInteger(qualifiers, "ior-port", DEFAULT_IORPORT));
-
     }
 
-    /** {@inheritDoc} */
+    /*
+     * (non-Javadoc)
+     * 
+     * @see org.opennms.ng.services.capsd.AbstractTcpPlugin#populateConnectionConfig(org.opennms.ng.services.capsd.ConnectionConfig,
+     *      java.util.Map)
+     */
+
+    /**
+     * {@inheritDoc}
+     */
     @Override
     protected boolean preconnectCheck(ConnectionConfig tcpConfig) {
         // get a log to send errors
@@ -184,11 +156,9 @@ public final class DominoIIOPPlugin extends AbstractTcpPlugin {
 
     /**
      * Method used to retrieve the IOR string from the Domino server.
-     * 
-     * @param host
-     *            the host name which has the IOR
-     * @param port
-     *            the port to find the IOR via HTTP
+     *
+     * @param host the host name which has the IOR
+     * @param port the port to find the IOR via HTTP
      */
     private String retrieveIORText(String host, int port) throws IOException {
         String IOR = "";
@@ -211,10 +181,20 @@ public final class DominoIIOPPlugin extends AbstractTcpPlugin {
         }
         dis.close();
 
-        if (!IOR.startsWith("IOR:"))
+        if (!IOR.startsWith("IOR:")) {
             throw new IOException("Invalid IOR: " + IOR);
+        }
 
         return IOR;
+    }
+
+    /**
+     * <p>saveConfig</p>
+     *
+     * @param config a {@link org.opennms.ng.services.capsd.ConnectionConfig} object.
+     */
+    protected void saveConfig(ConnectionConfig config) {
+        // override this as this plugin does not save any params
     }
 
     /*
@@ -223,11 +203,32 @@ public final class DominoIIOPPlugin extends AbstractTcpPlugin {
      * @see org.opennms.ng.services.capsd.AbstractTcpPlugin#saveConfig(org.opennms.ng.services.capsd.ConnectionConfig)
      */
     /**
-     * <p>saveConfig</p>
+     * Encapsulates the configuration characteristics unique to a DominoIIOP
+     * connection
      *
-     * @param config a {@link org.opennms.ng.services.capsd.ConnectionConfig} object.
+     * @author Matt Brozowski
      */
-    protected void saveConfig(ConnectionConfig config) {
-        // override this as this plugin does not save any params
+    public static class DominoConnectionConfig extends ConnectionConfig {
+
+        int m_iorPort;
+
+        /**
+         * @param inetAddress
+         * @param qualifiers
+         * @param defaultPort
+         * @param defaultTimeout
+         * @param defaultRetries
+         */
+        public DominoConnectionConfig(InetAddress inetAddress, int port) {
+            super(inetAddress, port);
+        }
+
+        public int getIorPort() {
+            return m_iorPort;
+        }
+
+        public void setIorPort(int iorPort) {
+            m_iorPort = iorPort;
+        }
     }
 }

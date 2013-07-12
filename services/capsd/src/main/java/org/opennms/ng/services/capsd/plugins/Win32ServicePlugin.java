@@ -28,12 +28,12 @@
 
 package org.opennms.ng.services.capsd.plugins;
 
+import java.net.InetAddress;
+import java.util.Map;
+
 import org.opennms.core.utils.ParameterMap;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.net.InetAddress;
-import java.util.Map;
 
 /**
  * <p>Win32ServicePlugin class.</p>
@@ -42,28 +42,30 @@ import java.util.Map;
  * @version $Id: $
  */
 public class Win32ServicePlugin extends SnmpPlugin {
-    
+
     private static final Logger LOG = LoggerFactory.getLogger(org.opennms.ng.services.capsd.plugins.Win32ServicePlugin.class);
-    
-	private static final String SV_SVC_OPERATING_STATE_OID = ".1.3.6.1.4.1.77.1.2.3.1.3";
-	private static final String DEFAULT_SERVICE_NAME = "Server";
-	
-	/** {@inheritDoc} */
-        @Override
-	public boolean isProtocolSupported(InetAddress address, Map<String, Object> qualifiers) {
-		String serviceName = ParameterMap.getKeyedString(qualifiers, "service-name", DEFAULT_SERVICE_NAME);
-		int snLength = serviceName.length();
-		
-		StringBuffer serviceOidBuf = new StringBuffer(SV_SVC_OPERATING_STATE_OID);
-		serviceOidBuf.append(".").append(Integer.toString(snLength));
-		for (byte thisByte : serviceName.getBytes()) {
-			serviceOidBuf.append(".").append(Byte.toString(thisByte));
-		}
-		
-		LOG.debug("For Win32 service '" + serviceName +"', OID to check is " + serviceOidBuf.toString());
-		qualifiers.put("vbname", serviceOidBuf.toString());
-		qualifiers.put("vbvalue", "1");
-		
-		return super.isProtocolSupported(address, qualifiers);
-	}
+
+    private static final String SV_SVC_OPERATING_STATE_OID = ".1.3.6.1.4.1.77.1.2.3.1.3";
+    private static final String DEFAULT_SERVICE_NAME = "Server";
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public boolean isProtocolSupported(InetAddress address, Map<String, Object> qualifiers) {
+        String serviceName = ParameterMap.getKeyedString(qualifiers, "service-name", DEFAULT_SERVICE_NAME);
+        int snLength = serviceName.length();
+
+        StringBuffer serviceOidBuf = new StringBuffer(SV_SVC_OPERATING_STATE_OID);
+        serviceOidBuf.append(".").append(Integer.toString(snLength));
+        for (byte thisByte : serviceName.getBytes()) {
+            serviceOidBuf.append(".").append(Byte.toString(thisByte));
+        }
+
+        LOG.debug("For Win32 service '" + serviceName + "', OID to check is " + serviceOidBuf.toString());
+        qualifiers.put("vbname", serviceOidBuf.toString());
+        qualifiers.put("vbvalue", "1");
+
+        return super.isProtocolSupported(address, qualifiers);
+    }
 }

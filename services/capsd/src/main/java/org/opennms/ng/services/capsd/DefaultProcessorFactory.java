@@ -35,7 +35,7 @@ package org.opennms.ng.services.capsd;
  * @version $Id: $
  */
 public class DefaultProcessorFactory implements SuspectEventProcessorFactory, RescanProcessorFactory {
-    
+
     private CapsdDbSyncer m_capsdDbSyncer;
     private PluginManager m_pluginManager;
 
@@ -60,7 +60,10 @@ public class DefaultProcessorFactory implements SuspectEventProcessorFactory, Re
     /* (non-Javadoc)
      * @see org.opennms.ng.services.capsd.SuspectEventProcessorFactory#createSuspectEventProcessor(java.lang.String)
      */
-    /** {@inheritDoc} */
+
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public SuspectEventProcessor createSuspectEventProcessor(String ifAddress) {
         return new SuspectEventProcessor(m_capsdDbSyncer, m_pluginManager, ifAddress);
@@ -69,7 +72,10 @@ public class DefaultProcessorFactory implements SuspectEventProcessorFactory, Re
     /* (non-Javadoc)
      * @see org.opennms.ng.services.capsd.RescanProcessorFactory#createRescanProcessor(int)
      */
-    /** {@inheritDoc} */
+
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public RescanProcessor createRescanProcessor(int nodeId) {
         return new RescanProcessor(nodeId, false, m_capsdDbSyncer, m_pluginManager);
@@ -78,10 +84,12 @@ public class DefaultProcessorFactory implements SuspectEventProcessorFactory, Re
     /* (non-Javadoc)
      * @see org.opennms.ng.services.capsd.RescanProcessorFactory#createForcedRescanProcessor(int)
      */
-    /** {@inheritDoc} */
+
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public RescanProcessor createForcedRescanProcessor(int nodeId) {
         return new RescanProcessor(nodeId, true, m_capsdDbSyncer, m_pluginManager);
     }
-
 }

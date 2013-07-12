@@ -32,7 +32,7 @@ import java.net.InetAddress;
 import java.util.Map;
 
 /**
- * <P>
+ * <p/>
  * The CapsdPlugin interface is the basic interface that a plugin for the
  * capabilites daemon must support. The interface allows the daemon to determine
  * what protocols can be verified by the plugin and has the required methods to
@@ -55,8 +55,7 @@ public interface Plugin {
      * Returns true if the protocol defined by this plugin is supported. If the
      * protocol is not supported then a false value is returned to the caller.
      *
-     * @param address
-     *            The address to check for support.
+     * @param address The address to check for support.
      * @return True if the protocol is supported by the address.
      */
     public boolean isProtocolSupported(InetAddress address);
@@ -68,10 +67,8 @@ public interface Plugin {
      * additional information by key-name. These key-value pairs can be added to
      * service events if needed.
      *
-     * @param address
-     *            The address to check for support.
-     * @param qualifiers
-     *            The map where qualification are set by the plugin.
+     * @param address    The address to check for support.
+     * @param qualifiers The map where qualification are set by the plugin.
      * @return True if the protocol is supported by the address.
      */
     public boolean isProtocolSupported(InetAddress address, Map<String, Object> qualifiers);

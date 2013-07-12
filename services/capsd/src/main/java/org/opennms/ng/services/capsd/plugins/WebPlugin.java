@@ -28,7 +28,16 @@
 
 package org.opennms.ng.services.capsd.plugins;
 
-import org.apache.http.*;
+import java.io.IOException;
+import java.net.InetAddress;
+import java.net.URISyntaxException;
+import java.util.Map;
+
+import org.apache.http.HttpHost;
+import org.apache.http.HttpRequest;
+import org.apache.http.HttpRequestInterceptor;
+import org.apache.http.HttpResponse;
+import org.apache.http.HttpVersion;
 import org.apache.http.auth.AuthScope;
 import org.apache.http.auth.AuthState;
 import org.apache.http.auth.Credentials;
@@ -51,11 +60,6 @@ import org.opennms.ng.services.capsd.AbstractPlugin;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.IOException;
-import java.net.InetAddress;
-import java.net.URISyntaxException;
-import java.util.Map;
-
 /**
  * <p>WebPlugin class.</p>
  *
@@ -63,8 +67,7 @@ import java.util.Map;
  * @version $Id: $
  */
 public class WebPlugin extends AbstractPlugin {
-    
-    
+
     private static final Logger LOG = LoggerFactory.getLogger(org.opennms.ng.services.capsd.plugins.WebPlugin.class);
 
     static Integer DEFAULT_TIMEOUT = 3000;
@@ -76,25 +79,31 @@ public class WebPlugin extends AbstractPlugin {
     static String DEFAULT_HTTP_STATUS_RANGE = "100-399";
     static String DEFAULT_SCHEME = "http";
 
-    /** {@inheritDoc} */
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public String getProtocolName() {
         // TODO Auto-generated method stub
         return null;
     }
 
-    /** {@inheritDoc} */
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public boolean isProtocolSupported(InetAddress address) {
         // TODO Auto-generated method stub
         return false;
     }
 
-    /** {@inheritDoc} */
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public boolean isProtocolSupported(InetAddress address, Map<String, Object> map) {
 
-        boolean retval=false;
+        boolean retval = false;
         DefaultHttpClient httpClient = new DefaultHttpClient();
 
         try {
@@ -102,28 +111,31 @@ public class WebPlugin extends AbstractPlugin {
             ub.setScheme(ParameterMap.getKeyedString(map, "scheme", DEFAULT_SCHEME));
             ub.setHost(InetAddressUtils.str(address));
             ub.setPort(ParameterMap.getKeyedInteger(map, "port", DEFAULT_PORT));
-            ub.setPath( ParameterMap.getKeyedString(map, "path", DEFAULT_PATH));
+            ub.setPath(ParameterMap.getKeyedString(map, "path", DEFAULT_PATH));
             HttpGet getMethod = new HttpGet(ub.build());
-            httpClient.getParams().setParameter(CoreConnectionPNames.CONNECTION_TIMEOUT, ParameterMap.getKeyedInteger(map,"timeout", DEFAULT_TIMEOUT));
-            httpClient.getParams().setParameter(CoreConnectionPNames.SO_TIMEOUT, ParameterMap.getKeyedInteger(map,"timeout", DEFAULT_TIMEOUT));
-            httpClient.getParams().setParameter(CoreProtocolPNames.USER_AGENT, ParameterMap.getKeyedString(map,"user-agent",DEFAULT_USER_AGENT));
-            getMethod.getParams().setParameter(ClientPNames.VIRTUAL_HOST, new HttpHost(ParameterMap.getKeyedString(map,"virtual-host", InetAddressUtils.str(address)), ParameterMap.getKeyedInteger(map, "port", DEFAULT_PORT)));
+            httpClient.getParams().setParameter(CoreConnectionPNames.CONNECTION_TIMEOUT, ParameterMap.getKeyedInteger(map, "timeout",
+                DEFAULT_TIMEOUT));
+            httpClient.getParams().setParameter(CoreConnectionPNames.SO_TIMEOUT, ParameterMap.getKeyedInteger(map, "timeout", DEFAULT_TIMEOUT));
+            httpClient.getParams().setParameter(CoreProtocolPNames.USER_AGENT, ParameterMap.getKeyedString(map, "user-agent", DEFAULT_USER_AGENT));
+            getMethod.getParams().setParameter(ClientPNames.VIRTUAL_HOST, new HttpHost(ParameterMap.getKeyedString(map, "virtual-host",
+                InetAddressUtils.str(address)), ParameterMap.getKeyedInteger(map, "port", DEFAULT_PORT)));
 
-            if(ParameterMap.getKeyedBoolean(map, "http-1.0", false)) {
+            if (ParameterMap.getKeyedBoolean(map, "http-1.0", false)) {
                 httpClient.getParams().setParameter(CoreProtocolPNames.PROTOCOL_VERSION, HttpVersion.HTTP_1_0);
             }
 
-            for(Object okey : map.keySet()) {
+            for (Object okey : map.keySet()) {
                 String key = okey.toString();
-                if(key.matches("header_[0-9]+$")){
-                    String headerName  = ParameterMap.getKeyedString(map,key,null);
-                    String headerValue = ParameterMap.getKeyedString(map,key + "_value",null);
+                if (key.matches("header_[0-9]+$")) {
+                    String headerName = ParameterMap.getKeyedString(map, key, null);
+                    String headerValue = ParameterMap.getKeyedString(map, key + "_value", null);
                     getMethod.setHeader(headerName, headerValue);
                 }
             }
 
-            if(ParameterMap.getKeyedBoolean(map,"auth-enabled",false)){
-                httpClient.getCredentialsProvider().setCredentials(AuthScope.ANY, new UsernamePasswordCredentials( ParameterMap.getKeyedString(map, "auth-user", DEFAULT_USER), ParameterMap.getKeyedString(map, "auth-password", DEFAULT_PASSWORD)));
+            if (ParameterMap.getKeyedBoolean(map, "auth-enabled", false)) {
+                httpClient.getCredentialsProvider().setCredentials(AuthScope.ANY, new UsernamePasswordCredentials(ParameterMap.getKeyedString(map,
+                    "auth-user", DEFAULT_USER), ParameterMap.getKeyedString(map, "auth-password", DEFAULT_PASSWORD)));
                 if (ParameterMap.getKeyedBoolean(map, "auth-preemptive", true)) {
                     /**
                      * Add an HttpRequestInterceptor that will perform preemptive auth
@@ -134,9 +146,9 @@ public class WebPlugin extends AbstractPlugin {
                         @Override
                         public void process(final HttpRequest request, final HttpContext context) throws IOException {
 
-                            AuthState authState = (AuthState)context.getAttribute(ClientContext.TARGET_AUTH_STATE);
-                            CredentialsProvider credsProvider = (CredentialsProvider)context.getAttribute(ClientContext.CREDS_PROVIDER);
-                            HttpHost targetHost = (HttpHost)context.getAttribute(ExecutionContext.HTTP_TARGET_HOST);
+                            AuthState authState = (AuthState) context.getAttribute(ClientContext.TARGET_AUTH_STATE);
+                            CredentialsProvider credsProvider = (CredentialsProvider) context.getAttribute(ClientContext.CREDS_PROVIDER);
+                            HttpHost targetHost = (HttpHost) context.getAttribute(ExecutionContext.HTTP_TARGET_HOST);
 
                             // If not auth scheme has been initialized yet
                             if (authState.getAuthScheme() == null) {
@@ -149,7 +161,6 @@ public class WebPlugin extends AbstractPlugin {
                                 }
                             }
                         }
-
                     };
                     httpClient.addRequestInterceptor(preemptiveAuth, 0);
                 }
@@ -158,42 +169,38 @@ public class WebPlugin extends AbstractPlugin {
             HttpResponse response = httpClient.execute(getMethod);
             Integer statusCode = response.getStatusLine().getStatusCode();
 
-            String expectedText = ParameterMap.getKeyedString(map,"response-text",null);
+            String expectedText = ParameterMap.getKeyedString(map, "response-text", null);
 
-            if(!inRange(ParameterMap.getKeyedString(map, "response-range", DEFAULT_HTTP_STATUS_RANGE),statusCode)){
-                retval=false;
-            }
-            else {
-                retval=true;
+            if (!inRange(ParameterMap.getKeyedString(map, "response-range", DEFAULT_HTTP_STATUS_RANGE), statusCode)) {
+                retval = false;
+            } else {
+                retval = true;
             }
 
-            if (expectedText!=null){
+            if (expectedText != null) {
                 String responseText = EntityUtils.toString(response.getEntity());
-                if(expectedText.charAt(0)=='~'){
-                    if(!responseText.matches(expectedText.substring(1)))
-                        retval=false;
-                    else 
-                        retval=true;                
-                }
-                else {
-
-                    if(responseText.equals(expectedText)){
-                        retval=true;
+                if (expectedText.charAt(0) == '~') {
+                    if (!responseText.matches(expectedText.substring(1))) {
+                        retval = false;
+                    } else {
+                        retval = true;
                     }
-                    else
-                        retval=false;
+                } else {
+
+                    if (responseText.equals(expectedText)) {
+                        retval = true;
+                    } else {
+                        retval = false;
+                    }
                 }
-
-
             }
-
         } catch (IOException e) {
             LOG.info(e.getMessage(), e);
             retval = false;
         } catch (URISyntaxException e) {
             LOG.info(e.getMessage(), e);
             retval = false;
-        } finally{
+        } finally {
             if (httpClient != null) {
                 httpClient.getConnectionManager().shutdown();
             }
@@ -202,12 +209,12 @@ public class WebPlugin extends AbstractPlugin {
         return retval;
     }
 
-    private boolean inRange(String range,Integer val){
+    private boolean inRange(String range, Integer val) {
         String boundries[] = range.split("-");
-        if(val < new Integer(boundries[0]) || val > new Integer(boundries[1]))
+        if (val < new Integer(boundries[0]) || val > new Integer(boundries[1])) {
             return false;
-        else
+        } else {
             return true;
+        }
     }
-
 }

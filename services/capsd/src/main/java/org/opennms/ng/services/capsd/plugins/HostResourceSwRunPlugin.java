@@ -28,17 +28,21 @@
 
 package org.opennms.ng.services.capsd.plugins;
 
+import java.net.InetAddress;
+import java.util.Map;
+
 import antlr.StringUtils;
 import org.opennms.core.utils.InetAddressUtils;
 import org.opennms.core.utils.ParameterMap;
+import org.opennms.netmgt.snmp.SnmpAgentConfig;
+import org.opennms.netmgt.snmp.SnmpInstId;
+import org.opennms.netmgt.snmp.SnmpObjId;
+import org.opennms.netmgt.snmp.SnmpUtils;
+import org.opennms.netmgt.snmp.SnmpValue;
 import org.opennms.ng.services.capsd.AbstractPlugin;
 import org.opennms.ng.services.snmpconfig.SnmpPeerFactory;
-import org.opennms.netmgt.snmp.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.net.InetAddress;
-import java.util.Map;
 
 /**
  * This class is used to test if a particular process is listed
@@ -49,8 +53,7 @@ import java.util.Map;
  * @author <A HREF="http://www.opennms.org">OpenNMS </A>
  */
 public class HostResourceSwRunPlugin extends AbstractPlugin {
-    
-    
+
     private static final Logger LOG = LoggerFactory.getLogger(org.opennms.ng.services.capsd.plugins.HostResourceSwRunPlugin.class);
 
     /**
@@ -82,7 +85,7 @@ public class HostResourceSwRunPlugin extends AbstractPlugin {
 
     /**
      * {@inheritDoc}
-     *
+     * <p/>
      * Returns true if the protocol defined by this plugin is supported. If the
      * protocol is not supported then a false value is returned to the caller.
      */
@@ -93,7 +96,7 @@ public class HostResourceSwRunPlugin extends AbstractPlugin {
 
     /**
      * {@inheritDoc}
-     *
+     * <p/>
      * Returns true if the protocol defined by this plugin is supported. If the
      * protocol is not supported then a false value is returned to the caller.
      * The qualifier map passed to the method is used by the plugin to return
@@ -102,13 +105,15 @@ public class HostResourceSwRunPlugin extends AbstractPlugin {
      */
     @Override
     public boolean isProtocolSupported(InetAddress ipaddr, Map<String, Object> parameters) {
-        
+
         boolean status = false;
 
         // Retrieve this interface's SNMP peer object
         //
         SnmpAgentConfig agentConfig = SnmpPeerFactory.getInstance().getAgentConfig(ipaddr);
-        if (agentConfig == null) throw new RuntimeException("SnmpAgentConfig object not available for interface " + ipaddr);
+        if (agentConfig == null) {
+            throw new RuntimeException("SnmpAgentConfig object not available for interface " + ipaddr);
+        }
 
         // Get configuration parameters
         //
@@ -120,7 +125,8 @@ public class HostResourceSwRunPlugin extends AbstractPlugin {
         // set timeout and retries on SNMP peer object
         //
         agentConfig.setTimeout(ParameterMap.getKeyedInteger(parameters, "timeout", agentConfig.getTimeout()));
-        agentConfig.setRetries(ParameterMap.getKeyedInteger(parameters, "retry", ParameterMap.getKeyedInteger(parameters, "retries", agentConfig.getRetries())));
+        agentConfig.setRetries(ParameterMap.getKeyedInteger(parameters, "retry", ParameterMap.getKeyedInteger(parameters, "retries",
+            agentConfig.getRetries())));
         agentConfig.setPort(ParameterMap.getKeyedInteger(parameters, "port", agentConfig.getPort()));
 
         LOG.debug("capsd: service= SNMP address= {}", agentConfig);
@@ -137,16 +143,16 @@ public class HostResourceSwRunPlugin extends AbstractPlugin {
             Map<SnmpInstId, SnmpValue> nameResults = SnmpUtils.getOidValues(agentConfig, "HostResourceSwRunMonitor", SnmpObjId.get(serviceNameOid));
 
             // Iterate over the list of running services
-            for(SnmpInstId nameInstance : nameResults.keySet()) {
+            for (SnmpInstId nameInstance : nameResults.keySet()) {
 
                 // See if the service name is in the list of running services
                 if (match(serviceName, stripExtraQuotes(nameResults.get(nameInstance).toString()))) {
-                    LOG.debug("poll: HostResourceSwRunMonitor poll succeeded, addr=" + InetAddressUtils.str(ipaddr) + " service name=" + serviceName + " value=" + nameResults.get(nameInstance));
+                    LOG.debug("poll: HostResourceSwRunMonitor poll succeeded, addr=" + InetAddressUtils.str(ipaddr) + " service name=" + serviceName
+                        + " value=" + nameResults.get(nameInstance));
                     status = true;
                     break;
                 }
             }
-
         } catch (NumberFormatException e) {
             LOG.warn("Number operator used on a non-number {}", e.getMessage());
         } catch (IllegalArgumentException e) {
@@ -156,7 +162,6 @@ public class HostResourceSwRunPlugin extends AbstractPlugin {
         }
 
         return status;
-        
     }
 
     private boolean match(String expectedText, String currentText) {

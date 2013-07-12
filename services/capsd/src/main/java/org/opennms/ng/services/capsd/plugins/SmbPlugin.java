@@ -28,18 +28,18 @@
 
 package org.opennms.ng.services.capsd.plugins;
 
+import java.net.InetAddress;
+import java.net.UnknownHostException;
+import java.util.Map;
+
 import jcifs.netbios.NbtAddress;
 import org.opennms.core.utils.InetAddressUtils;
 import org.opennms.ng.services.capsd.AbstractPlugin;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.net.InetAddress;
-import java.net.UnknownHostException;
-import java.util.Map;
-
 /**
- * <P>
+ * <p/>
  * This class is designed to be used by the capabilities daemon to test for SMB
  * support on remote interfaces. The class implements the Plugin interface that
  * allows it to be used along with other plugins by the daemon.
@@ -58,10 +58,8 @@ public final class SmbPlugin extends AbstractPlugin {
 
     /**
      * Test to see if the passed host talks SMB &amp; has a NetBIOS name.
-     * 
-     * @param host
-     *            The remote host to check.
-     * 
+     *
+     * @param host The remote host to check.
      * @return True if the remote interface responds talks SMB and has a NETBIOS
      *         name. False otherwise.
      */
@@ -105,7 +103,7 @@ public final class SmbPlugin extends AbstractPlugin {
 
     /**
      * {@inheritDoc}
-     *
+     * <p/>
      * Returns true if the protocol defined by this plugin is supported. If the
      * protocol is not supported then a false value is returned to the caller.
      */
@@ -116,7 +114,7 @@ public final class SmbPlugin extends AbstractPlugin {
 
     /**
      * {@inheritDoc}
-     *
+     * <p/>
      * Returns true if the protocol defined by this plugin is supported. If the
      * protocol is not supported then a false value is returned to the caller.
      * The qualifier map passed to the method is used by the plugin to return
@@ -127,5 +125,4 @@ public final class SmbPlugin extends AbstractPlugin {
     public boolean isProtocolSupported(InetAddress address, Map<String, Object> qualifiers) {
         return isSmb(address);
     }
-
 }

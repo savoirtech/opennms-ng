@@ -28,13 +28,13 @@
 
 package org.opennms.ng.services.capsd.plugins;
 
+import java.net.InetAddress;
+import java.util.Map;
+
 import org.opennms.core.utils.IPLike;
 import org.opennms.core.utils.InetAddressUtils;
 import org.opennms.core.utils.ParameterMap;
 import org.opennms.ng.services.capsd.Plugin;
-
-import java.net.InetAddress;
-import java.util.Map;
 
 /**
  * <p>LoopPlugin class.</p>
@@ -49,6 +49,7 @@ public class LoopPlugin implements Plugin {
     /* (non-Javadoc)
      * @see org.opennms.ng.services.capsd.Plugin#getProtocolName()
      */
+
     /**
      * <p>getProtocolName</p>
      *
@@ -62,7 +63,10 @@ public class LoopPlugin implements Plugin {
     /* (non-Javadoc)
      * @see org.opennms.ng.services.capsd.Plugin#isProtocolSupported(java.net.InetAddress)
      */
-    /** {@inheritDoc} */
+
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public boolean isProtocolSupported(InetAddress address) {
         return isProtocolSupported(address, null);
@@ -71,21 +75,23 @@ public class LoopPlugin implements Plugin {
     /* (non-Javadoc)
      * @see org.opennms.ng.services.capsd.Plugin#isProtocolSupported(java.net.InetAddress, java.util.Map)
      */
-    /** {@inheritDoc} */
+
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public boolean isProtocolSupported(InetAddress address, Map<String, Object> qualifiers) {
-        
+
         if (qualifiers == null) {
             return false;
         }
-        
+
         String ipMatch = getIpMatch(qualifiers);
         if (IPLike.matches(InetAddressUtils.str(address), ipMatch)) {
             return isSupported(qualifiers);
         } else {
             return false;
         }
-        
     }
 
     private boolean isSupported(Map<String, Object> parameters) {
@@ -95,5 +101,4 @@ public class LoopPlugin implements Plugin {
     private String getIpMatch(Map<String, Object> parameters) {
         return ParameterMap.getKeyedString(parameters, "ip-match", "*.*.*.*");
     }
-
 }

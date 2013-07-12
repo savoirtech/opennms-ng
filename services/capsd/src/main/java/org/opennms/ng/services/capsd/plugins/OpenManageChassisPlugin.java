@@ -28,24 +28,24 @@
 
 package org.opennms.ng.services.capsd.plugins;
 
+import java.net.InetAddress;
+import java.util.Map;
+
 import org.opennms.core.utils.ParameterMap;
-import org.opennms.ng.services.snmpconfig.SnmpPeerFactory;
 import org.opennms.netmgt.snmp.SnmpAgentConfig;
 import org.opennms.netmgt.snmp.SnmpObjId;
 import org.opennms.netmgt.snmp.SnmpUtils;
 import org.opennms.netmgt.snmp.SnmpValue;
+import org.opennms.ng.services.snmpconfig.SnmpPeerFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.net.InetAddress;
-import java.util.Map;
 
 /**
  * <p>
  * This class is used to test if Dell OpenManage chassis monitoring is possible.
  * The specific OIDs referenced to "SNMP Reference Guide", available from
- *
- *      http://support.dell.com/support/edocs/software/svradmin/6.1/en
+ * <p/>
+ * http://support.dell.com/support/edocs/software/svradmin/6.1/en
  * </p>
  *
  * @author <A HREF="mailto:r.trommer@open-factory.org">Ronny Trommer</A>
@@ -55,9 +55,9 @@ import java.util.Map;
  * @version $Id: $
  */
 public final class OpenManageChassisPlugin extends SnmpPlugin {
-    
+
     private static final Logger LOG = LoggerFactory.getLogger(org.opennms.ng.services.capsd.plugins.OpenManageChassisPlugin.class);
-    
+
     /**
      * Name of monitored service.
      */
@@ -83,8 +83,9 @@ public final class OpenManageChassisPlugin extends SnmpPlugin {
         private int value() {
             return this.state;
         }
-    };
-    
+    }
+    ;
+
     /**
      * Returns the name of the protocol that this plugin checks on the target
      * system for support.
@@ -98,7 +99,7 @@ public final class OpenManageChassisPlugin extends SnmpPlugin {
 
     /**
      * {@inheritDoc}
-     *
+     * <p/>
      * Returns true if the protocol defined by this plugin is supported. If
      * the protocol is not supported then a false value is returned to the
      * caller. The qualifier map passed to the method is used by the plugin to
@@ -106,32 +107,33 @@ public final class OpenManageChassisPlugin extends SnmpPlugin {
      * added to service events if needed.
      */
     @Override
-    public boolean isProtocolSupported(InetAddress ipaddr,
-            Map<String, Object> qualifiers) {
+    public boolean isProtocolSupported(InetAddress ipaddr, Map<String, Object> qualifiers) {
         try {
-            
+
             SnmpAgentConfig agentConfig = SnmpPeerFactory.getInstance().getAgentConfig(ipaddr);
-            if (agentConfig == null) throw new RuntimeException("SnmpAgentConfig object not available for interface " + ipaddr);
-            
+            if (agentConfig == null) {
+                throw new RuntimeException("SnmpAgentConfig object not available for interface " + ipaddr);
+            }
+
             if (qualifiers != null) {
                 // "port" parm
                 //
                 if (qualifiers.get("port") != null) {
-                    int port = ParameterMap.getKeyedInteger(qualifiers,"port",agentConfig.getPort());
+                    int port = ParameterMap.getKeyedInteger(qualifiers, "port", agentConfig.getPort());
                     agentConfig.setPort(port);
                 }
 
                 // "timeout" parm
                 //
                 if (qualifiers.get("timeout") != null) {
-                    int timeout = ParameterMap.getKeyedInteger(qualifiers,"timeout",agentConfig.getTimeout());
+                    int timeout = ParameterMap.getKeyedInteger(qualifiers, "timeout", agentConfig.getTimeout());
                     agentConfig.setTimeout(timeout);
                 }
 
                 // "retry" parm
                 //
                 if (qualifiers.get("retry") != null) {
-                    int retry = ParameterMap.getKeyedInteger(qualifiers,"retry",agentConfig.getRetries());
+                    int retry = ParameterMap.getKeyedInteger(qualifiers, "retry", agentConfig.getRetries());
                     agentConfig.setRetries(retry);
                 }
 
@@ -139,24 +141,28 @@ public final class OpenManageChassisPlugin extends SnmpPlugin {
                 //
                 if (qualifiers.get("force version") != null) {
                     String version = (String) qualifiers.get("force version");
-                    if (version.equalsIgnoreCase("snmpv1"))
+                    if (version.equalsIgnoreCase("snmpv1")) {
                         agentConfig.setVersion(SnmpAgentConfig.VERSION1);
-                    else if (version.equalsIgnoreCase("snmpv2")
-                            || version.equalsIgnoreCase("snmpv2c"))
-                        agentConfig.setVersion(SnmpAgentConfig.VERSION2C);
+                    } else {
+                        if (version.equalsIgnoreCase("snmpv2") || version.equalsIgnoreCase("snmpv2c")) {
+                            agentConfig.setVersion(SnmpAgentConfig.VERSION2C);
+                        }
 
-                    // TODO: make sure JoeSnmpStrategy correctly handles this.
-                    else if (version.equalsIgnoreCase("snmpv3"))
-                        agentConfig.setVersion(SnmpAgentConfig.VERSION3);
+                        // TODO: make sure JoeSnmpStrategy correctly handles this.
+                        else {
+                            if (version.equalsIgnoreCase("snmpv3")) {
+                                agentConfig.setVersion(SnmpAgentConfig.VERSION3);
+                            }
+                        }
+                    }
                 }
 
                 // Get the OpenManage chassis status
                 SnmpObjId chassisStatusSnmpObject = SnmpObjId.get(CHASSIS_STATUS_OID);
                 SnmpValue chassisStatus = SnmpUtils.get(agentConfig, chassisStatusSnmpObject);
-                
+
                 // If no chassis status received, do not detect the protocol and quit
-                if (chassisStatus == null)
-                {
+                if (chassisStatus == null) {
                     LOG.warn("Cannot receive chassis status");
                     return false;
                 } else {
@@ -164,9 +170,8 @@ public final class OpenManageChassisPlugin extends SnmpPlugin {
                 }
 
                 // Validate chassis status, check status is somewhere between OTHER and NON_RECOVERABLE
-                if  (Integer.parseInt(chassisStatus.toString()) >= DELL_STATUS.OTHER.value() && 
-                    Integer.parseInt(chassisStatus.toString()) <= DELL_STATUS.NON_RECOVERABLE.value())
-                {
+                if (Integer.parseInt(chassisStatus.toString()) >= DELL_STATUS.OTHER.value() && Integer.parseInt(chassisStatus.toString())
+                    <= DELL_STATUS.NON_RECOVERABLE.value()) {
                     // OpenManage chassis status detected
                     LOG.debug("poll: OpenManageChassis: is valid, protocol supported.");
                     return true;

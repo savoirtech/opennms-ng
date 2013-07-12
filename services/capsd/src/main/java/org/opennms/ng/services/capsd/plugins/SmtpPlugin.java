@@ -28,6 +28,19 @@
 
 package org.opennms.ng.services.capsd.plugins;
 
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.InterruptedIOException;
+import java.lang.reflect.UndeclaredThrowableException;
+import java.net.ConnectException;
+import java.net.InetAddress;
+import java.net.InetSocketAddress;
+import java.net.NoRouteToHostException;
+import java.net.Socket;
+import java.util.Map;
+import java.util.StringTokenizer;
+
 import org.apache.regexp.RE;
 import org.apache.regexp.RESyntaxException;
 import org.opennms.core.utils.InetAddressUtils;
@@ -36,17 +49,8 @@ import org.opennms.ng.services.capsd.AbstractPlugin;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.InterruptedIOException;
-import java.lang.reflect.UndeclaredThrowableException;
-import java.net.*;
-import java.util.Map;
-import java.util.StringTokenizer;
-
 /**
- * <P>
+ * <p/>
  * This class is designed to be used by the capabilities daemon to test for the
  * existance of an SMTP server on remote interfaces. The class implements the
  * Plugin interface that allows it to be used along with other plugins by the
@@ -64,19 +68,18 @@ public final class SmtpPlugin extends AbstractPlugin {
      * The regular expression test used to determine if the reply is a multi
      * line reply. A multi line reply is one that each line, but the last, is in
      * the form of "ddd-" where 'ddd' is the result code.
-     * 
      */
     private static final RE MULTILINE_RESULT;
 
     /**
-     * <P>
+     * <p/>
      * The capability name of the plugin.
      * </P>
      */
     private static final String PROTOCOL_NAME = "SMTP";
 
     /**
-     * <P>
+     * <p/>
      * The default port on which the host is checked to see if it supports SMTP.
      * </P>
      */
@@ -106,18 +109,15 @@ public final class SmtpPlugin extends AbstractPlugin {
     }
 
     /**
-     * <P>
+     * <p/>
      * Test to see if the passed host-port pair is the endpoint for an SMTP
      * server. If there is an SMTP server at that destination then a value of
      * true is returned from the method. Otherwise a false value is returned to
      * the caller.
      * </P>
-     * 
-     * @param host
-     *            The remote host to connect to.
-     * @param port
-     *            The remote port on the host.
-     * 
+     *
+     * @param host The remote host to connect to.
+     * @param port The remote port on the host.
      * @return True if server supports SMTP on the specified port, false
      *         otherwise
      */
@@ -126,7 +126,7 @@ public final class SmtpPlugin extends AbstractPlugin {
         //
 
         boolean isAServer = false;
-        for (int attempts = 0; attempts <= retries && !isAServer; attempts++) {
+        for (int attempts = 0;attempts <= retries && !isAServer;attempts++) {
             Socket socket = null;
             try {
                 socket = new Socket();
@@ -144,7 +144,6 @@ public final class SmtpPlugin extends AbstractPlugin {
                 String result = null;
                 do {
                     result = lineRdr.readLine();
-
                 } while (result != null && result.length() > 0 && MULTILINE_RESULT.match(result));
 
                 if (result == null || result.length() == 0) {
@@ -181,7 +180,6 @@ public final class SmtpPlugin extends AbstractPlugin {
                     // code we are looking for.
                     do {
                         result = lineRdr.readLine();
-
                     } while (result != null && result.length() > 0 && MULTILINE_RESULT.match(result));
 
                     if (result == null || result.length() == 0) {
@@ -217,7 +215,6 @@ public final class SmtpPlugin extends AbstractPlugin {
                         // code we are looking for.
                         do {
                             result = lineRdr.readLine();
-
                         } while (result != null && result.length() > 0 && MULTILINE_RESULT.match(result));
 
                         if (result == null || result.length() == 0) {
@@ -228,8 +225,9 @@ public final class SmtpPlugin extends AbstractPlugin {
                         t = new StringTokenizer(result);
                         rc = Integer.parseInt(t.nextToken());
 
-                        if (rc == 221)
+                        if (rc == 221) {
                             isAServer = true;
+                        }
                     }
                 }
             } catch (NumberFormatException e) {
@@ -257,8 +255,9 @@ public final class SmtpPlugin extends AbstractPlugin {
                 isAServer = false;
             } finally {
                 try {
-                    if (socket != null)
+                    if (socket != null) {
                         socket.close();
+                    }
                 } catch (IOException e) {
                 }
             }
@@ -284,7 +283,7 @@ public final class SmtpPlugin extends AbstractPlugin {
 
     /**
      * {@inheritDoc}
-     *
+     * <p/>
      * Returns true if the protocol defined by this plugin is supported. If the
      * protocol is not supported then a false value is returned to the caller.
      */
@@ -295,7 +294,7 @@ public final class SmtpPlugin extends AbstractPlugin {
 
     /**
      * {@inheritDoc}
-     *
+     * <p/>
      * Returns true if the protocol defined by this plugin is supported. If the
      * protocol is not supported then a false value is returned to the caller.
      * The qualifier map passed to the method is used by the plugin to return
@@ -315,8 +314,9 @@ public final class SmtpPlugin extends AbstractPlugin {
         }
 
         boolean result = isServer(address, port, retries, timeout);
-        if (result && qualifiers != null && !qualifiers.containsKey("port"))
+        if (result && qualifiers != null && !qualifiers.containsKey("port")) {
             qualifiers.put("port", port);
+        }
 
         return result;
     }

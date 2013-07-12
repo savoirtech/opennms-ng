@@ -31,15 +31,15 @@ package org.opennms.ng.services.capsd.snmp;
 import java.net.InetAddress;
 
 /**
- * <P>
+ * <p/>
  * The IpAddrTableEntry class is designed to hold all the MIB-II information for
  * one entry in the ipAddrTable. The table effectively contains a list of these
  * entries, each entry having information about one address. The entry contains
  * an IP Address, its netmask, interface binding, broadcast address, and maximum
  * packet reassembly size.
  * </P>
- *
- * <P>
+ * <p/>
+ * <p/>
  * This object is used by the IpAddrTable to hold information single entries in
  * the table. See the IpAddrTable documentation form more information.
  * </P>
@@ -54,52 +54,62 @@ import java.net.InetAddress;
 public final class IpAddrTableEntry extends SnmpStore {
     // Lookup strings for specific table entries
     //
-    /** Constant <code>IP_ADDR_ENT_ADDR="ipAdEntAddr"</code> */
+    /**
+     * Constant <code>IP_ADDR_ENT_ADDR="ipAdEntAddr"</code>
+     */
     public final static String IP_ADDR_ENT_ADDR = "ipAdEntAddr";
 
-    /** Constant <code>IP_ADDR_IF_INDEX="ipAdEntIfIndex"</code> */
+    /**
+     * Constant <code>IP_ADDR_IF_INDEX="ipAdEntIfIndex"</code>
+     */
     public final static String IP_ADDR_IF_INDEX = "ipAdEntIfIndex";
 
-    /** Constant <code>IP_ADDR_ENT_NETMASK="ipAdEntNetMask"</code> */
+    /**
+     * Constant <code>IP_ADDR_ENT_NETMASK="ipAdEntNetMask"</code>
+     */
     public final static String IP_ADDR_ENT_NETMASK = "ipAdEntNetMask";
 
-    /** Constant <code>IP_ADDR_ENT_BCASTADDR="ipAdEntBcastAddr"</code> */
+    /**
+     * Constant <code>IP_ADDR_ENT_BCASTADDR="ipAdEntBcastAddr"</code>
+     */
     public final static String IP_ADDR_ENT_BCASTADDR = "ipAdEntBcastAddr";
 
-    /** Constant <code>ms_elemList</code> */
-    public final static NamedSnmpVar[] ms_elemList = new NamedSnmpVar[] {
-        new NamedSnmpVar(NamedSnmpVar.SNMPIPADDRESS, IP_ADDR_ENT_ADDR, ".1.3.6.1.2.1.4.20.1.1", 1),
-        new NamedSnmpVar(NamedSnmpVar.SNMPINT32, IP_ADDR_IF_INDEX, ".1.3.6.1.2.1.4.20.1.2", 2),
-        new NamedSnmpVar(NamedSnmpVar.SNMPIPADDRESS, IP_ADDR_ENT_NETMASK, ".1.3.6.1.2.1.4.20.1.3", 3),
-        new NamedSnmpVar(NamedSnmpVar.SNMPINT32, IP_ADDR_ENT_BCASTADDR, ".1.3.6.1.2.1.4.20.1.4", 4)
+    /**
+     * Constant <code>ms_elemList</code>
+     */
+    public final static NamedSnmpVar[] ms_elemList = new NamedSnmpVar[]{new NamedSnmpVar(NamedSnmpVar.SNMPIPADDRESS, IP_ADDR_ENT_ADDR,
+        ".1.3.6.1.2.1.4.20.1.1", 1), new NamedSnmpVar(NamedSnmpVar.SNMPINT32, IP_ADDR_IF_INDEX, ".1.3.6.1.2.1.4.20.1.2", 2), new NamedSnmpVar(
+        NamedSnmpVar.SNMPIPADDRESS, IP_ADDR_ENT_NETMASK, ".1.3.6.1.2.1.4.20.1.3", 3), new NamedSnmpVar(NamedSnmpVar.SNMPINT32, IP_ADDR_ENT_BCASTADDR,
+        ".1.3.6.1.2.1.4.20.1.4", 4)
 
-        // Array size has changed from 5 to 4...no longer going after
-        // ipAdEntReasmMaxSize variable because we aren't currently using
-        // it and not all agents implement it which causes the collection
-        // of the ipAddrTable to fail
-        //
-        // new NamedSnmpVar(NamedSnmpVar.SNMPINT32, IP_ADDR_ENT_REASM_MAXSIZE, ".1.3.6.1.2.1.4.20.1.5", 5)
+                                                                        // Array size has changed from 5 to 4...no longer going after
+                                                                        // ipAdEntReasmMaxSize variable because we aren't currently using
+                                                                        // it and not all agents implement it which causes the collection
+                                                                        // of the ipAddrTable to fail
+                                                                        //
+                                                                        // new NamedSnmpVar(NamedSnmpVar.SNMPINT32, IP_ADDR_ENT_REASM_MAXSIZE,
+                                                                        // ".1.3.6.1.2.1.4.20.1.5", 5)
     };
 
     /**
-     * <P>
+     * <p/>
      * The TABLE_OID is the object identifier that represents the root of the IP
      * Address table in the MIB forest.
      * </P>
      */
     public static final String TABLE_OID = ".1.3.6.1.2.1.4.20.1"; // start of
-                                                                    // table
-                                                                    // (GETNEXT)
+    // table
+    // (GETNEXT)
 
     /**
-     * <P>
+     * <p/>
      * The class constructor used to initialize the object to its initial state.
      * Although the object's member variables can change after an instance is
      * created, this constructor will initialize all the variables as per their
      * named variable from the passed array of SNMP varbinds.
      * </P>
-     *
-     * <P>
+     * <p/>
+     * <p/>
      * If the information in the object should not be modified then a <EM>final
      * </EM> modifier can be applied to the created object.
      * </P>
@@ -134,7 +144,7 @@ public final class IpAddrTableEntry extends SnmpStore {
     public InetAddress getIpAdEntNetMask() {
         return getIPAddress(org.opennms.ng.services.capsd.snmp.IpAddrTableEntry.IP_ADDR_ENT_NETMASK);
     }
-    
+
     /**
      * <p>getIpAdEntBcastAddr</p>
      *
@@ -143,6 +153,4 @@ public final class IpAddrTableEntry extends SnmpStore {
     public InetAddress getIpAdEntBcastAddr() {
         return getIPAddress(org.opennms.ng.services.capsd.snmp.IpAddrTableEntry.IP_ADDR_ENT_BCASTADDR);
     }
-
-    
 }

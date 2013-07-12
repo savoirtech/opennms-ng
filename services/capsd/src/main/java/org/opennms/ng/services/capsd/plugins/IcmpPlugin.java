@@ -28,15 +28,15 @@
 
 package org.opennms.ng.services.capsd.plugins;
 
-import org.opennms.core.utils.ParameterMap;
-import org.opennms.ng.services.capsd.AbstractPlugin;
-import org.opennms.netmgt.icmp.PingConstants;
-import org.opennms.netmgt.icmp.PingerFactory;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import java.net.InetAddress;
 import java.util.Map;
+
+import org.opennms.core.utils.ParameterMap;
+import org.opennms.netmgt.icmp.PingConstants;
+import org.opennms.netmgt.icmp.PingerFactory;
+import org.opennms.ng.services.capsd.AbstractPlugin;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * This class provides Capsd with the ability to check for ICMP support on new
@@ -67,26 +67,26 @@ public final class IcmpPlugin extends AbstractPlugin {
 
     /**
      * {@inheritDoc}
-     *
+     * <p/>
      * Returns true if the protocol defined by this plugin is supported. If the
      * protocol is not supported then a false value is returned to the caller.
      */
     @Override
     public boolean isProtocolSupported(InetAddress address) {
-		try {
-	    	Number retval = PingerFactory.getInstance().ping(address);
-	    	if (retval != null) {
-	    		return true;
-	    	}
-		} catch (Throwable e) {
-			LOG.warn("Pinger failed to ping " + address, e);
-		}
-		return false;
+        try {
+            Number retval = PingerFactory.getInstance().ping(address);
+            if (retval != null) {
+                return true;
+            }
+        } catch (Throwable e) {
+            LOG.warn("Pinger failed to ping " + address, e);
+        }
+        return false;
     }
 
     /**
      * {@inheritDoc}
-     *
+     * <p/>
      * Returns true if the protocol defined by this plugin is supported. If the
      * protocol is not supported then a false value is returned to the caller.
      * The qualifier map passed to the method is used by the plugin to return
@@ -95,25 +95,25 @@ public final class IcmpPlugin extends AbstractPlugin {
      */
     @Override
     public boolean isProtocolSupported(InetAddress address, Map<String, Object> qualifiers) {
-    	int retries;
-    	long timeout;
+        int retries;
+        long timeout;
 
-    	try {
-    		if (qualifiers != null) {
-    			retries = ParameterMap.getKeyedInteger(qualifiers, "retry", PingConstants.DEFAULT_RETRIES);
-    			timeout = ParameterMap.getKeyedLong(qualifiers, "timeout", PingConstants.DEFAULT_TIMEOUT);
-    		} else {
-    			retries = PingConstants.DEFAULT_RETRIES;
-    			timeout = PingConstants.DEFAULT_TIMEOUT;
-    		}
-    		Number retval = PingerFactory.getInstance().ping(address, timeout, retries);
-    		if (retval != null) {
-    			return true;
-    		}
-    	} catch (Throwable e) {
-			LOG.warn("Pinger failed to ping " + address, e);
+        try {
+            if (qualifiers != null) {
+                retries = ParameterMap.getKeyedInteger(qualifiers, "retry", PingConstants.DEFAULT_RETRIES);
+                timeout = ParameterMap.getKeyedLong(qualifiers, "timeout", PingConstants.DEFAULT_TIMEOUT);
+            } else {
+                retries = PingConstants.DEFAULT_RETRIES;
+                timeout = PingConstants.DEFAULT_TIMEOUT;
+            }
+            Number retval = PingerFactory.getInstance().ping(address, timeout, retries);
+            if (retval != null) {
+                return true;
+            }
+        } catch (Throwable e) {
+            LOG.warn("Pinger failed to ping " + address, e);
         }
-    	
-    	return false;
+
+        return false;
     }
 }

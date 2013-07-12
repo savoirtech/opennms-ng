@@ -28,7 +28,6 @@
 
 package org.opennms.ng.services.capsd.snmp;
 
-
 import org.opennms.netmgt.snmp.AbstractSnmpStore;
 import org.opennms.netmgt.snmp.SnmpResult;
 import org.opennms.netmgt.snmp.SnmpValue;
@@ -43,11 +42,11 @@ import org.slf4j.LoggerFactory;
  * @version $Id: $
  */
 public class SnmpStore extends AbstractSnmpStore {
-    
+
     private static final Logger LOG = LoggerFactory.getLogger(org.opennms.ng.services.capsd.snmp.SnmpStore.class);
-    
+
     /**
-     * <P>
+     * <p/>
      * The keys that will be supported by default from the TreeMap base class.
      * Each of the elements in the list are an instance of the SNMP Interface
      * table. Objects in this list should be used by multiple instances of this
@@ -67,7 +66,7 @@ public class SnmpStore extends AbstractSnmpStore {
     }
 
     /**
-     * <P>
+     * <p/>
      * Returns the number of entries in the MIB-II ifTable element list.
      * </P>
      *
@@ -85,31 +84,38 @@ public class SnmpStore extends AbstractSnmpStore {
     public NamedSnmpVar[] getElements() {
         return ms_elemList;
     }
-    
-    /** {@inheritDoc} */
+
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public void storeResult(SnmpResult res) {
         putValue(res.getBase().toString(), res.getValue());
         for (NamedSnmpVar var : ms_elemList) {
             if (res.getBase().equals(var.getSnmpObjId())) {
                 if (res.getValue().isError()) {
-                    LOG.error("storeResult: got an error for alias "+var.getAlias()+" ["+res.getBase()+"].["+res.getInstance()+"], but we should only be getting non-errors: " + res.getValue());
-                } else if (res.getValue().isEndOfMib()) {
-                    LOG.debug("storeResult: got endOfMib for alias "+var.getAlias()+" ["+res.getBase()+"].["+res.getInstance()+"], not storing");
+                    LOG.error("storeResult: got an error for alias " + var.getAlias() + " [" + res.getBase() + "].[" + res.getInstance()
+                        + "], but we should only be getting non-errors: " + res.getValue());
                 } else {
-                    SnmpValueType type = SnmpValueType.valueOf(res.getValue().getType());
-                    LOG.debug("Storing Result: alias: "+var.getAlias()+" ["+res.getBase()+"].["+res.getInstance()+"] = " + (type == null ? "Unknown" : type.getDisplayString()) + ": "+toLogString(res.getValue()));
-                    putValue(var.getAlias(), res.getValue());
+                    if (res.getValue().isEndOfMib()) {
+                        LOG.debug("storeResult: got endOfMib for alias " + var.getAlias() + " [" + res.getBase() + "].[" + res.getInstance()
+                            + "], not storing");
+                    } else {
+                        SnmpValueType type = SnmpValueType.valueOf(res.getValue().getType());
+                        LOG.debug(
+                            "Storing Result: alias: " + var.getAlias() + " [" + res.getBase() + "].[" + res.getInstance() + "] = " + (type == null
+                                ? "Unknown" : type.getDisplayString()) + ": " + toLogString(res.getValue()));
+                        putValue(var.getAlias(), res.getValue());
+                    }
                 }
             }
         }
     }
-    
+
     private String toLogString(SnmpValue val) {
         if (val.getType() == SnmpValue.SNMP_OCTET_STRING) {
             return val.toDisplayString() + " (" + val.toHexString() + ")";
         }
         return val.toString();
     }
-
 }

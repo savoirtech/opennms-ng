@@ -28,13 +28,13 @@
 
 package org.opennms.ng.services.capsd.snmp;
 
+import java.net.InetAddress;
+
 import org.opennms.netmgt.snmp.SnmpInstId;
 import org.opennms.netmgt.snmp.SnmpObjId;
 
-import java.net.InetAddress;
-
 /**
- * <P>
+ * <p/>
  * The IfXTable uses a SnmpSession to collect the entries in the remote agent's
  * interface extensions table. It implements the SnmpHandler to receive
  * notifications and handle errors associated with the data collection. Data is
@@ -58,7 +58,7 @@ import java.net.InetAddress;
 public final class IfXTable extends SnmpTable<IfXTableEntry> {
 
     /**
-     * <P>
+     * <p/>
      * Constructs an IfXTable object that is used to collect the interface
      * elements from the remote agent. Once all the interfaces are collected, or
      * there is an error in the collection the signaler object is <EM>notified
@@ -72,7 +72,9 @@ public final class IfXTable extends SnmpTable<IfXTableEntry> {
         super(address, "ifXTable", IfXTableEntry.ms_elemList);
     }
 
-    /** {@inheritDoc} */
+    /**
+     * {@inheritDoc}
+     */
     @Override
     protected IfXTableEntry createTableEntry(SnmpObjId base, SnmpInstId inst, Object val) {
         return new IfXTableEntry(inst.toInt());
@@ -85,7 +87,7 @@ public final class IfXTable extends SnmpTable<IfXTableEntry> {
      * @return a {@link IfXTableEntry} object.
      */
     public IfXTableEntry getEntry(int ifIndex) {
-        for(IfXTableEntry entry : this) {
+        for (IfXTableEntry entry : this) {
             Integer ndx = entry.getIfIndex();
             if (ndx != null && ndx.intValue() == ifIndex) {
                 return entry;
@@ -105,19 +107,19 @@ public final class IfXTable extends SnmpTable<IfXTableEntry> {
 
         // Find ifXTable entry with matching ifIndex
 
-        for(IfXTableEntry ifXEntry : this) {
+        for (IfXTableEntry ifXEntry : this) {
 
             int ifXIndex = -1;
             Integer snmpIfIndex = ifXEntry.getIfIndex();
-            if (snmpIfIndex != null)
+            if (snmpIfIndex != null) {
                 ifXIndex = snmpIfIndex.intValue();
+            }
 
             // compare with passed ifIndex
             if (ifXIndex == ifIndex) {
                 // Found match! Get the ifName
                 return ifXEntry.getIfName();
             }
-
         }
         return null;
     }
@@ -131,19 +133,19 @@ public final class IfXTable extends SnmpTable<IfXTableEntry> {
     public String getIfAlias(int ifIndex) {
         // Find ifXTable entry with matching ifIndex
 
-        for(IfXTableEntry ifXEntry : this) {
+        for (IfXTableEntry ifXEntry : this) {
 
             int ifXIndex = -1;
             Integer snmpIfIndex = ifXEntry.getIfIndex();
-            if (snmpIfIndex != null)
+            if (snmpIfIndex != null) {
                 ifXIndex = snmpIfIndex.intValue();
+            }
 
             // compare with passed ifIndex
             if (ifXIndex == ifIndex) {
                 // Found match! Get the ifAlias
                 return ifXEntry.getIfAlias();
             }
-
         }
         return null;
     }
@@ -155,21 +157,20 @@ public final class IfXTable extends SnmpTable<IfXTableEntry> {
      * @return a {@link Long} object.
      */
     public Long getIfHighSpeed(int ifIndex) {
-        for(IfXTableEntry ifXEntry : this) {
-            
+        for (IfXTableEntry ifXEntry : this) {
+
             int ifXIndex = -1;
             Integer snmpIfIndex = ifXEntry.getIfIndex();
-            if (snmpIfIndex != null)
+            if (snmpIfIndex != null) {
                 ifXIndex = snmpIfIndex.intValue();
-    
+            }
+
             // compare with passed ifIndex
             if (ifXIndex == ifIndex) {
                 // Found match! Get the ifAlias
                 return ifXEntry.getIfHighSpeed();
             }
-    
         }
         return null;
     }
-
 }

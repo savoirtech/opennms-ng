@@ -28,23 +28,27 @@
 
 package org.opennms.ng.services.capsd.plugins;
 
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.InterruptedIOException;
+import java.lang.reflect.UndeclaredThrowableException;
+import java.net.ConnectException;
+import java.net.InetAddress;
+import java.net.InetSocketAddress;
+import java.net.NoRouteToHostException;
+import java.net.Socket;
+import java.util.Map;
+import java.util.StringTokenizer;
+
 import org.opennms.core.utils.InetAddressUtils;
 import org.opennms.core.utils.ParameterMap;
 import org.opennms.ng.services.capsd.AbstractPlugin;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.InterruptedIOException;
-import java.lang.reflect.UndeclaredThrowableException;
-import java.net.*;
-import java.util.Map;
-import java.util.StringTokenizer;
-
 /**
- * <P>
+ * <p/>
  * This class is designed to be used by the capabilities daemon to test for the
  * existance of MS Exchange server on remote interfaces. The class implements
  * the Plugin interface that allows it to be used along with other plugins by
@@ -59,14 +63,14 @@ public final class Pop3Plugin extends AbstractPlugin {
     private static final Logger LOG = LoggerFactory.getLogger(org.opennms.ng.services.capsd.plugins.Pop3Plugin.class);
 
     /**
-     * <P>
+     * <p/>
      * The capability name for the plugin.
      * </P>
      */
     private static final String PROTOCOL_NAME = "POP3";
 
     /**
-     * <P>
+     * <p/>
      * The default port on which to check for POP3 service.
      * </P>
      */
@@ -83,25 +87,22 @@ public final class Pop3Plugin extends AbstractPlugin {
     private final static int DEFAULT_TIMEOUT = 5000; // in milliseconds
 
     /**
-     * <P>
+     * <p/>
      * Test to see if the passed host is running Microsoft Exchange server. If
      * the remote host is running POP3, IMAP or MAPI and we are able to retreive
      * a banner from any of the ports these services listen on wich include the
      * text "Microsoft Exchange" then this method will return true. Otherwise a
      * false value is returned to the caller.
      * </P>
-     * 
-     * @param host
-     *            The remote host to test.
-     * @param port
-     *            The remote port to test.
-     * 
+     *
+     * @param host The remote host to test.
+     * @param port The remote port to test.
      * @return True if server is running MS Exchange, false otherwise
      */
     private boolean isServer(InetAddress host, int port, int retries, int timeout) {
 
         boolean isAServer = false;
-        for (int attempts = 0; attempts <= retries && !isAServer; attempts++) {
+        for (int attempts = 0;attempts <= retries && !isAServer;attempts++) {
             Socket socket = null;
 
             try {
@@ -132,8 +133,9 @@ public final class Pop3Plugin extends AbstractPlugin {
                     // Server response should start with: "+OK"
                     //
                     t = new StringTokenizer(lineRdr.readLine());
-                    if (t.nextToken().equals("+OK"))
+                    if (t.nextToken().equals("+OK")) {
                         isAServer = true;
+                    }
                 }
             } catch (ConnectException cE) {
                 // Connection refused!! Continue to retry.
@@ -159,8 +161,9 @@ public final class Pop3Plugin extends AbstractPlugin {
                 LOG.error("Pop3Plugin: An undeclared throwable exception was caught contacting host " + InetAddressUtils.str(host), t);
             } finally {
                 try {
-                    if (socket != null)
+                    if (socket != null) {
                         socket.close();
+                    }
                 } catch (IOException e) {
                 }
             }
@@ -182,7 +185,7 @@ public final class Pop3Plugin extends AbstractPlugin {
 
     /**
      * {@inheritDoc}
-     *
+     * <p/>
      * Returns true if the protocol defined by this plugin is supported. If the
      * protocol is not supported then a false value is returned to the caller.
      */
@@ -193,7 +196,7 @@ public final class Pop3Plugin extends AbstractPlugin {
 
     /**
      * {@inheritDoc}
-     *
+     * <p/>
      * Returns true if the protocol defined by this plugin is supported. If the
      * protocol is not supported then a false value is returned to the caller.
      * The qualifier map passed to the method is used by the plugin to return
@@ -213,10 +216,10 @@ public final class Pop3Plugin extends AbstractPlugin {
         }
 
         boolean result = isServer(address, port, retries, timeout);
-        if (result && qualifiers != null && !qualifiers.containsKey("port"))
+        if (result && qualifiers != null && !qualifiers.containsKey("port")) {
             qualifiers.put("port", port);
+        }
 
         return result;
     }
-
 }

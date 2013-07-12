@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0"
-         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+<project xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xmlns="http://maven.apache.org/POM/4.0.0"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <parent>
         <artifactId>bundles</artifactId>
@@ -12,8 +12,8 @@
 
     <packaging>bundle</packaging>
 
-    <name>OPENNMS :: Utils - DB, XML, Core</name>
-    <description>OPENNMS Utils - DB, XML, Core</description>
+    <name>OPENNMS :: Utils - DB, XML, Core, Lib</name>
+    <description>OPENNMS Utils - DB, XML, Core, Lib</description>
 
     <artifactId>opennms-util</artifactId>
     <version>${opennms.version}</version>
@@ -37,12 +37,12 @@
             org.opennms.core.utils.url;version="${opennms.version}",
             org.opennms.core.xml;version="${opennms.version}",
             org.opennms.core.xml.bind;version="${opennms.version}",
-            org.opennms.netmgt.config.opennmsDataSources;version="${opennms.version},
-            org.opennms.netmgt.config.opennmsDataSources.descriptors;version="${opennms.version},
+            org.opennms.netmgt.config.opennmsDataSources;version="${opennms.version}",
+            org.opennms.netmgt.config.opennmsDataSources.descriptors;version="${opennms.version}",
             org.opennms.core.db;version="${opennms.version}",
         </opennms.osgi.export.pkg>
 
-        <opennms.osgi.include.resource>{maven-resources},{maven-dependencies}</opennms.osgi.include.resource>
+
         <opennms.osgi.failok>true</opennms.osgi.failok>
         <!-- Trying to get around dynamic class.forname loading -->
         <opennms.osgi.dynamic>*</opennms.osgi.dynamic>
@@ -57,7 +57,7 @@
             <version>${opennms.version}</version>
         </dependency>
 
-        <!-- CORE XML -->
+        <!-- CORE LIBRARIES  -->
 
         <dependency>
             <groupId>org.opennms.core</groupId>
@@ -68,6 +68,12 @@
         <dependency>
             <groupId>org.opennms.core</groupId>
             <artifactId>org.opennms.core.db</artifactId>
+            <version>${opennms.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.opennms.core</groupId>
+            <artifactId>org.opennms.core.lib</artifactId>
             <version>${opennms.version}</version>
         </dependency>
 
@@ -90,6 +96,7 @@
                                     <include>${pkgGroupId}:${pkgArtifactId}</include>
                                     <include>org.opennms.core:org.opennms.core.xml</include>
                                     <include>org.opennms.core:org.opennms.core.db</include>
+                                    <include>org.opennms.core:org.opennms.core.lib</include>
                                 </includes>
                             </artifactSet>
 

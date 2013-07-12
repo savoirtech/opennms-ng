@@ -28,14 +28,14 @@
 
 package org.opennms.ng.services.capsd.plugins;
 
+import java.net.InetAddress;
+import java.util.Map;
+
 import org.opennms.core.utils.InetAddressUtils;
 import org.opennms.ng.services.capsd.Plugin;
 import org.opennms.sms.phonebook.Phonebook;
 import org.opennms.sms.phonebook.PhonebookException;
 import org.opennms.sms.phonebook.PropertyPhonebook;
-
-import java.net.InetAddress;
-import java.util.Map;
 
 /**
  * <p>SmsPlugin class.</p>
@@ -46,12 +46,13 @@ import java.util.Map;
 public class SmsPlugin implements Plugin {
 
     static private final String PROTOCOL_NAME = "SMS";
-    
+
     private final Phonebook m_smsDirectory = new PropertyPhonebook();
 
     /* (non-Javadoc)
      * @see org.opennms.ng.services.capsd.Plugin#getProtocolName()
      */
+
     /**
      * <p>getProtocolName</p>
      *
@@ -65,7 +66,10 @@ public class SmsPlugin implements Plugin {
     /* (non-Javadoc)
      * @see org.opennms.ng.services.capsd.Plugin#isProtocolSupported(java.net.InetAddress)
      */
-    /** {@inheritDoc} */
+
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public boolean isProtocolSupported(InetAddress address) {
         return isProtocolSupported(address, null);
@@ -74,7 +78,10 @@ public class SmsPlugin implements Plugin {
     /* (non-Javadoc)
      * @see org.opennms.ng.services.capsd.Plugin#isProtocolSupported(java.net.InetAddress, java.util.Map)
      */
-    /** {@inheritDoc} */
+
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public boolean isProtocolSupported(InetAddress address, Map<String, Object> qualifiers) {
 
@@ -84,7 +91,6 @@ public class SmsPlugin implements Plugin {
         } catch (PhonebookException e) {
             return false;
         }
-        
     }
 
     /**
@@ -95,5 +101,4 @@ public class SmsPlugin implements Plugin {
     public Phonebook getSmsDirectory() {
         return m_smsDirectory;
     }
-
 }

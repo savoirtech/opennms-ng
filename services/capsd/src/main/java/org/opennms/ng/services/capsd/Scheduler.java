@@ -28,6 +28,20 @@
 
 package org.opennms.ng.services.capsd;
 
+import java.lang.reflect.UndeclaredThrowableException;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Timestamp;
+import java.util.Collections;
+import java.util.Date;
+import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.RejectedExecutionException;
+
 import org.opennms.core.db.DataSourceFactory;
 import org.opennms.core.fiber.PausableFiber;
 import org.opennms.core.utils.DBUtils;
@@ -35,25 +49,17 @@ import org.opennms.ng.services.capsdconfig.CapsdConfigFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.lang.reflect.UndeclaredThrowableException;
-import java.sql.*;
-import java.util.*;
-import java.util.Date;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.RejectedExecutionException;
-
 /**
  * This class implements a simple scheduler to ensure that Capsd rescans occurs
  * at the expected intervals.
- * 
+ *
  * @author <a href="mailto:mike@opennms.org">Mike Davidson </a>
  * @author <a href="http://www.opennms.org/">OpenNMS </a>
- * 
  */
 final class Scheduler implements Runnable, PausableFiber {
-    
+
     private static final Logger LOG = LoggerFactory.getLogger(org.opennms.ng.services.capsd.Scheduler.class);
-    
+
     /**
      * The prefix for the fiber name.
      */
@@ -68,7 +74,8 @@ final class Scheduler implements Runnable, PausableFiber {
      * SQL used to retrieve the last poll time for all the managed interfaces
      * belonging to a particular node.
      */
-    private static final String SQL_GET_LAST_POLL_TIME = "SELECT iplastcapsdpoll FROM ipinterface WHERE nodeid=? AND (ismanaged = 'M' OR ismanaged = 'N')";
+    private static final String SQL_GET_LAST_POLL_TIME = "SELECT iplastcapsdpoll FROM ipinterface WHERE nodeid=? AND (ismanaged = 'M' OR ismanaged "
+        + "= 'N')";
 
     /**
      * Special identifier used in place of a valid node id in order to schedule
@@ -167,10 +174,11 @@ final class Scheduler implements Runnable, PausableFiber {
         }
 
         boolean timeForRescan() {
-            if (System.currentTimeMillis() >= (m_lastScanned.getTime() + m_interval))
+            if (System.currentTimeMillis() >= (m_lastScanned.getTime() + m_interval)) {
                 return true;
-            else
+            } else {
                 return false;
+            }
         }
 
         @Override
@@ -186,8 +194,8 @@ final class Scheduler implements Runnable, PausableFiber {
 
     /**
      * Constructs a new instance of the scheduler.
+     *
      * @param rescanProcessorFactory TODO
-     * 
      */
     Scheduler(ExecutorService rescanQ, RescanProcessorFactory rescanProcessorFactory) throws SQLException {
 
@@ -198,7 +206,7 @@ final class Scheduler implements Runnable, PausableFiber {
         m_worker = null;
 
         m_knownNodes = Collections.synchronizedList(new LinkedList<NodeInfo>());
-        
+
         // Get rescan interval from configuration factory
         //
         m_interval = CapsdConfigFactory.getInstance().getRescanFrequency();
@@ -229,9 +237,8 @@ final class Scheduler implements Runnable, PausableFiber {
     /**
      * Builds a list of NodeInfo objects representing each of the nodes in the
      * database capable of being scheduled for rescan.
-     * 
-     * @throws java.sql.SQLException
-     *             if there is a problem accessing the database.
+     *
+     * @throws java.sql.SQLException if there is a problem accessing the database.
      */
     private void loadKnownNodes() throws SQLException {
         Connection db = null;
@@ -275,24 +282,21 @@ final class Scheduler implements Runnable, PausableFiber {
                         m_knownNodes.add(nodeInfo);
                     }
                 } else {
-                    LOG.debug("Node w/ nodeid " + nodeId + " has no managed interfaces from which to retrieve a last poll time...it will not be scheduled.");
+                    LOG.debug("Node w/ nodeid " + nodeId
+                        + " has no managed interfaces from which to retrieve a last poll time...it will not be scheduled.");
                 }
             }
         } finally {
             d.cleanUp();
         }
-
     }
 
     /**
      * Creates a NodeInfo object representing the specified node and adds it to
      * the known node list for scheduling.
      *
-     * @param nodeId
-     *            Id of node to be scheduled
-     *
-     * @throws java.sql.SQLException
-     *             if there is any problem accessing the database
+     * @param nodeId Id of node to be scheduled
+     * @throws java.sql.SQLException if there is any problem accessing the database
      */
     void scheduleNode(int nodeId) throws SQLException {
         // Retrieve last poll time for the node from the ipInterface
@@ -313,8 +317,9 @@ final class Scheduler implements Runnable, PausableFiber {
                     LOG.debug("scheduleNode: adding node " + nodeId + " with last poll time " + lastPolled);
                     m_knownNodes.add(new NodeInfo(nodeId, lastPolled, m_interval));
                 }
-            } else
+            } else {
                 LOG.warn("scheduleNode: Failed to retrieve last polled time from database for nodeid {}", nodeId);
+            }
         } finally {
             d.cleanUp();
         }
@@ -323,8 +328,7 @@ final class Scheduler implements Runnable, PausableFiber {
     /**
      * Removes the specified node from the known node list.
      *
-     * @param nodeId
-     *            Id of node to be removed.
+     * @param nodeId Id of node to be removed.
      */
     void unscheduleNode(int nodeId) {
         synchronized (m_knownNodes) {
@@ -344,8 +348,7 @@ final class Scheduler implements Runnable, PausableFiber {
      * Creates a NodeInfo object representing the specified node and adds it to
      * the rescan queue for immediate rescanning.
      *
-     * @param nodeId
-     *            Id of node to be rescanned
+     * @param nodeId Id of node to be rescanned
      */
     void forceRescan(int nodeId) {
         try {
@@ -358,12 +361,13 @@ final class Scheduler implements Runnable, PausableFiber {
     /**
      * Starts the fiber.
      *
-     * @throws IllegalStateException
-     *             Thrown if the fiber is already running.
+     * @throws IllegalStateException Thrown if the fiber is already running.
      */
     @Override
     public synchronized void start() {
-        if (m_worker != null) throw new IllegalStateException("The fiber has already run or is running");
+        if (m_worker != null) {
+            throw new IllegalStateException("The fiber has already run or is running");
+        }
 
         m_worker = new Thread(this, getName());
         m_worker.setDaemon(true);
@@ -377,13 +381,13 @@ final class Scheduler implements Runnable, PausableFiber {
      * Stops the fiber. If the fiber has never been run then an exception is
      * generated.
      *
-     * @throws IllegalStateException
-     *             Throws if the fiber has never been started.
+     * @throws IllegalStateException Throws if the fiber has never been started.
      */
     @Override
     public synchronized void stop() {
-        if (m_worker == null)
+        if (m_worker == null) {
             throw new IllegalStateException("The fiber has never been started");
+        }
 
         m_status = STOP_PENDING;
         m_worker.interrupt();
@@ -395,20 +399,22 @@ final class Scheduler implements Runnable, PausableFiber {
      * Pauses the scheduler if it is current running. If the fiber has not been
      * run or has already stopped then an exception is generated.
      *
-     * @throws IllegalStateException
-     *             Throws if the operation could not be completed due to the
-     *             fiber's state.
+     * @throws IllegalStateException Throws if the operation could not be completed due to the
+     *                               fiber's state.
      */
     @Override
     public synchronized void pause() {
-        if (m_worker == null)
+        if (m_worker == null) {
             throw new IllegalStateException("The fiber has never been started");
+        }
 
-        if (m_status == STOPPED || m_status == STOP_PENDING)
+        if (m_status == STOPPED || m_status == STOP_PENDING) {
             throw new IllegalStateException("The fiber is not running or a stop is pending");
+        }
 
-        if (m_status == PAUSED)
+        if (m_status == PAUSED) {
             return;
+        }
 
         m_status = PAUSE_PENDING;
         notifyAll();
@@ -418,20 +424,22 @@ final class Scheduler implements Runnable, PausableFiber {
      * Resumes the scheduler if it has been paused. If the fiber has not been
      * run or has already stopped then an exception is generated.
      *
-     * @throws IllegalStateException
-     *             Throws if the operation could not be completed due to the
-     *             fiber's state.
+     * @throws IllegalStateException Throws if the operation could not be completed due to the
+     *                               fiber's state.
      */
     @Override
     public synchronized void resume() {
-        if (m_worker == null)
+        if (m_worker == null) {
             throw new IllegalStateException("The fiber has never been started");
+        }
 
-        if (m_status == STOPPED || m_status == STOP_PENDING)
+        if (m_status == STOPPED || m_status == STOP_PENDING) {
             throw new IllegalStateException("The fiber is not running or a stop is pending");
+        }
 
-        if (m_status == RUNNING)
+        if (m_status == RUNNING) {
             return;
+        }
 
         m_status = RESUME_PENDING;
         notifyAll();
@@ -444,8 +452,9 @@ final class Scheduler implements Runnable, PausableFiber {
      */
     @Override
     public synchronized int getStatus() {
-        if (m_worker != null && m_worker.isAlive() == false)
+        if (m_worker != null && m_worker.isAlive() == false) {
             m_status = STOPPED;
+        }
         return m_status;
     }
 
@@ -516,12 +525,14 @@ final class Scheduler implements Runnable, PausableFiber {
                     NodeInfo node = iter.next();
 
                     // Don't schedule if already scheduled
-                    if (node.isScheduled())
+                    if (node.isScheduled()) {
                         continue;
+                    }
 
                     // Don't schedule if its not time for rescan yet
-                    if (!node.timeForRescan())
+                    if (!node.timeForRescan()) {
                         continue;
+                    }
 
                     // Must be time for a rescan!
                     //
@@ -593,14 +604,11 @@ final class Scheduler implements Runnable, PausableFiber {
                     }
                 }
             }
-
         } // end for(;;)
 
         LOG.debug("Scheduler.run: scheduler exiting, state = STOPPED");
         synchronized (this) {
             m_status = STOPPED;
         }
-
     } // end run
-
 }

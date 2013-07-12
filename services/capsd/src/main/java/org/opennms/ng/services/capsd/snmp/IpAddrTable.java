@@ -28,18 +28,18 @@
 
 package org.opennms.ng.services.capsd.snmp;
 
+import java.net.InetAddress;
+import java.util.ArrayList;
+import java.util.List;
+
 import org.opennms.core.utils.InetAddressUtils;
 import org.opennms.netmgt.snmp.SnmpInstId;
 import org.opennms.netmgt.snmp.SnmpObjId;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.net.InetAddress;
-import java.util.ArrayList;
-import java.util.List;
-
 /**
- * <P>
+ * <p/>
  * IpAddrTable uses a SnmpSession to collect the ipAddrTable entries It
  * implements the SnmpHandler to receive notifications when a reply is
  * received/error occurs in the SnmpSession used to send requests /recieve
@@ -53,12 +53,11 @@ import java.util.List;
  * @see <A HREF="http://www.ietf.org/rfc/rfc1213.txt">RFC1213 </A>
  */
 public class IpAddrTable extends SnmpTable<IpAddrTableEntry> {
-    
-    
+
     private static final Logger LOG = LoggerFactory.getLogger(org.opennms.ng.services.capsd.snmp.IpAddrTable.class);
 
     /**
-     * <P>
+     * <p/>
      * Constructs an IpAddrTable object that is used to collect the address
      * elements from the remote agent. Once all the elements are collected, or
      * there is an error in the collection the signaler object is <EM>notified
@@ -72,20 +71,22 @@ public class IpAddrTable extends SnmpTable<IpAddrTableEntry> {
         super(address, "ipAddrTable", IpAddrTableEntry.ms_elemList);
     }
 
-    /** {@inheritDoc} */
+    /**
+     * {@inheritDoc}
+     */
     @Override
     protected IpAddrTableEntry createTableEntry(SnmpObjId base, SnmpInstId inst, Object val) {
         return new IpAddrTableEntry();
     }
 
-     /**
-      * <p>getIfAddressAndMask</p>
-      *
-      * @param ifIndex a int.
-      * @return an array of {@link java.net.InetAddress} objects.
-      */
-     public InetAddress[] getIfAddressAndMask(int ifIndex) {
-        for(IpAddrTableEntry entry : this) {
+    /**
+     * <p>getIfAddressAndMask</p>
+     *
+     * @param ifIndex a int.
+     * @return an array of {@link java.net.InetAddress} objects.
+     */
+    public InetAddress[] getIfAddressAndMask(int ifIndex) {
+        for (IpAddrTableEntry entry : this) {
 
             Integer ndx = entry.getIpAdEntIfIndex();
             if (ndx != null && ndx.intValue() == ifIndex) {
@@ -110,7 +111,7 @@ public class IpAddrTable extends SnmpTable<IpAddrTableEntry> {
     public int getIfIndex(InetAddress address) {
         LOG.debug("getIfIndex: num ipAddrTable entries: {}", this.size());
 
-        for(IpAddrTableEntry entry : this) {
+        for (IpAddrTableEntry entry : this) {
 
             InetAddress ifAddr = entry.getIpAdEntAddr();
             if (ifAddr != null && ifAddr.equals(address)) {
@@ -119,8 +120,9 @@ public class IpAddrTable extends SnmpTable<IpAddrTableEntry> {
                 //
                 Integer ndx = entry.getIpAdEntIfIndex();
                 LOG.debug("getIfIndex: got a match for address " + InetAddressUtils.str(address) + " index: " + ndx);
-                if (ndx != null)
+                if (ndx != null) {
                     return ndx.intValue();
+                }
             }
         }
         LOG.debug("getIfIndex: no matching ipAddrTable entry for {}", InetAddressUtils.str(address));
@@ -131,22 +133,22 @@ public class IpAddrTable extends SnmpTable<IpAddrTableEntry> {
      * Returns all Internet addresses at the corresponding index. If the address
      * cannot be resolved then a null reference is returned.
      *
+     * @param index a int.
      * @return list of InetAddress objects representing each of the interfaces
      *         IP addresses.
-     * @param index a int.
      */
     public List<InetAddress> getIpAddresses(int index) {
         if (index == -1) {
             return null;
         }
-        
+
         List<InetAddress> addresses = new ArrayList<InetAddress>();
-        
-        for(IpAddrTableEntry entry : this) {
+
+        for (IpAddrTableEntry entry : this) {
 
             Integer ndx = entry.getIpAdEntIfIndex();
             if (ndx != null && ndx.intValue() == index) {
-                
+
                 InetAddress ifAddr = entry.getIpAdEntAddr();
                 if (ifAddr != null) {
                     addresses.add(ifAddr);
@@ -164,18 +166,17 @@ public class IpAddrTable extends SnmpTable<IpAddrTableEntry> {
      *         IP addresses.
      */
     public List<InetAddress> getIpAddresses() {
-        List <InetAddress>addresses = new ArrayList<InetAddress>();
-        
-        for(IpAddrTableEntry entry : this) {
+        List<InetAddress> addresses = new ArrayList<InetAddress>();
+
+        for (IpAddrTableEntry entry : this) {
 
             Integer ndx = entry.getIpAdEntIfIndex();
             if (ndx != null) {
-        
+
                 InetAddress ifAddr = entry.getIpAdEntAddr();
                 if (ifAddr != null) {
                     addresses.add(ifAddr);
                 }
-        
             }
         }
         return addresses;

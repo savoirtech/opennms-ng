@@ -35,12 +35,12 @@ package org.opennms.ng.services.capsd.plugins;
  * @author <A HREF="http://www.opennms.org/">OpenNMS </A>
  */
 
-import org.opennms.protocols.jmx.connectors.ConnectionWrapper;
-import org.opennms.protocols.jmx.connectors.JBossConnectionFactory;
-
 import java.net.InetAddress;
 import java.util.HashMap;
 import java.util.Map;
+
+import org.opennms.protocols.jmx.connectors.ConnectionWrapper;
+import org.opennms.protocols.jmx.connectors.JBossConnectionFactory;
 
 /**
  * <p>JBossPlugin class.</p>
@@ -53,16 +53,22 @@ public class JBossPlugin extends JMXPlugin {
     /* (non-Javadoc)
      * @see org.opennms.ng.services.capsd.JMXPlugin#getMBeanServer()
      */
-    /** {@inheritDoc} */
+
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public ConnectionWrapper getMBeanServerConnection(Map<String, Object> map, InetAddress address) {
-        return  JBossConnectionFactory.getMBeanServerConnection(map, address);
+        return JBossConnectionFactory.getMBeanServerConnection(map, address);
     }
     
     /* (non-Javadoc)
      * @see org.opennms.ng.services.capsd.Plugin#getProtocolName()
      */
-    /** {@inheritDoc} */
+
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public String getProtocolName(Map<String, Object> map) {
         return "jboss";
@@ -70,10 +76,13 @@ public class JBossPlugin extends JMXPlugin {
     /* (non-Javadoc)
      * @see org.opennms.ng.services.capsd.Plugin#isProtocolSupported(java.net.InetAddress)
      */
-    /** {@inheritDoc} */
+
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public boolean isProtocolSupported(InetAddress address) {
-        
+
         HashMap<String, Object> map = new HashMap<String, Object>();
         map.put("port", "1099");
 

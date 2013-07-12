@@ -32,15 +32,15 @@ package org.opennms.ng.services.capsd;
  * <p>InsufficientInformationException class.</p>
  *
  * @author brozow
- *
- * FIXME To change the template for this generated type comment go to Window -
- * Preferences - Java - Code Generation - Code and Comments
+ *         <p/>
+ *         FIXME To change the template for this generated type comment go to Window -
+ *         Preferences - Java - Code Generation - Code and Comments
  * @version $Id: $
  */
 public class InsufficientInformationException extends Exception {
 
     /**
-     * 
+     *
      */
     private static final long serialVersionUID = 8687696175850117574L;
 
@@ -82,5 +82,4 @@ public class InsufficientInformationException extends Exception {
         super(arg0);
         // FIXME Auto-generated constructor stub
     }
-
 }

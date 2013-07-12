@@ -28,12 +28,6 @@
 
 package org.opennms.ng.services.capsd;
 
-import org.opennms.core.utils.DefaultSocketWrapper;
-import org.opennms.core.utils.ParameterMap;
-import org.opennms.core.utils.SocketWrapper;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import java.io.IOException;
 import java.io.InterruptedIOException;
 import java.lang.reflect.UndeclaredThrowableException;
@@ -44,6 +38,12 @@ import java.net.Socket;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+
+import org.opennms.core.utils.DefaultSocketWrapper;
+import org.opennms.core.utils.ParameterMap;
+import org.opennms.core.utils.SocketWrapper;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 // TODO need to completely javadoc this class
 
@@ -56,7 +56,7 @@ import java.util.Map;
  * @version $Id: $
  */
 public abstract class AbstractTcpPlugin extends AbstractPlugin {
-    
+
     private static final Logger LOG = LoggerFactory.getLogger(org.opennms.ng.services.capsd.AbstractTcpPlugin.class);
 
     int m_defaultPort;
@@ -72,9 +72,9 @@ public abstract class AbstractTcpPlugin extends AbstractPlugin {
     /**
      * <p>Constructor for AbstractTcpPlugin.</p>
      *
-     * @param protocol a {@link String} object.
+     * @param protocol       a {@link String} object.
      * @param defaultTimeout a int.
-     * @param defaultRetry a int.
+     * @param defaultRetry   a int.
      */
     protected AbstractTcpPlugin(String protocol, int defaultTimeout, int defaultRetry) {
         this(protocol, -1, defaultTimeout, defaultRetry);
@@ -83,15 +83,16 @@ public abstract class AbstractTcpPlugin extends AbstractPlugin {
     /**
      * <p>Constructor for AbstractTcpPlugin.</p>
      *
-     * @param protocol a {@link String} object.
-     * @param defaultPort a int.
+     * @param protocol       a {@link String} object.
+     * @param defaultPort    a int.
      * @param defaultTimeout a int.
-     * @param defaultRetry a int.
+     * @param defaultRetry   a int.
      */
     protected AbstractTcpPlugin(String protocol, int defaultPort, int defaultTimeout, int defaultRetry) {
         super();
-        if (protocol == null)
+        if (protocol == null) {
             throw new NullPointerException("protocol is null");
+        }
 
         m_protocolName = protocol;
         m_defaultPort = defaultPort;
@@ -100,7 +101,7 @@ public abstract class AbstractTcpPlugin extends AbstractPlugin {
     }
 
     /**
-     * <P>
+     * <p/>
      * Test to see if the passed host-port pair is the endpoint for an Citrix
      * server. If there is an Citrix server at that destination then a value of
      * true is returned from the method. Otherwise a false value is returned to
@@ -119,7 +120,7 @@ public abstract class AbstractTcpPlugin extends AbstractPlugin {
         int timeout = (config.getTimeout() == 0 ? 10 : config.getTimeout());
 
         boolean isAServer = false;
-        for (int attempts = 0; attempts <= config.getRetry() && !isAServer; attempts++) {
+        for (int attempts = 0;attempts <= config.getRetry() && !isAServer;attempts++) {
 
             if (!preconnectCheck(config)) {
                 // No chance of supporting this protocol just bail
@@ -139,7 +140,6 @@ public abstract class AbstractTcpPlugin extends AbstractPlugin {
                 socket = getSocketWrapper().wrapSocket(socket);
 
                 isAServer = checkProtocol(socket, config);
-
             } catch (ConnectException cE) {
                 // Connection refused!! Continue to retry.
                 //
@@ -161,8 +161,9 @@ public abstract class AbstractTcpPlugin extends AbstractPlugin {
                 LOG.warn(getPluginName() + ": Undeclared throwable exception caught contacting host " + config.getInetAddress(), t);
                 isAServer = false;
             } finally {
-                if (socket != null)
+                if (socket != null) {
                     closeSocket(socket, config);
+                }
             }
         }
 
@@ -181,8 +182,9 @@ public abstract class AbstractTcpPlugin extends AbstractPlugin {
      */
     protected void closeSocket(Socket socket, ConnectionConfig config) {
         try {
-            if (socket != null)
+            if (socket != null) {
                 socket.close();
+            }
         } catch (IOException e) {
 
         }
@@ -202,7 +204,7 @@ public abstract class AbstractTcpPlugin extends AbstractPlugin {
      * <p>createConnectionConfig</p>
      *
      * @param address a {@link java.net.InetAddress} object.
-     * @param port a int.
+     * @param port    a int.
      * @return a {@link ConnectionConfig} object.
      */
     protected ConnectionConfig createConnectionConfig(InetAddress address, int port) {
@@ -213,12 +215,13 @@ public abstract class AbstractTcpPlugin extends AbstractPlugin {
      * <p>getConnectionConfigList</p>
      *
      * @param qualifiers a {@link java.util.Map} object.
-     * @param address a {@link java.net.InetAddress} object.
+     * @param address    a {@link java.net.InetAddress} object.
      * @return a {@link java.util.List} object.
      */
     protected List<ConnectionConfig> getConnectionConfigList(Map<String, Object> qualifiers, InetAddress address) {
-        if (m_defaultPort == -1)
+        if (m_defaultPort == -1) {
             throw new IllegalStateException("m_defaultPort == -1");
+        }
 
         int port = getKeyedInteger(qualifiers, "port", m_defaultPort);
         return Collections.singletonList(createConnectionConfig(address, port));
@@ -228,30 +231,32 @@ public abstract class AbstractTcpPlugin extends AbstractPlugin {
      * <p>getKeyedInteger</p>
      *
      * @param qualifiers a {@link java.util.Map} object.
-     * @param key a {@link String} object.
+     * @param key        a {@link String} object.
      * @param defaultVal a int.
      * @return a int.
      */
     final protected int getKeyedInteger(Map<String, Object> qualifiers, String key, int defaultVal) {
-        if (qualifiers == null)
+        if (qualifiers == null) {
             return defaultVal;
-        else
+        } else {
             return ParameterMap.getKeyedInteger(qualifiers, key, defaultVal);
+        }
     }
 
     /**
      * <p>getKeyedIntegerArray</p>
      *
      * @param qualifiers a {@link java.util.Map} object.
-     * @param key a {@link String} object.
+     * @param key        a {@link String} object.
      * @param defaultVal an array of int.
      * @return an array of int.
      */
     final protected int[] getKeyedIntegerArray(Map<String, Object> qualifiers, String key, int[] defaultVal) {
-        if (qualifiers == null)
+        if (qualifiers == null) {
             return defaultVal;
-        else
+        } else {
             return ParameterMap.getKeyedIntegerArray(qualifiers, key, defaultVal);
+        }
     }
 
     /**
@@ -281,7 +286,7 @@ public abstract class AbstractTcpPlugin extends AbstractPlugin {
 
     /**
      * {@inheritDoc}
-     *
+     * <p/>
      * Returns true if the protocol defined by this plugin is supported. If the
      * protocol is not supported then a false value is returned to the caller.
      */
@@ -292,7 +297,7 @@ public abstract class AbstractTcpPlugin extends AbstractPlugin {
 
     /**
      * {@inheritDoc}
-     *
+     * <p/>
      * Returns true if the protocol defined by this plugin is supported. If the
      * protocol is not supported then a false value is returned to the caller.
      * The qualifier map passed to the method is used by the plugin to return
@@ -304,23 +309,23 @@ public abstract class AbstractTcpPlugin extends AbstractPlugin {
 
         List<ConnectionConfig> connList = getConnectionConfigList(qualifiers, address);
 
-        for(ConnectionConfig config : connList) {
+        for (ConnectionConfig config : connList) {
             populateConnectionConfig(config, qualifiers);
             if (checkConnection(config)) {
-                if (qualifiers != null)
+                if (qualifiers != null) {
                     saveConfig(qualifiers, config);
+                }
                 return true;
             }
         }
 
         return false;
-
     }
 
     /**
      * <p>populateConnectionConfig</p>
      *
-     * @param config a {@link ConnectionConfig} object.
+     * @param config     a {@link ConnectionConfig} object.
      * @param qualifiers a {@link java.util.Map} object.
      */
     protected void populateConnectionConfig(ConnectionConfig config, Map<String, Object> qualifiers) {
@@ -343,7 +348,7 @@ public abstract class AbstractTcpPlugin extends AbstractPlugin {
      * <p>saveConfig</p>
      *
      * @param qualifiers a {@link java.util.Map} object.
-     * @param config a {@link ConnectionConfig} object.
+     * @param config     a {@link ConnectionConfig} object.
      */
     protected void saveConfig(Map<String, Object> qualifiers, ConnectionConfig config) {
         saveKeyedInteger(qualifiers, "port", config.getPort());
@@ -353,19 +358,19 @@ public abstract class AbstractTcpPlugin extends AbstractPlugin {
      * <p>saveKeyedInteger</p>
      *
      * @param qualifiers a {@link java.util.Map} object.
-     * @param key a {@link String} object.
-     * @param value a int.
+     * @param key        a {@link String} object.
+     * @param value      a int.
      */
     final protected void saveKeyedInteger(Map<String, Object> qualifiers, String key, int value) {
-        if (qualifiers != null && !qualifiers.containsKey(key))
+        if (qualifiers != null && !qualifiers.containsKey(key)) {
             qualifiers.put(key, Integer.valueOf(value));
+        }
     }
 
     /**
      * <p>setPluginName</p>
      *
-     * @param pluginName
-     *            The pluginName to set.
+     * @param pluginName The pluginName to set.
      */
     final public void setPluginName(String pluginName) {
         m_pluginName = pluginName;

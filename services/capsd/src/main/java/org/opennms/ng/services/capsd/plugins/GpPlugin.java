@@ -28,6 +28,11 @@
 
 package org.opennms.ng.services.capsd.plugins;
 
+import java.io.IOException;
+import java.io.InterruptedIOException;
+import java.net.InetAddress;
+import java.util.Map;
+
 import org.apache.regexp.RE;
 import org.apache.regexp.RESyntaxException;
 import org.opennms.core.utils.ExecRunner;
@@ -37,13 +42,8 @@ import org.opennms.ng.services.capsd.AbstractPlugin;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.IOException;
-import java.io.InterruptedIOException;
-import java.net.InetAddress;
-import java.util.Map;
-
 /**
- * <P>
+ * <p/>
  * This class is designed to be used by the capabilities daemon to test for the
  * existance of a generic service by calling an external script or program. The
  * external script or program will be passed two options: --hostname, the IP
@@ -74,7 +74,7 @@ public final class GpPlugin extends AbstractPlugin {
     private final static int DEFAULT_TIMEOUT = 5000; // in milliseconds
 
     /**
-     * <P>
+     * <p/>
      * Test to see if the passed script-host-argument combination is the
      * endpoint for a GP server. If there is a GP server at that destination
      * then a value of true is returned from the method. Otherwise a false value
@@ -82,44 +82,38 @@ public final class GpPlugin extends AbstractPlugin {
      * generate a banner line which contains the text from the banner or match
      * argument.
      * </P>
-     * 
-     * @param host
-     *            The host to pass to the script
-     * @param retry
-     *            The number of retry attempts to make
-     * @param timeout
-     *            The timeout value for each retry
-     * @param script
-     *            The external script or program to call
-     * @param args
-     *            The arguments to pass to the script
-     * @param regex
-     *            The regular expression used to determine banner match
+     *
+     * @param host         The host to pass to the script
+     * @param retry        The number of retry attempts to make
+     * @param timeout      The timeout value for each retry
+     * @param script       The external script or program to call
+     * @param args         The arguments to pass to the script
+     * @param regex        The regular expression used to determine banner match
      * @param bannerResult
-     * @param hoption
-     *            The option string passed to the exec for the IP address (hostname)
-     * @param toption
-     *            The option string passed to the exec for the timeout
-     * 
+     * @param hoption      The option string passed to the exec for the IP address (hostname)
+     * @param toption      The option string passed to the exec for the timeout
      * @return True if a connection is established with the script and the
      *         banner line returned by the script matches the regular expression
      *         regex.
      */
-    private boolean isServer(InetAddress host, int retry, int timeout, String script, String args, RE regex, StringBuffer bannerResult, String hoption, String toption) {
+    private boolean isServer(InetAddress host, int retry, int timeout, String script, String args, RE regex, StringBuffer bannerResult,
+                             String hoption, String toption) {
 
         boolean isAServer = false;
 
-        LOG.debug("poll: address = {}, script = {}, arguments = {}, timeout(seconds) = {}, retry = {}", retry, InetAddressUtils.str(host), script, args, timeout);
+        LOG.debug("poll: address = {}, script = {}, arguments = {}, timeout(seconds) = {}, retry = {}", retry, InetAddressUtils.str(host), script,
+            args, timeout);
 
-        for (int attempts = 0; attempts <= retry && !isAServer; attempts++) {
+        for (int attempts = 0;attempts <= retry && !isAServer;attempts++) {
             try {
                 int exitStatus = 100;
                 ExecRunner er = new ExecRunner();
                 er.setMaxRunTimeSecs(timeout);
-                if (args == null)
+                if (args == null) {
                     exitStatus = er.exec(script + " " + hoption + " " + InetAddressUtils.str(host) + " " + toption + " " + timeout);
-                else
+                } else {
                     exitStatus = er.exec(script + " " + hoption + " " + InetAddressUtils.str(host) + " " + toption + " " + timeout + " " + args);
+                }
                 if (exitStatus != 0) {
                     LOG.debug("{} failed with exit code {}", script, exitStatus);
                     isAServer = false;
@@ -133,16 +127,19 @@ public final class GpPlugin extends AbstractPlugin {
                         String error = "";
                         response = er.getOutString();
                         error = er.getErrString();
-                        if (response.equals(""))
+                        if (response.equals("")) {
                             LOG.debug("{} returned no output", script);
-                        if (!error.equals(""))
+                        }
+                        if (!error.equals("")) {
                             LOG.debug("{} error = {}", script, error);
+                        }
                         if (regex == null || regex.match(response)) {
 
                             LOG.debug("isServer: matching response = {}", response);
                             isAServer = true;
-                            if (bannerResult != null)
+                            if (bannerResult != null) {
                                 bannerResult.append(response);
+                            }
                         } else {
                             isAServer = false;
 
@@ -189,7 +186,7 @@ public final class GpPlugin extends AbstractPlugin {
 
     /**
      * {@inheritDoc}
-     *
+     * <p/>
      * Returns true if the protocol defined by this plugin is supported. If the
      * protocol is not supported then a false value is returned to the caller.
      */
@@ -200,7 +197,7 @@ public final class GpPlugin extends AbstractPlugin {
 
     /**
      * {@inheritDoc}
-     *
+     * <p/>
      * Returns true if the protocol defined by this plugin is supported. If the
      * protocol is not supported then a false value is returned to the caller.
      * The qualifier map passed to the method is used by the plugin to return
@@ -224,8 +221,8 @@ public final class GpPlugin extends AbstractPlugin {
             args = ParameterMap.getKeyedString(qualifiers, "args", null);
             banner = ParameterMap.getKeyedString(qualifiers, "banner", null);
             match = ParameterMap.getKeyedString(qualifiers, "match", null);
-	    hoption = ParameterMap.getKeyedString(qualifiers, "hoption", "--hostname");
-	    toption = ParameterMap.getKeyedString(qualifiers, "toption", "--timeout");
+            hoption = ParameterMap.getKeyedString(qualifiers, "hoption", "--hostname");
+            toption = ParameterMap.getKeyedString(qualifiers, "toption", "--timeout");
         }
         if (script == null) {
             throw new RuntimeException("GpPlugin: required parameter 'script' is not present in supplied properties.");
@@ -234,28 +231,34 @@ public final class GpPlugin extends AbstractPlugin {
         //
         // convert timeout to seconds for ExecRunner
         //
-        if (0 < timeout && timeout < 1000)
+        if (0 < timeout && timeout < 1000) {
             timeout = 1;
-        else
+        } else {
             timeout = timeout / 1000;
+        }
 
         try {
             StringBuffer bannerResult = null;
             RE regex = null;
             if (match == null && (banner == null || banner.equals("*"))) {
                 regex = null;
-            } else if (match != null) {
-                regex = new RE(match);
-                bannerResult = new StringBuffer();
-            } else if (banner != null) {
-                regex = new RE(banner);
-                bannerResult = new StringBuffer();
+            } else {
+                if (match != null) {
+                    regex = new RE(match);
+                    bannerResult = new StringBuffer();
+                } else {
+                    if (banner != null) {
+                        regex = new RE(banner);
+                        bannerResult = new StringBuffer();
+                    }
+                }
             }
 
             boolean result = isServer(address, retry, timeout, script, args, regex, bannerResult, hoption, toption);
             if (result && qualifiers != null) {
-                if (bannerResult != null && bannerResult.length() > 0)
+                if (bannerResult != null && bannerResult.length() > 0) {
                     qualifiers.put("banner", bannerResult.toString());
+                }
             }
 
             return result;

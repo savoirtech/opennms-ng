@@ -32,29 +32,29 @@ import org.opennms.core.utils.SocketWrapper;
 import org.opennms.core.utils.SslSocketWrapper;
 
 /**
- * <P>
+ * <p/>
  * This class is designed to be used by the capabilities daemon to test for the
  * existance of an HTTPS server on remote interfaces. The class implements the
  * Plugin interface that allows it to be used along with other plugins by the
  * daemon.
- *
+ * <p/>
  * This plugin generates a HTTP GET request and checks the return code returned
  * by the remote host to determine if it supports the protocol.
- *
+ * <p/>
  * The remote host's response will be deemed valid if the return code falls in
  * the 100 to 599 range (inclusive).
- *
+ * <p/>
  * This is based on the following information from RFC 1945 (HTTP 1.0) HTTP 1.0
  * GET return codes: 1xx: Informational - Not used, future use 2xx: Success 3xx:
  * Redirection 4xx: Client error 5xx: Server error
  * </P>
- *
+ * <p/>
  * This plugin generates a HTTP GET request and checks the return code returned
  * by the remote host to determine if it supports the protocol.
- *
+ * <p/>
  * The remote host's response will be deemed valid if the return code falls in
  * the 100 to 599 range (inclusive).
- *
+ * <p/>
  * This is based on the following information from RFC 1945 (HTTP 1.0) HTTP 1.0
  * GET return codes: 1xx: Informational - Not used, future use 2xx: Success 3xx:
  * Redirection 4xx: Client error 5xx: Server error
@@ -66,12 +66,12 @@ import org.opennms.core.utils.SslSocketWrapper;
 public class HttpsPlugin extends HttpPlugin {
 
     /**
-     * <P>
+     * <p/>
      * The default ports on which the host is checked to see if it supports
      * HTTP.
      * </P>
      */
-    private static final int[] DEFAULT_PORTS = { 443 };
+    private static final int[] DEFAULT_PORTS = {443};
 
     /**
      * <p>Constructor for HttpsPlugin.</p>
@@ -80,7 +80,9 @@ public class HttpsPlugin extends HttpPlugin {
         super("HTTPS", true, "GET / HTTP/1.0\r\n\r\n", "HTTP/", DEFAULT_PORTS);
     }
 
-    /** {@inheritDoc} */
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public SocketWrapper getSocketWrapper() {
         return new SslSocketWrapper();

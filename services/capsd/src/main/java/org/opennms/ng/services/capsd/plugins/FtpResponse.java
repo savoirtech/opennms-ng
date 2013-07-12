@@ -28,13 +28,13 @@
 
 package org.opennms.ng.services.capsd.plugins;
 
-import org.springframework.util.StringUtils;
-
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.net.Socket;
 import java.util.ArrayList;
 import java.util.List;
+
+import org.springframework.util.StringUtils;
 
 /**
  * Represents an FTP command response.
@@ -54,7 +54,7 @@ public class FtpResponse {
     /**
      * Creates an FTP response with given status code and response string.
      *
-     * @param code numeric status code
+     * @param code     numeric status code
      * @param response response detail message (one line per array element)
      */
     public FtpResponse(int code, String[] response) {
@@ -97,7 +97,7 @@ public class FtpResponse {
     public void setResponse(String[] response) {
         m_response = response;
     }
-    
+
     /**
      * Search for a text string in each line of the response result.
      * Note that each line is tested individually.
@@ -111,10 +111,9 @@ public class FtpResponse {
                 return true;
             }
         }
-        
+
         return false;
     }
-
 
     /**
      * Converts FTP response to string.
@@ -134,24 +133,26 @@ public class FtpResponse {
             sb.append(" " + m_response[0]);
         }
 
-        for (i = 1; i < m_response.length; i++) {
+        for (i = 1;i < m_response.length;i++) {
             sb.append("\n");
-            
+
             if (i == (m_response.length - 1)) {
                 sb.append(m_code);
                 sb.append(" ");
                 sb.append(m_response[i]);
-            } else if (m_response[i].startsWith(m_code + " ")) {
-                sb.append(" ");
-                sb.append(m_response[i]);
             } else {
-                sb.append(m_response[i]);
+                if (m_response[i].startsWith(m_code + " ")) {
+                    sb.append(" ");
+                    sb.append(m_response[i]);
+                } else {
+                    sb.append(m_response[i]);
+                }
             }
         }
 
         return sb.toString();
     }
-    
+
     /**
      * Does this response have a valid code?
      *
@@ -185,7 +186,7 @@ public class FtpResponse {
     /**
      * Helper method to send commands to the remote server.
      *
-     * @param socket connection to the server
+     * @param socket  connection to the server
      * @param command command to send, without trailing EOL (CRLF, \r\n).
      * @throws java.io.IOException if we can't write() to the OutputStream for the Socket
      */
@@ -207,9 +208,8 @@ public class FtpResponse {
         String firstResponseLine = in.readLine();
         if (firstResponseLine == null) {
             throw new IOException("End of stream was reached before a response could be read");
-            
         }
-        
+
         // XXX this could use better error checking!
         String codeString = firstResponseLine.substring(0, 3);
         response.add(firstResponseLine.substring(4));
@@ -230,14 +230,16 @@ public class FtpResponse {
             while (true) {
                 String subsequentResponse = in.readLine();
                 if (subsequentResponse == null) {
-                    throw new IOException("End of stream was reached before the complete multi-line response could be read.  What was read: " + StringUtils.collectionToDelimitedString(response, "\n"));
+                    throw new IOException(
+                        "End of stream was reached before the complete multi-line response could be read.  What was read: " + StringUtils
+                            .collectionToDelimitedString(response, "\n"));
                 }
-                
+
                 if (subsequentResponse.startsWith(endMultiLine)) {
                     response.add(subsequentResponse.substring(4));
                     break;
                 }
-                
+
                 response.add(subsequentResponse);
             }
         }

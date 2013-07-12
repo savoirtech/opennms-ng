@@ -28,21 +28,25 @@
 
 package org.opennms.ng.services.capsd;
 
+import java.net.InetAddress;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.TreeMap;
+
 import org.exolab.castor.xml.ValidationException;
 import org.opennms.core.utils.InetAddressUtils;
-import org.opennms.ng.services.capsd.CapsdProtocolInfo.Action;
 import org.opennms.netmgt.config.capsd.Property;
 import org.opennms.netmgt.config.capsd.ProtocolConfiguration;
 import org.opennms.netmgt.config.capsd.ProtocolPlugin;
 import org.opennms.netmgt.config.capsd.Range;
+import org.opennms.ng.services.capsd.CapsdProtocolInfo.Action;
 import org.opennms.ng.services.capsdconfig.CapsdConfig;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.util.Assert;
-
-import java.net.InetAddress;
-import java.util.*;
 
 /**
  * <p>PluginManager class.</p>
@@ -51,9 +55,9 @@ import java.util.*;
  * @version $Id: $
  */
 public class PluginManager implements InitializingBean {
-    
+
     private static final Logger LOG = LoggerFactory.getLogger(org.opennms.ng.services.capsd.PluginManager.class);
-    
+
     private CapsdConfig m_capsdConfig;
 
     /**
@@ -86,17 +90,21 @@ public class PluginManager implements InitializingBean {
                     Class<?> cplugin = Class.forName(plugin.getClassName());
                     Object oplugin = cplugin.newInstance();
                     if (!(oplugin instanceof Plugin)) {
-                        throw new ValidationException("CapsdConfigFactory: successfully loaded plugin class for protocol " + plugin.getProtocol() + ", class-name = " + plugin.getClassName() + ", however the class is not an instance of " + Plugin.class.getName());
+                        throw new ValidationException(
+                            "CapsdConfigFactory: successfully loaded plugin class for protocol " + plugin.getProtocol() + ", class-name = " + plugin
+                                .getClassName() + ", however the class is not an instance of " + Plugin.class.getName());
                     }
-                    
+
                     Plugin p = (Plugin) oplugin;
-    
+
                     // map them
                     m_pluginsByClass.put(plugin.getClassName(), p);
                     m_pluginsByProtocol.put(plugin.getProtocol(), p);
                 }
             } catch (Throwable t) {
-                String message = "CapsdConfigFactory: failed to load plugin for protocol " + plugin.getProtocol() + ", class-name = " + plugin.getClassName() + ", exception = " + t; 
+                String message =
+                    "CapsdConfigFactory: failed to load plugin for protocol " + plugin.getProtocol() + ", class-name = " + plugin.getClassName()
+                        + ", exception = " + t;
                 LOG.error(message, t);
                 throw new ValidationException(message, t);
             }
@@ -109,8 +117,7 @@ public class PluginManager implements InitializingBean {
      * and return the protocol information. The returns information has all the
      * necessary element to check the address for capabilities.
      *
-     * @param address
-     *            The address to get protocol information for.
+     * @param address The address to get protocol information for.
      * @return The array of protocol information instances for the address.
      */
     public CapsdProtocolInfo[] getProtocolSpecification(InetAddress address) {
@@ -120,11 +127,12 @@ public class PluginManager implements InitializingBean {
          * of type ProtocolInfo
          */
         List<CapsdProtocolInfo> lprotos = new ArrayList<CapsdProtocolInfo>(getCapsdConfig().getConfiguration().getProtocolPluginCount());
-    
+
         // go through all the defined plugins
         List<ProtocolPlugin> plugins = getCapsdConfig().getProtocolPlugins();
         Iterator<ProtocolPlugin> pluginIter = plugins.iterator();
-        PLUGINLOOP: while (pluginIter.hasNext()) {
+        PLUGINLOOP:
+        while (pluginIter.hasNext()) {
             ProtocolPlugin plugin = pluginIter.next();
             boolean found = false;
     
@@ -143,27 +151,27 @@ public class PluginManager implements InitializingBean {
                         found = true;
                     }
                 }
-    
+
                 // check the ranges
                 List<Range> ranges = getCapsdConfig().getRanges(pluginConf);
                 Iterator<Range> rangeIter = ranges.iterator();
                 while (rangeIter.hasNext() && !found) {
                     Range rng = rangeIter.next();
-    
+
                     InetAddress start = null;
                     start = InetAddressUtils.addr(rng.getBegin());
                     if (start == null) {
                         LOG.warn("CapsdConfigFactory: failed to convert address " + rng.getBegin() + " to InetAddress");
                         continue;
                     }
-    
+
                     InetAddress stop = null;
                     stop = InetAddressUtils.addr(rng.getEnd());
                     if (stop == null) {
                         LOG.warn("CapsdConfigFactory: failed to convert address " + rng.getEnd() + " to InetAddress");
                         continue;
                     }
-    
+
                     if (InetAddressUtils.isInetAddressInRange(address.getAddress(), start.getAddress(), stop.getAddress())) {
                         found = true;
                     }
@@ -185,28 +193,33 @@ public class PluginManager implements InitializingBean {
                 String scan = null;
                 if ((scan = pluginConf.getScan()) != null) {
                     if (scan.equals("enable")) {
-                        lprotos.add(new CapsdProtocolInfo(plugin.getProtocol(), m_pluginsByProtocol.get(plugin.getProtocol()), null, Action.AUTO_SET));
+                        lprotos.add(new CapsdProtocolInfo(plugin.getProtocol(), m_pluginsByProtocol.get(plugin.getProtocol()), null,
+                            Action.AUTO_SET));
                         continue PLUGINLOOP;
-                    } else if (scan.equals("off")) {
-                        continue PLUGINLOOP;
+                    } else {
+                        if (scan.equals("off")) {
+                            continue PLUGINLOOP;
+                        }
                     }
-                } else if ((scan = plugin.getScan()) != null) {
-                    if (scan.equals("off")) {
-                        continue PLUGINLOOP;
+                } else {
+                    if ((scan = plugin.getScan()) != null) {
+                        if (scan.equals("off")) {
+                            continue PLUGINLOOP;
+                        }
                     }
                 }
-    
+
                 // it's either on specifically, or by default
                 // so map it parameters
                 Map<String, Object> params = new TreeMap<String, Object>();
-    
+
                 // add the plugin defaults first, then specifics
                 addProperties(getCapsdConfig().getPluginProperties(plugin), params);
                 addProperties(getCapsdConfig().getProtocolConfigurationProperties(pluginConf), params);
-    
+
                 lprotos.add(new CapsdProtocolInfo(plugin.getProtocol(), m_pluginsByProtocol.get(plugin.getProtocol()), params, Action.SCAN));
             } // end ProtocolConfiguration loop
-    
+
             // use default config if not found
             if (!found) {
                 // if found then build protocol
@@ -214,15 +227,14 @@ public class PluginManager implements InitializingBean {
                 if ("off".equals(plugin.getScan())) {
                     continue PLUGINLOOP;
                 }
-    
+
                 // it's either on specifically, or by default
                 // so map it parameters
                 Map<String, Object> params = new TreeMap<String, Object>();
                 addProperties(getCapsdConfig().getPluginProperties(plugin), params);
-    
+
                 lprotos.add(new CapsdProtocolInfo(plugin.getProtocol(), m_pluginsByProtocol.get(plugin.getProtocol()), params, Action.SCAN));
             }
-    
         } // end ProtocolPlugin
     
         /*
@@ -231,7 +243,7 @@ public class PluginManager implements InitializingBean {
          * result
          */
         CapsdProtocolInfo[] result = new CapsdProtocolInfo[lprotos.size()];
-    
+
         return lprotos.toArray(result);
     }
 
@@ -258,7 +270,7 @@ public class PluginManager implements InitializingBean {
     public void setCapsdConfig(CapsdConfig capsdConfig) {
         m_capsdConfig = capsdConfig;
     }
-    
+
     /**
      * <p>afterPropertiesSet</p>
      *
@@ -267,8 +279,7 @@ public class PluginManager implements InitializingBean {
     @Override
     public void afterPropertiesSet() throws ValidationException {
         Assert.state(m_capsdConfig != null, "property capsdConfig must be set to a non-null value");
-        
+
         instantiatePlugins();
     }
-
 }

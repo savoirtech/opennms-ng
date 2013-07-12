@@ -28,15 +28,19 @@
 
 package org.opennms.ng.services.capsd.plugins;
 
-import org.opennms.core.utils.ParameterMap;
-import org.opennms.ng.services.capsd.AbstractPlugin;
-import org.opennms.ng.services.snmpconfig.SnmpPeerFactory;
-import org.opennms.netmgt.snmp.*;
-
 import java.lang.reflect.UndeclaredThrowableException;
 import java.net.InetAddress;
 import java.util.Map;
 import java.util.regex.Pattern;
+
+import org.opennms.core.utils.ParameterMap;
+import org.opennms.netmgt.snmp.SnmpAgentConfig;
+import org.opennms.netmgt.snmp.SnmpInstId;
+import org.opennms.netmgt.snmp.SnmpObjId;
+import org.opennms.netmgt.snmp.SnmpUtils;
+import org.opennms.netmgt.snmp.SnmpValue;
+import org.opennms.ng.services.capsd.AbstractPlugin;
+import org.opennms.ng.services.snmpconfig.SnmpPeerFactory;
 
 /**
  * This class is used to test passed address for SNMP support. The configuration
@@ -73,7 +77,7 @@ public class SnmpPlugin extends AbstractPlugin {
 
     /**
      * {@inheritDoc}
-     *
+     * <p/>
      * Returns true if the protocol defined by this plugin is supported. If the
      * protocol is not supported then a false value is returned to the caller.
      */
@@ -82,27 +86,23 @@ public class SnmpPlugin extends AbstractPlugin {
         try {
             SnmpAgentConfig agentConfig = SnmpPeerFactory.getInstance().getAgentConfig(address);
             return (getValue(agentConfig, DEFAULT_OID) != null);
-
         } catch (Throwable t) {
             throw new UndeclaredThrowableException(t);
         }
-        
     }
-    
+
     private String getValue(SnmpAgentConfig agentConfig, String oid) {
         SnmpValue val = SnmpUtils.get(agentConfig, SnmpObjId.get(oid));
         if (val == null || val.isNull() || val.isEndOfMib() || val.isError()) {
             return null;
-        }
-        else {
+        } else {
             return val.toString();
         }
     }
 
-
     /**
      * {@inheritDoc}
-     *
+     * <p/>
      * Returns true if the protocol defined by this plugin is supported. If the
      * protocol is not supported then a false value is returned to the caller.
      * The qualifier map passed to the method is used by the plugin to return
@@ -111,14 +111,14 @@ public class SnmpPlugin extends AbstractPlugin {
      */
     @Override
     public boolean isProtocolSupported(InetAddress address, Map<String, Object> qualifiers) {
-        
+
         try {
 
             String oid = ParameterMap.getKeyedString(qualifiers, "vbname", DEFAULT_OID);
             SnmpAgentConfig agentConfig = SnmpPeerFactory.getInstance().getAgentConfig(address);
             String expectedValue = null;
             String isTable = null;
-            
+
             if (qualifiers != null) {
                 // "port" parm
                 //
@@ -126,77 +126,78 @@ public class SnmpPlugin extends AbstractPlugin {
                     int port = ParameterMap.getKeyedInteger(qualifiers, "port", agentConfig.getPort());
                     agentConfig.setPort(port);
                 }
-                
+
                 // "timeout" parm
                 //
                 if (qualifiers.get("timeout") != null) {
                     int timeout = ParameterMap.getKeyedInteger(qualifiers, "timeout", agentConfig.getTimeout());
                     agentConfig.setTimeout(timeout);
                 }
-                
+
                 // "retry" parm
                 //
                 if (qualifiers.get("retry") != null) {
                     int retry = ParameterMap.getKeyedInteger(qualifiers, "retry", agentConfig.getRetries());
                     agentConfig.setRetries(retry);
                 }
-                
+
                 // "force version" parm
                 //
                 if (qualifiers.get("force version") != null) {
                     String version = (String) qualifiers.get("force version");
-                    if (version.equalsIgnoreCase("snmpv1"))
+                    if (version.equalsIgnoreCase("snmpv1")) {
                         agentConfig.setVersion(SnmpAgentConfig.VERSION1);
-                    else if (version.equalsIgnoreCase("snmpv2") || version.equalsIgnoreCase("snmpv2c"))
-                        agentConfig.setVersion(SnmpAgentConfig.VERSION2C);
-                    
-                    //TODO: make sure JoeSnmpStrategy correctly handles this.
-                    else if (version.equalsIgnoreCase("snmpv3"))
-                        agentConfig.setVersion(SnmpAgentConfig.VERSION3);
+                    } else {
+                        if (version.equalsIgnoreCase("snmpv2") || version.equalsIgnoreCase("snmpv2c")) {
+                            agentConfig.setVersion(SnmpAgentConfig.VERSION2C);
+                        }
+
+                        //TODO: make sure JoeSnmpStrategy correctly handles this.
+                        else {
+                            if (version.equalsIgnoreCase("snmpv3")) {
+                                agentConfig.setVersion(SnmpAgentConfig.VERSION3);
+                            }
+                        }
+                    }
                 }
-                
+
                 // "vbvalue" parm
                 //
                 if (qualifiers.get("vbvalue") != null) {
                     expectedValue = (String) qualifiers.get("vbvalue");
                 }
-                
-                if(qualifiers.get("table") != null) {
-                	isTable = (String) qualifiers.get("table");
+
+                if (qualifiers.get("table") != null) {
+                    isTable = (String) qualifiers.get("table");
                 }
             }
-            
+
             if (isTable != null && isTable.equalsIgnoreCase("true")) {
-            	
-            	 SnmpObjId snmpObjId = SnmpObjId.get(oid);
-            	
-            	  Map<SnmpInstId, SnmpValue> table = SnmpUtils.getOidValues(agentConfig, "SnmpPlugin", snmpObjId);
-            	  for (Map.Entry<SnmpInstId, SnmpValue> e : table.entrySet()) { 
-                      if (e.getValue().toString().equals(expectedValue)) {	
-                      	return true;
-                      }    
-                  }
+
+                SnmpObjId snmpObjId = SnmpObjId.get(oid);
+
+                Map<SnmpInstId, SnmpValue> table = SnmpUtils.getOidValues(agentConfig, "SnmpPlugin", snmpObjId);
+                for (Map.Entry<SnmpInstId, SnmpValue> e : table.entrySet()) {
+                    if (e.getValue().toString().equals(expectedValue)) {
+                        return true;
+                    }
+                }
+            } else {
+                String retrievedValue = getValue(agentConfig, oid);
+
+                if (retrievedValue != null && expectedValue != null) {
+                    return (Pattern.compile(expectedValue).matcher(retrievedValue).find());
+                } else {
+                    return (retrievedValue != null);
+
+                    //return (expectedValue == null ? true : retrievedValue.equals(expectedValue));
+                }
             }
-            
-            else { 
-            	String retrievedValue = getValue(agentConfig, oid);
-            
-            	if (retrievedValue != null && expectedValue != null) {
-            		return (Pattern.compile(expectedValue).matcher(retrievedValue).find());
-            	} else {
-            		return (retrievedValue != null);
-                
-                //return (expectedValue == null ? true : retrievedValue.equals(expectedValue));
-            	}
-            
-            }
-            
         } catch (Throwable t) {
             throw new UndeclaredThrowableException(t);
         }
-        
+
         // should never get here.
         return false;
-        
     }
 }

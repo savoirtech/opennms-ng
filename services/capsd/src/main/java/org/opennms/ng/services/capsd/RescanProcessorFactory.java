@@ -51,5 +51,4 @@ public interface RescanProcessorFactory {
      * @return a {@link RescanProcessor} object.
      */
     public abstract RescanProcessor createForcedRescanProcessor(int nodeId);
-
 }
