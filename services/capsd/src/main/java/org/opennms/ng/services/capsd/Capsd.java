@@ -31,7 +31,6 @@ package org.opennms.ng.services.capsd;
 import org.opennms.core.logging.Logging;
 import org.opennms.core.utils.BeanUtils;
 import org.opennms.core.utils.InetAddressUtils;
-import org.opennms.netmgt.daemon.AbstractServiceDaemon;
 import org.opennms.netmgt.model.events.StoppableEventListener;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -58,7 +57,7 @@ import java.util.concurrent.ExecutorService;
  * @author <A HREF="mailto:mike@opennms.org">Mike Davidson </A>
  * @author <A HREF="http://www.opennms.org/">OpenNMS </A>
  */
-public class Capsd extends AbstractServiceDaemon {
+public class Capsd {
 
     private static final Logger LOG = LoggerFactory.getLogger(org.opennms.ng.services.capsd.Capsd.class);
     
@@ -109,6 +108,8 @@ public class Capsd extends AbstractServiceDaemon {
     @Autowired
     private CapsdDbSyncer m_capsdDbSyncer;
 
+    private final String m_name;
+
     /**
      * <P>
      * Static initialization
@@ -123,14 +124,13 @@ public class Capsd extends AbstractServiceDaemon {
      * Constructs the Capsd objec
      */
     public Capsd() {
-    	super("capsd");
+        m_name = "capsd";
         m_scheduler = null;
     }
 
     /**
      * <p>onStop</p>
      */
-    @Override
     protected void onStop() {
         // System.err.println("Capsd onStop() dumping stack");
         // Thread.dumpStack();
@@ -150,7 +150,6 @@ public class Capsd extends AbstractServiceDaemon {
 	/**
 	 * <p>onInit</p>
 	 */
-    @Override
 	protected void onInit() {
         BeanUtils.assertAutowiring(this);
 
@@ -193,7 +192,6 @@ public class Capsd extends AbstractServiceDaemon {
     /**
      * <p>onStart</p>
      */
-    @Override
     protected void onStart() {
         // System.err.println("Capsd onStart() dumping stack");
         // Thread.dumpStack();
@@ -214,7 +212,6 @@ public class Capsd extends AbstractServiceDaemon {
     /**
      * <p>onPause</p>
      */
-    @Override
     protected void onPause() {
         // XXX Pause all threads?
     }
@@ -222,7 +219,6 @@ public class Capsd extends AbstractServiceDaemon {
     /**
      * <p>onResume</p>
      */
-    @Override
     protected void onResume() {
         // XXX Resume all threads?
 	}
@@ -314,6 +310,8 @@ public class Capsd extends AbstractServiceDaemon {
     public void setEventListener(StoppableEventListener eventListener) {
         m_eventListener = eventListener;
     }
+
+    final public String getName() { return m_name; }
 
 } // end Capsd class
 

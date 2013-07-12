@@ -37,7 +37,6 @@ import org.opennms.netmgt.EventConstants;
 import org.opennms.ng.services.capsd.IfCollector.SupportedProtocol;
 import org.opennms.ng.services.capsd.snmp.*;
 import org.opennms.netmgt.config.*;
-import org.opennms.netmgt.eventd.EventIpcManagerFactory;
 import org.opennms.netmgt.model.capsd.DbIfServiceEntry;
 import org.opennms.netmgt.model.capsd.DbIpInterfaceEntry;
 import org.opennms.netmgt.model.capsd.DbNodeEntry;
@@ -1781,7 +1780,7 @@ final class SuspectEventProcessor implements Runnable {
     private void sendEvent(Event newEvent) {
         // Send event to Eventd
         try {
-            EventIpcManagerFactory.getIpcManager().sendNow(newEvent);
+//            EventIpcManagerFactory.getIpcManager().sendNow(newEvent);
 
             LOG.debug("sendEvent: successfully sent: {}", toString(newEvent));
         } catch (Throwable t) {

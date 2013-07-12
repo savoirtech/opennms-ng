@@ -44,7 +44,7 @@
         <antlr.version>2.7.7_5</antlr.version>
         <aries.blueprint.version>1.0.1</aries.blueprint.version>
         <aries.blueprint.jpa.container.version>1.0.0</aries.blueprint.jpa.container.version>
-        <aspectj.version>1.6.8</aspectj.version>
+        <aspectj.version>1.7.1_1</aspectj.version>
 
         <bsf.version>2.4.0</bsf.version>
         <c3p0.version>0.9.1.2</c3p0.version>
@@ -697,18 +697,8 @@
                 <version>${jcifs.version}</version>
             </dependency>
             <dependency>
-                <groupId>org.aspectj</groupId>
-                <artifactId>aspectjrt</artifactId>
-                <version>${aspectj.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.aspectj</groupId>
-                <artifactId>aspectjtools</artifactId>
-                <version>${aspectj.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.aspectj</groupId>
-                <artifactId>aspectjweaver</artifactId>
+                <groupId>org.apache.servicemix.bundles</groupId>
+                <artifactId>org.apache.servicemix.bundles.aspectj</artifactId>
                 <version>${aspectj.version}</version>
             </dependency>
             <dependency>

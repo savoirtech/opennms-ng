@@ -35,7 +35,6 @@ import org.opennms.netmgt.EventConstants;
 import org.opennms.ng.services.capsd.IfCollector.SupportedProtocol;
 import org.opennms.ng.services.capsd.snmp.*;
 import org.opennms.netmgt.config.*;
-import org.opennms.netmgt.eventd.EventIpcManagerFactory;
 import org.opennms.netmgt.model.capsd.DbIfServiceEntry;
 import org.opennms.netmgt.model.capsd.DbIpInterfaceEntry;
 import org.opennms.netmgt.model.capsd.DbNodeEntry;
@@ -2717,7 +2716,7 @@ public final class RescanProcessor implements Runnable {
             // Send all events created during rescan process to eventd
             for (Event event : m_eventList) {
                 try {
-                    EventIpcManagerFactory.getIpcManager().sendNow(event);
+//                    EventIpcManagerFactory.getIpcManager().sendNow(event);
                 } catch (Throwable t) {
                     LOG.warn("run: unexpected throwable exception caught " + "while sending event: " + t, t);
                 }

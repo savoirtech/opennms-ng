@@ -28,8 +28,8 @@
 
 package org.opennms.ng.services.capsd.plugins;
 
-import org.opennms.ng.services.capsd.AbstractPlugin;
 import org.opennms.netmgt.poller.monitors.SshMonitor;
+import org.opennms.ng.services.capsd.AbstractPlugin;
 
 import java.net.InetAddress;
 import java.util.Map;

@@ -41,7 +41,6 @@
         <opennms.osgi.export.pkg>
             org.opennms.netmgt;version="${opennms.version}",
             org.opennms.netmgt.model*;version="${opennms.version}",
-
             org.opennms.netmgt.xml*;version="${opennms.version}",
         </opennms.osgi.export.pkg>
 

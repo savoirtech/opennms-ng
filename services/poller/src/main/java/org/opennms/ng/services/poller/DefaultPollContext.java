@@ -30,12 +30,12 @@ package org.opennms.ng.services.poller;
 
 import org.opennms.core.utils.InetAddressUtils;
 import org.opennms.netmgt.EventConstants;
-import org.opennms.netmgt.capsd.plugins.IcmpPlugin;
 import org.opennms.netmgt.config.OpennmsServerConfigFactory;
 import org.opennms.netmgt.config.PollerConfig;
 import org.opennms.netmgt.model.events.EventBuilder;
 import org.opennms.netmgt.model.events.EventIpcManager;
 import org.opennms.netmgt.model.events.EventListener;
+import org.opennms.ng.services.poller.monitors.IcmpPlugin;
 import org.opennms.ng.services.poller.pollables.PendingPollEvent;
 import org.opennms.ng.services.poller.pollables.PollContext;
 import org.opennms.ng.services.poller.pollables.PollEvent;
