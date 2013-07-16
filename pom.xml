@@ -500,7 +500,19 @@
 
             <dependency>
                 <groupId>org.opennms.ng</groupId>
+                <artifactId>passive-config</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>org.opennms.ng</groupId>
                 <artifactId>snmp-config</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>org.opennms.ng</groupId>
+                <artifactId>passive</artifactId>
                 <version>${project.version}</version>
             </dependency>
 

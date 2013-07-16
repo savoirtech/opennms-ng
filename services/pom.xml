@@ -18,6 +18,7 @@
     <modules>
         <module>capsd</module>
         <module>eventd</module>
+        <module>passive</module>
         <module>poller</module>
         <module>scheduler</module>
         <module>syslogd</module>
