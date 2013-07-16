@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0"
-         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+<project xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xmlns="http://maven.apache.org/POM/4.0.0"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <parent>
         <artifactId>bundles</artifactId>
@@ -23,10 +23,16 @@
         <pkgArtifactId>opennms-dao-api</pkgArtifactId>
         <pkgVersion>${opennms.version}</pkgVersion>
 
+        <opennms.osgi.import>
+            org.hibernate.criterion;resolution:=optional,,
+            org.opennms.core.criteria;resolution:=optional,
+            *
+        </opennms.osgi.import>
         <opennms.osgi.export.pkg>
             org.opennms.netmgt.dao;version="${opennms.version}",
             org.opennms.netmgt.dao.api;version="${opennms.version}",
             org.opennms.netmgt.dao.util;version="${opennms.version}",
+
         </opennms.osgi.export.pkg>
 
         <opennms.osgi.include.resource>{maven-resources},{maven-dependencies}</opennms.osgi.include.resource>
