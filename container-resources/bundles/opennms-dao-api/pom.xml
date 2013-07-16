@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <parent>
+        <artifactId>bundles</artifactId>
+        <groupId>org.opennms.ng</groupId>
+        <version>1.0-SNAPSHOT</version>
+    </parent>
+    <modelVersion>4.0.0</modelVersion>
+    <groupId>org.opennms.bundles</groupId>
+
+    <packaging>bundle</packaging>
+
+    <name>OPENNMS :: DAO API</name>
+    <description>OPENNMS DAO API</description>
+
+    <artifactId>opennms-dao-api</artifactId>
+    <version>${opennms.version}</version>
+
+    <properties>
+        <pkgGroupId>org.opennms.bundles</pkgGroupId>
+        <pkgArtifactId>opennms-dao-api</pkgArtifactId>
+        <pkgVersion>${opennms.version}</pkgVersion>
+
+        <opennms.osgi.export.pkg>
+            org.opennms.netmgt.dao;version="${opennms.version}",
+            org.opennms.netmgt.dao.api;version="${opennms.version}",
+            org.opennms.netmgt.dao.util;version="${opennms.version}",
+        </opennms.osgi.export.pkg>
+
+        <opennms.osgi.include.resource>{maven-resources},{maven-dependencies}</opennms.osgi.include.resource>
+        <opennms.osgi.failok>true</opennms.osgi.failok>
+        <!-- Trying to get around dynamic class.forname loading -->
+        <opennms.osgi.dynamic>*</opennms.osgi.dynamic>
+
+    </properties>
+
+    <dependencies>
+
+        <dependency>
+            <groupId>org.opennms</groupId>
+            <artifactId>opennms-dao-api</artifactId>
+        </dependency>
+
+    </dependencies>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-shade-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>shade</goal>
+                        </goals>
+                        <configuration>
+                            <artifactSet>
+                                <includes>
+                                    <include>${pkgGroupId}:${pkgArtifactId}</include>
+                                </includes>
+                            </artifactSet>
+
+                            <promoteTransitiveDependencies>true</promoteTransitiveDependencies>
+                            <createDependencyReducedPom>true</createDependencyReducedPom>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
+
+</project>
