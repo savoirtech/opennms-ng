@@ -131,6 +131,8 @@
         <bundle>mvn:org.apache.servicemix.bundles/org.apache.servicemix.bundles.antlr/${antlr.version}</bundle>
         <bundle>mvn:org.apache.servicemix.bundles/org.apache.servicemix.bundles.jcifs/${jcifs.version}</bundle>
         <bundle>mvn:org.opennms.bundles/jldap/${jldap.version}</bundle>
+        <bundle>mvn:org.opennms.bundles/opennms-dao-api/${opennms.version}</bundle>
+
         <bundle>mvn:org.opennms.ng/poller/${project.version}</bundle>
     </feature>
 
