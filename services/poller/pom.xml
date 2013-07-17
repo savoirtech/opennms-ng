@@ -21,7 +21,7 @@
         </opennms.osgi.import.pkg>
 
         <opennms.osgi.export.pkg>
-            org.opennms.ng.services.poller*
+            org.opennms.ng.services.poller*,
         </opennms.osgi.export.pkg>
 
         <!-- Trying to get around dynamic class.forname loading -->
@@ -41,6 +41,10 @@
         <dependency>
             <groupId>org.opennms.ng</groupId>
             <artifactId>event-config</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.opennms.bundles</groupId>
+            <artifactId>opennms-poller-api</artifactId>
         </dependency>
         <dependency>
             <groupId>org.opennms.ng</groupId>

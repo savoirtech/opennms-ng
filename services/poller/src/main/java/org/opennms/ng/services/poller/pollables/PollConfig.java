@@ -29,7 +29,7 @@
 package org.opennms.ng.services.poller.pollables;
 
 import org.opennms.netmgt.model.PollStatus;
-import org.opennms.netmgt.scheduler.Timer;
+import org.opennms.ng.services.scheduler.Timer;
 
 
 /**
