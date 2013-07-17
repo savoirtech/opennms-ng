@@ -66,6 +66,7 @@
                                     <artifact>org.opennms:opennms-services</artifact>
                                     <includes>
                                         <include>org/opennms/protocols/**</include>
+                                        <include>org/opennms/netmgt/protocols/**</include>
                                     </includes>
                                 </filter>
                             </filters>
