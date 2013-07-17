@@ -25,6 +25,48 @@
         <bundle>mvn:org.opennms.bundles/opennms-config-model/${opennms.version}</bundle>
     </feature>
 
+    <feature name="opennms-services-bundle" version="${project.version}">
+        <bundle>mvn:org.opennms.ng/amq-pool/${project.version}</bundle>
+
+        <bundle>mvn:org.apache.servicemix.bundles/org.apache.servicemix.bundles.oro</bundle>
+        <bundle>mvn:org.apache.servicemix.bundles/org.apache.servicemix.bundles.antlr/${antlr.version}</bundle>
+        <bundle>mvn:org.apache.servicemix.bundles/org.apache.servicemix.bundles.jcifs/${jcifs.version}</bundle>
+        <bundle>mvn:org.apache.servicemix.bundles/org.apache.servicemix.bundles.aspectj/${aspectj.version}</bundle>
+
+        <bundle>mvn:org.opennms.bundles/jldap/${jldap.version}</bundle>
+
+        <bundle>mvn:org.apache.servicemix.bundles/org.apache.servicemix.bundles.aspectj/${aspectj.version}</bundle>
+        <bundle>mvn:org.opennms.bundles/jldap/${jldap.version}</bundle>
+
+        <bundle>mvn:org.opennms.bundles/opennms-javamail-api/${opennms.version}</bundle>
+        <bundle>mvn:org.apache.httpcomponents/httpcore-osgi/${httpcore.version}</bundle>
+        <bundle>mvn:org.apache.httpcomponents/httpclient-osgi/${httpclient.version}</bundle>
+        <bundle>mvn:org.opennms.bundles/bsf/${bsf.version}</bundle>
+
+        <bundle>mvn:commons-dbcp/commons-dbcp/${commons-dbcp.version}</bundle>
+        <bundle>mvn:org.opennms.ng/enhydra-xa/${project.version}</bundle>
+        <bundle>mvn:org.opennms.bundles/postgresql/${project.version}</bundle>
+
+        <bundle>mvn:org.opennms.ng/datasource/${project.version}</bundle>
+
+        <bundle>mvn:org.opennms.bundles/dnsjava/${project.version}</bundle>
+        <bundle>mvn:org.opennms.bundles/opennms-core-snmp-api/${opennms.version}</bundle>
+
+        <feature>opennms-util</feature>
+        <bundle>mvn:org.opennms.core/org.opennms.core.logging/${opennms.version}</bundle>
+        <bundle>mvn:org.opennms.bundles/opennms-core-snmp-api/${opennms.version}</bundle>
+        <feature>camel-quartz</feature>
+        <feature>spring-orm</feature>
+
+        <bundle>mvn:org.opennms.features/org.opennms.features.phonebook/${opennms.version}</bundle>
+
+        <bundle>mvn:org.opennms.bundles/dnsjava/${project.version}</bundle>
+        <bundle>mvn:org.opennms.bundles/opennms-core-snmp-api/${opennms.version}</bundle>
+
+        <bundle>mvn:org.opennms.bundles/opennms-services-bundle/${opennms.version}</bundle>
+
+    </feature>
+
     <feature name="opennms-javamail-api" version="${project.version}">
         <feature>opennms-config-model</feature>
         <bundle>mvn:org.opennms.bundles/opennms-javamail-api/${opennms.version}</bundle>

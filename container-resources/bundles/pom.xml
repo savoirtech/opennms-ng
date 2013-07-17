@@ -33,6 +33,7 @@
         <module>dnsjava</module>
         <module>opennms-services-common</module>
         <module>opennms-rrd-api</module>
+        <module>opennms-services-bundle</module>
     </modules>
 
 </project>

@@ -1,0 +1,128 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xmlns="http://maven.apache.org/POM/4.0.0"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <parent>
+        <artifactId>bundles</artifactId>
+        <groupId>org.opennms.ng</groupId>
+        <version>1.0-SNAPSHOT</version>
+    </parent>
+    <modelVersion>4.0.0</modelVersion>
+
+    <artifactId>opennms-services-bundle</artifactId>
+
+    <groupId>org.opennms.bundles</groupId>
+
+    <packaging>bundle</packaging>
+
+    <name>OPENNMS :: Services bundle Jar</name>
+    <description>OPENNMS Services BUNDLE - Services UBER Jar</description>
+
+    <version>${opennms.version}</version>
+
+    <properties>
+        <pkgGroupId>org.opennms.bundles</pkgGroupId>
+        <pkgArtifactId>opennms-services-bundle</pkgArtifactId>
+        <pkgVersion>${opennms.version}</pkgVersion>
+
+        <opennms.osgi.import.pkg>
+            org.xbill.DNS;resolution:=optional,
+            mx4j.log;resolution:=optional,
+            org.apache.commons.jexl2; resolution:=optional,
+            org.apache.xmlrpc; resolution:=optional,
+            org.apache.xmlrpc.secure; resolution:=optional,
+
+            <!-- Excluded for now -->
+
+            org.jfree.chart; resolution:=optional,
+            org.jfree.chart.axis; resolution:=optional,
+            org.jfree.chart.labels; resolution:=optional,
+            org.jfree.chart.plot; resolution:=optional,
+            org.jfree.chart.renderer.category; resolution:=optional,
+            org.jfree.chart.title; resolution:=optional,
+            org.jfree.data.category; resolution:=optional,
+            org.jfree.data.jdbc; resolution:=optional,
+            org.jivesoftware.smack; resolution:=optional,
+            org.jivesoftware.smack.packet; resolution:=optional,
+            org.jivesoftware.smackx.muc; resolution:=optional,
+            org.opennms.api.integration.ticketing; resolution:=optional,
+
+            <!-- Hibernate -->
+
+            org.hibernate; resolution:=optional,
+            org.hibernate.annotations; resolution:=optional,
+            org.hibernate.criterion; resolution:=optional,
+            org.hibernate.engine; resolution:=optional,
+            org.hibernate.impl; resolution:=optional,
+            org.hibernate.metadata; resolution:=optional,
+            org.hibernate.transform; resolution:=optional,
+            org.hibernate.type; resolution:=optional,
+            org.hibernate.usertype; resolution:=optional,
+            org.opennms.core.criteria; resolution:=optional,
+            org.opennms.core.criteria.restrictions; resolution:=optional,
+
+            org.apache.tomcat.jdbc.pool; version="1.1.1";resolution:=optional,
+
+            org.springframework.security.core; resolution:=optional,
+            org.springframework.security.core.userdetails; resolution:=optional,
+            snaq.db;resolution:=optional,,
+            twitter4j;resolution:=optional,
+
+            *
+        </opennms.osgi.import.pkg>
+        <opennms.osgi.export>
+            org.opennms;version="${opennms.version}",
+            org.opennms.netmgt*;version="${opennms.version}",
+            org.opennms.protocols*;version="${opennms.version}",
+            org.opennms.spring*;version="${opennms.version}",
+
+        </opennms.osgi.export>
+
+        <opennms.osgi.failok>true</opennms.osgi.failok>
+        <!-- Trying to get around dynamic class.forname loading -->
+        <opennms.osgi.dynamic>*</opennms.osgi.dynamic>
+
+    </properties>
+
+    <dependencies>
+
+        <dependency>
+            <groupId>org.opennms</groupId>
+            <artifactId>opennms-services</artifactId>
+            <version>${opennms.version}</version>
+        </dependency>
+
+        <!-- CORE LIBRARIES  -->
+
+    </dependencies>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-shade-plugin</artifactId>
+                <version>${maven.shade.plugin.version}</version>
+                <executions>
+                    <execution>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>shade</goal>
+                        </goals>
+                        <configuration>
+                            <artifactSet>
+                                <includes>
+                                    <include>${pkgGroupId}:${pkgArtifactId}</include>
+
+                                </includes>
+                            </artifactSet>
+
+                            <promoteTransitiveDependencies>true</promoteTransitiveDependencies>
+                            <createDependencyReducedPom>true</createDependencyReducedPom>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
+
+</project>

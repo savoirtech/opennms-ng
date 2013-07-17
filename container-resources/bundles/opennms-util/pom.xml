@@ -37,8 +37,6 @@
             org.opennms.core.utils.url;version="${opennms.version}",
             org.opennms.core.xml;version="${opennms.version}",
             org.opennms.core.xml.bind;version="${opennms.version}",
-            org.opennms.netmgt.config.opennmsDataSources;version="${opennms.version}",
-            org.opennms.netmgt.config.opennmsDataSources.descriptors;version="${opennms.version}",
             org.opennms.core.db;version="${opennms.version}",
         </opennms.osgi.export.pkg>
 
