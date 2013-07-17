@@ -29,8 +29,8 @@
 
     </properties>
 
-    <name>OPENNMS :: Daemons :: Scheduler</name>
-    <description>OPENNMS Daemons :: Scheduler</description>
+    <name>OPENNMS :: Daemons :: Passive</name>
+    <description>OPENNMS Daemons :: Passive</description>
 
     <dependencies>
         <!--dependency>

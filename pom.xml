@@ -466,6 +466,11 @@
 
             <dependency>
                 <groupId>org.opennms.bundles</groupId>
+                <artifactId>opennms-poller-api</artifactId>
+                <version>${opennms.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.opennms.bundles</groupId>
                 <artifactId>opennms-protocols</artifactId>
                 <version>${opennms.version}</version>
             </dependency>

@@ -44,6 +44,10 @@
         </dependency>
         <dependency>
             <groupId>org.opennms.ng</groupId>
+            <artifactId>passive</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.opennms.ng</groupId>
             <artifactId>scheduler</artifactId>
         </dependency>
         <dependency>
