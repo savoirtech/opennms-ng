@@ -82,6 +82,7 @@
 
         <postgres.version>9.1-901.jdbc4</postgres.version>
         <postgres.bundle.version>9.1.0.901</postgres.bundle.version>
+        <quartz.version>1.6.6_2</quartz.version>
 
         <slf4j.version>1.7.2</slf4j.version>
         <spring.version>3.0.7.RELEASE</spring.version>
@@ -771,6 +772,11 @@
                 <groupId>org.apache.servicemix.bundles</groupId>
                 <artifactId>org.apache.servicemix.bundles.jcifs</artifactId>
                 <version>${jcifs.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.servicemix.bundles</groupId>
+                <artifactId>org.apache.servicemix.bundles.quartz</artifactId>
+                <version>${quartz.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.apache.servicemix.bundles</groupId>
