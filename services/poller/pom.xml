@@ -20,9 +20,9 @@
             *
         </opennms.osgi.import.pkg>
 
-        <opennms.osgi.export.pkg>
+        <opennms.osgi.export>
             org.opennms.ng.services.poller*
-        </opennms.osgi.export.pkg>
+        </opennms.osgi.export>
 
         <!-- Trying to get around dynamic class.forname loading -->
         <opennms.osgi.dynamic>*</opennms.osgi.dynamic>
