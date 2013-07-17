@@ -28,7 +28,7 @@
             *
         </opennms.osgi.import.pkg>
         <opennms.osgi.export>
-            org.opennms.protocols*;version="${opennms.version}"
+            org.opennms.protocols*;version="${opennms.version}",
             org.opennms.netmgt.protocols*;version="${opennms.version}"
         </opennms.osgi.export>
 
