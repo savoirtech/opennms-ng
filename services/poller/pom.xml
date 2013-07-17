@@ -15,6 +15,7 @@
     <properties>
         <opennms.osgi.import.pkg>
             org.hibernate*;resolution:=optional,
+            org.opennms.netmgt.threshd*;resolution:=optional,
             org.springframework.security.core*;resolution:=optional,
             org.opennms.netmgt.snmp.snmp4j,
             *
@@ -81,6 +82,10 @@
         <dependency>
             <groupId>org.opennms</groupId>
             <artifactId>opennms-icmp-api</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.servicemix.bundles</groupId>
+            <artifactId>org.apache.servicemix.bundles.quartz</artifactId>
         </dependency>
         <dependency>
             <groupId>org.slf4j</groupId>

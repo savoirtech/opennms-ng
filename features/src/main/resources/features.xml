@@ -99,6 +99,7 @@
     <feature name="database-schema-config" version="${project.version}">
         <feature>configuration-base</feature>
         <bundle>mvn:org.opennms.bundles/opennms-rrd-api/${opennms.version}</bundle>
+        <bundle>mvn:org.opennms.bundles/opennms-dao-api/${opennms.version}</bundle>
         <bundle>mvn:org.opennms.ng/database-schema-config/${project.version}</bundle>
     </feature>
 
@@ -182,6 +183,8 @@
         <bundle>mvn:org.apache.servicemix.bundles/org.apache.servicemix.bundles.jcifs/${jcifs.version}</bundle>
         <bundle>mvn:org.opennms.bundles/jldap/${jldap.version}</bundle>
         <bundle>mvn:org.opennms.bundles/opennms-dao-api/${opennms.version}</bundle>
+        <bundle>mvn:org.opennms.bundles/opennms-services-common/${opennms.version}</bundle>
+        <bundle>mvn:org.apache.servicemix.bundles/org.apache.servicemix.bundles.quartz/${quartz.version}</bundle>
 
         <bundle>mvn:org.opennms.ng/passive/${project.version}</bundle>
         <bundle>mvn:org.opennms.ng/poller/${project.version}</bundle>
