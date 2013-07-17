@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xmlns="http://maven.apache.org/POM/4.0.0"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <parent>
+        <artifactId>bundles</artifactId>
+        <groupId>org.opennms.ng</groupId>
+        <version>1.0-SNAPSHOT</version>
+    </parent>
+    <modelVersion>4.0.0</modelVersion>
+    <groupId>org.opennms.bundles</groupId>
+
+    <packaging>bundle</packaging>
+
+    <name>OPENNMS :: POLLER API</name>
+    <description>OPENNMS POLLER API</description>
+
+    <artifactId>opennms-poller-api</artifactId>
+    <version>${opennms.version}</version>
+
+    <properties>
+        <pkgGroupId>org.opennms.bundles</pkgGroupId>
+        <pkgArtifactId>opennms-poller-api</pkgArtifactId>
+        <pkgVersion>${opennms.version}</pkgVersion>
+
+        <opennms.osgi.import>
+            !org.opennms.netmgt.poller.monitors;version="${opennms.version}",
+        </opennms.osgi.import>
+        <opennms.osgi.export.pkg>
+            org.opennms.netmgt.poller.*;version="${opennms.version}",
+        </opennms.osgi.export.pkg>
+
+        <opennms.osgi.include.resource>{maven-resources},{maven-dependencies}</opennms.osgi.include.resource>
+        <opennms.osgi.failok>true</opennms.osgi.failok>
+        <!-- Trying to get around dynamic class.forname loading -->
+        <opennms.osgi.dynamic>*</opennms.osgi.dynamic>
+
+    </properties>
+
+    <dependencies>
+
+        <dependency>
+            <groupId>org.opennms.features.poller</groupId>
+            <artifactId>org.opennms.features.poller.api</artifactId>
+            <version>${opennms.version}</version>
+        </dependency>
+
+    </dependencies>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-shade-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>shade</goal>
+                        </goals>
+                        <configuration>
+                            <artifactSet>
+                                <includes>
+                                    <include>${pkgGroupId}:${pkgArtifactId}</include>
+                                </includes>
+                            </artifactSet>
+
+                            <promoteTransitiveDependencies>true</promoteTransitiveDependencies>
+                            <createDependencyReducedPom>true</createDependencyReducedPom>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
+
+</project>

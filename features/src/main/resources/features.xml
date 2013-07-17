@@ -69,6 +69,11 @@
         <bundle>mvn:org.opennms.ng/opennms-server-config/${project.version}</bundle>
     </feature>
 
+    <feature name="passive-config" version="${project.version}">
+        <feature>configuration-base</feature>
+        <bundle>mvn:org.opennms.ng/passive-config/${project.version}</bundle>
+    </feature>
+
     <feature name="collectd-config" version="${project.version}">
         <feature>configuration-base</feature>
         <feature>opennms-server-config</feature>
@@ -114,7 +119,9 @@
         <feature>configuration-base</feature>
         <feature>opennms-server-config</feature>
         <feature>collectd-config</feature>
+        <feature>passive-config</feature>
         <bundle>mvn:org.opennms.ng/snmp-config/${project.version}</bundle>
+        <bundle>mvn:org.opennms.bundles/opennms-poller-api/${opennms.version}</bundle>
         <bundle>mvn:org.opennms.ng/poller-config/${project.version}</bundle>
     </feature>
 
@@ -133,6 +140,7 @@
         <bundle>mvn:org.opennms.bundles/jldap/${jldap.version}</bundle>
         <bundle>mvn:org.opennms.bundles/opennms-dao-api/${opennms.version}</bundle>
 
+        <bundle>mvn:org.opennms.ng/passive/${project.version}</bundle>
         <bundle>mvn:org.opennms.ng/poller/${project.version}</bundle>
     </feature>
 

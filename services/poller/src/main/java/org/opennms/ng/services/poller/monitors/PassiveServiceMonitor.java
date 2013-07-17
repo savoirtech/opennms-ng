@@ -29,11 +29,11 @@
 package org.opennms.ng.services.poller.monitors;
 
 import org.opennms.netmgt.model.PollStatus;
-import org.opennms.netmgt.passive.PassiveStatusKeeper;
 import org.opennms.netmgt.poller.Distributable;
 import org.opennms.netmgt.poller.DistributionContext;
 import org.opennms.netmgt.poller.MonitoredService;
 import org.opennms.netmgt.poller.ServiceMonitor;
+import org.opennms.ng.services.passive.PassiveStatusKeeper;
 
 import java.util.Map;
 

@@ -26,6 +26,11 @@
     <dependencies>
 
         <dependency>
+            <groupId>org.opennms.bundles</groupId>
+            <artifactId>opennms-poller-api</artifactId>
+        </dependency>
+
+        <dependency>
             <groupId>org.opennms.ng</groupId>
             <artifactId>opennms-server-config</artifactId>
         </dependency>
