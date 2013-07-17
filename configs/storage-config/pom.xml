@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0"
-         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+<project xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xmlns="http://maven.apache.org/POM/4.0.0"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <parent>
         <artifactId>configs</artifactId>
@@ -9,25 +9,30 @@
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
-    <artifactId>event-config</artifactId>
+    <artifactId>storage-config</artifactId>
 
     <packaging>bundle</packaging>
 
-    <name>OPENNMS :: Configs :: Event Config</name>
-    <description>OPENNMS Configs :: Event Config</description>
-
+    <name>OPENNMS :: Configs :: Storage Config</name>
+    <description>OPENNMS Configs :: Storage Config</description>
 
     <properties>
         <opennms.osgi.export.pkg>
-            org.opennms.ng.services.eventconfig
+            org.opennms.ng.services.storageconfig
         </opennms.osgi.export.pkg>
 
     </properties>
 
     <dependencies>
+
         <dependency>
-            <groupId>org.opennms.bundles</groupId>
-            <artifactId>opennms-util</artifactId>
+            <groupId>org.opennms.ng</groupId>
+            <artifactId>database-schema-config</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>org.opennms.core</groupId>
+            <artifactId>org.opennms.core.xml</artifactId>
         </dependency>
 
         <dependency>

@@ -22,6 +22,8 @@
         <module>scheduler</module>
         <module>syslogd</module>
         <module>trapd</module>
+        <module>collectd</module>
+        <module>threshd</module>
     </modules>
 
 </project>

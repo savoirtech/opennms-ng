@@ -23,6 +23,7 @@
         <module>opennms-server-config</module>
         <module>snmp-config</module>
         <module>poller-config</module>
+        <module>storage-config</module>
     </modules>
 
 </project>

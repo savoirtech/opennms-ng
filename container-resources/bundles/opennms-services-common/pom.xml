@@ -28,6 +28,7 @@
         </opennms.osgi.import.pkg>
         <opennms.osgi.export.pkg>
             org.opennms.netmgt.utils;version="${opennms.version}",
+            org.opennms.ng.event.utils ;version="${project.version}",
         </opennms.osgi.export.pkg>
 
         <opennms.osgi.include.resource>{maven-resources},{maven-dependencies}</opennms.osgi.include.resource>

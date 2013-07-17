@@ -8,29 +8,28 @@
         <version>1.0-SNAPSHOT</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
-    <groupId>org.opennms.bundles</groupId>
-    <version>${opennms.version}</version>
+
+    <artifactId>opennms-rrd-api</artifactId>
 
     <packaging>bundle</packaging>
 
-    <name>OPENNMS :: DAO API</name>
-    <description>OPENNMS DAO API</description>
+    <groupId>org.opennms.bundles</groupId>
 
-    <artifactId>opennms-dao-api</artifactId>
+    <name>OPENNMS :: RRD API</name>
+    <description>OPENNMS RRD API</description>
+
+    <version>${opennms.version}</version>
 
     <properties>
         <pkgGroupId>org.opennms.bundles</pkgGroupId>
-        <pkgArtifactId>opennms-dao-api</pkgArtifactId>
+        <pkgArtifactId>opennms-rrd-api</pkgArtifactId>
         <pkgVersion>${opennms.version}</pkgVersion>
 
         <opennms.osgi.import>
-            org.hibernate.criterion;resolution:=optional,,
-            org.opennms.core.criteria;resolution:=optional,
             *
         </opennms.osgi.import>
         <opennms.osgi.export.pkg>
-            org.opennms.netmgt.dao.api;version="${opennms.version}",
-            org.opennms.netmgt.dao.util;version="${opennms.version}",
+            org.opennms.netmgt.rrd*;version=${opennms.version},
         </opennms.osgi.export.pkg>
 
         <opennms.osgi.include.resource>{maven-resources},{maven-dependencies}</opennms.osgi.include.resource>
@@ -41,13 +40,10 @@
     </properties>
 
     <dependencies>
-
         <dependency>
             <groupId>org.opennms</groupId>
-            <artifactId>opennms-dao-api</artifactId>
-            <version>${opennms.version}</version>
+            <artifactId>opennms-rrd-api</artifactId>
         </dependency>
-
     </dependencies>
 
     <build>
