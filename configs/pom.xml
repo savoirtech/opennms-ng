@@ -21,6 +21,7 @@
         <module>database-schema-config</module>
         <module>event-config</module>
         <module>opennms-server-config</module>
+        <module>passive-config</module>
         <module>snmp-config</module>
         <module>poller-config</module>
         <module>storage-config</module>
