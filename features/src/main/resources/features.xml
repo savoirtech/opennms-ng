@@ -56,6 +56,7 @@
 
     <feature name="database-schema-config" version="${project.version}">
         <feature>configuration-base</feature>
+        <bundle>mvn:org.opennms.bundles/opennms-rrd-api/${opennms.version}</bundle>
         <bundle>mvn:org.opennms.ng/database-schema-config/${project.version}</bundle>
     </feature>
 

@@ -29,6 +29,7 @@
         </opennms.osgi.import.pkg>
         <opennms.osgi.export>
             org.opennms.protocols*;version="${opennms.version}"
+            org.opennms.netmgt.protocols*;version="${opennms.version}"
         </opennms.osgi.export>
 
         <opennms.osgi.include.resource>{maven-resources},{maven-dependencies}</opennms.osgi.include.resource>
