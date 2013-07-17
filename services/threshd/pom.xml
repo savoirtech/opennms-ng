@@ -14,7 +14,7 @@
     <name>OPENNMS :: Daemons :: Threshd</name>
     <description>OPENNMS Daemons :: Threshd</description>
 
-    <packaging>bundle</packaging>
+
     <properties>
 
         <opennms.osgi.import.pkg>
