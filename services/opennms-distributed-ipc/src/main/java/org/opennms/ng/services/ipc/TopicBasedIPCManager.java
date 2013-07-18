@@ -13,12 +13,12 @@ import org.opennms.netmgt.model.events.EventProxyException;
 import org.opennms.netmgt.xml.event.Event;
 import org.opennms.netmgt.xml.event.Log;
 
-public class DistributedIPCHandler implements EventIpcManager {
+public class TopicBasedIPCManager implements EventIpcManager {
 
     private CamelContext camelContext;
     private ObjectPool producers;
 
-    public DistributedIPCHandler(CamelContext camelContext) {
+    public TopicBasedIPCManager(CamelContext camelContext) {
         this.camelContext = camelContext;
     }
 
@@ -49,7 +49,7 @@ public class DistributedIPCHandler implements EventIpcManager {
 
     @Override
     public void send(Event event) throws EventProxyException {
-        //TODO
+        sendNow(event);
     }
 
     @Override

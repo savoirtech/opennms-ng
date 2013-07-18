@@ -20,8 +20,8 @@ public class EventListenerTest extends BaseJMSTest {
     public void testIPCManager() throws InterruptedException {
 
         //Context assumes that camel JMS is there for us.
-        DistributedIPCHandler distributedIPCHandler = new DistributedIPCHandler(context);
-        distributedIPCHandler.init();
+        TopicBasedIPCManager topicBasedIPCManager = new TopicBasedIPCManager(context);
+        topicBasedIPCManager.init();
         Event testEvent = new Event();
         testEvent.setDescr(DESCRIPTION);
         testEvent.setUei("net/ding/dong");
@@ -32,7 +32,7 @@ public class EventListenerTest extends BaseJMSTest {
         CountDownLatch latch = new CountDownLatch(3);
 
         DummyListener listener = new DummyListener(latch);
-        distributedIPCHandler.addEventListener(listener,ueis);
+        topicBasedIPCManager.addEventListener(listener, ueis);
 
         template.sendBodyAndHeader(IPCConstants.EVENTBROADCAST, testEvent, "uei", "WANG");
         template.sendBodyAndHeader(IPCConstants.EVENTBROADCAST, testEvent, "uei", UEI1);
@@ -40,7 +40,7 @@ public class EventListenerTest extends BaseJMSTest {
 
         //Last event #3
 
-        distributedIPCHandler.sendNow(testEvent);
+        topicBasedIPCManager.sendNow(testEvent);
 
         latch.await(50000l, TimeUnit.MILLISECONDS);
     }
