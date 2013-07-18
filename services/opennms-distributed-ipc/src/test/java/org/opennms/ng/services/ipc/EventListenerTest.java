@@ -43,6 +43,8 @@ public class EventListenerTest extends BaseJMSTest {
         topicBasedIPCManager.sendNow(testEvent);
 
         latch.await(50000l, TimeUnit.MILLISECONDS);
+
+        topicBasedIPCManager.removeEventListener(listener);
     }
 
     private class DummyListener implements EventListener {
