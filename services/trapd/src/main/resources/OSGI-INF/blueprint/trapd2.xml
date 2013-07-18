@@ -11,18 +11,24 @@
         </cm:default-properties>
     </cm:property-placeholder>
 
-    <bean id="daemon" class="org.opennms.netmgt.trapd.Trapd">
+    <bean id="daemon" class="org.opennms.ng.services.trapd.Trapd" init-method="onInit">
         <property name="eventReader" ref="eventReader"/>
         <property name="backlogQ" ref="trapdBacklogQ"/>
+        <property name="processorFactory" ref="processorFactory"/>
+        <property name="trapdIpMgr" ref="trapdIpMgr"/>
+
+        <property name="snmpTrapAddress" ref="snmpTrapAddress"/>
+        <property name="snmpTrapPort" ref="snmpTrapPort"/>
+
+        <property name="snmpV3Users" ref="snmpV3Users"/>
+
     </bean>
 
-
-
-    <bean id="configLocation" class="org.opennms.ng.services.trapd.TrapdConfigStream" />
+    <bean id="configLocation" class="org.opennms.ng.services.trapd.TrapdConfigStream"/>
     <bean id="extBean" factory-ref="configLocation" factory-method="getConfig"/>
 
     <bean id="trapdConfig" class="org.opennms.netmgt.config.TrapdConfigFactory" init-method="init">
-        <argument ref="extBean" />
+        <argument ref="extBean"/>
     </bean>
 
     <bean id="eventReader" class="org.opennms.netmgt.trapd.BroadcastEventProcessor">
@@ -30,8 +36,10 @@
         <argument ref="trapdIpMgr"/>
     </bean>
 
-    <bean id="processorFactory" class="org.opennms.netmgt.trapd.TrapQueueProcessorFactory">
+    <bean id="processorFactory" class="org.opennms.ng.services.trapd.TrapQueueProcessorFactory" init-method="afterPropertiesSet">
         <property name="eventManager" ref="eventIpcManager"/>
+        <property name="newSuspect" ref="newSuspectOnTrap"/>
+        <property name="eventConfDao" ref="eventConfDao"/>
     </bean>
 
     <bean id="newSuspectOnTrap" factory-ref="trapdConfig" factory-method="getNewSuspectOnTrap"/>
@@ -52,7 +60,13 @@
     <reference id="nonJTA" interface="javax.sql.DataSource"
                filter="(transactional=false)" availability="mandatory"/>
 
+    <!--
     <bean id="trapdIpMgr" class="org.opennms.netmgt.trapd.JdbcTrapdIpMgr">
+        <property name="dataSource" ref="nonJTA"/>
+    </bean>
+        -->
+
+    <bean id="trapdIpMgr" class="org.opennms.ng.services.trapd.JdbcTrapdIpMgr">
         <property name="dataSource" ref="nonJTA"/>
     </bean>
 
@@ -61,5 +75,6 @@
     </bean>
 
     <reference id="eventIpcManager" interface="org.opennms.netmgt.model.events.EventIpcManager"/>
+    <reference id="eventConfDao" interface="org.opennms.ng.services.eventconfig.EventConfDao"/>
 
 </blueprint>

@@ -28,13 +28,6 @@
 
 package org.opennms.ng.services.trapd;
 
-import org.opennms.core.logging.Logging;
-import org.opennms.core.utils.InetAddressUtils;
-import org.opennms.netmgt.snmp.*;
-import org.opennms.netmgt.snmp.snmp4j.Snmp4JStrategy;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import java.io.IOException;
 import java.lang.reflect.UndeclaredThrowableException;
 import java.net.InetAddress;
@@ -42,17 +35,33 @@ import java.sql.SQLException;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
 
+import org.opennms.core.logging.Logging;
+import org.opennms.core.utils.BeanUtils;
+import org.opennms.core.utils.InetAddressUtils;
+import org.opennms.netmgt.snmp.SnmpUtils;
+import org.opennms.netmgt.snmp.SnmpV3User;
+import org.opennms.netmgt.snmp.TrapNotification;
+import org.opennms.netmgt.snmp.TrapNotificationListener;
+import org.opennms.netmgt.snmp.TrapProcessor;
+import org.opennms.netmgt.snmp.TrapProcessorFactory;
+import org.opennms.netmgt.trapd.BroadcastEventProcessor;
+import org.opennms.netmgt.trapd.EventCreator;
+import org.opennms.netmgt.trapd.TrapdIpMgr;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.util.Assert;
+
 /**
  * <p>
  * The Trapd listens for SNMP traps on the standard port(162). Creates a
  * SnmpTrapSession and implements the SnmpTrapHandler to get callbacks when
  * traps are received.
  * </p>
- *
+ * <p/>
  * <p>
  * The received traps are converted into XML and sent to eventd.
  * </p>
- *
+ * <p/>
  * <p>
  * <strong>Note: </strong>Trapd is a PausableFiber so as to receive control
  * events. However, a 'pause' on Trapd has no impact on the receiving and
@@ -68,8 +77,6 @@ import java.util.concurrent.ExecutorService;
  */
 public class Trapd implements TrapProcessorFactory, TrapNotificationListener {
 
-    private static final Logger LOG = LoggerFactory.getLogger(Trapd.class);
-
     public static final int START_PENDING = 0;
     public static final int STARTING = 1;
     public static final int RUNNING = 2;
@@ -78,41 +85,49 @@ public class Trapd implements TrapProcessorFactory, TrapNotificationListener {
     public static final int PAUSE_PENDING = 5;
     public static final int PAUSED = 6;
     public static final int RESUME_PENDING = 7;
-
-    private SnmpStrategy strategy;
-
+    private static final Logger LOG = LoggerFactory.getLogger(Trapd.class);
+    private static final String LOG4J_CATEGORY = "trapd";
     /**
      * The last status sent to the service control manager.
      */
-    private int status = START_PENDING;
-
+    private int m_status = START_PENDING;
+    /**
+     * The thread pool that processes traps
+     */
+    private ExecutorService m_backlogQ;
+    /**
+     * The queue processing thread
+     */
+    private TrapQueueProcessorFactory m_processorFactory;
+    /**
+     * The class instance used to receive new events from for the system.
+     */
+    private BroadcastEventProcessor m_eventReader;
     /**
      * Trapd IP manager.  Contains IP address -> node ID mapping.
      */
-    private TrapdIpMgr trapdIpMgr;
-
-    private String snmpTrapAddress;
-
-    private Integer snmpTrapPort;
-
-    private List<SnmpV3User> snmpV3Users;
-
-    private boolean registeredForTraps;
-
-    private ExecutorService backlogQ;
-
-    private TrapQueueProcessorFactory processorFactory;
+    private TrapdIpMgr m_trapdIpMgr;
+    private String m_snmpTrapAddress;
+    private Integer m_snmpTrapPort;
+    private List<SnmpV3User> m_snmpV3Users;
+    private boolean m_registeredForTraps;
 
     /**
-     * <P>
+     * <p/>
      * Constructs a new Trapd object that receives and forwards trap messages
      * via JSDT. The session is initialized with the default client name of <EM>
      * OpenNMS.trapd</EM>. The trap session is started on the default port, as
      * defined by the SNMP library.
      * </P>
      *
+     * @see org.opennms.protocols.snmp.SnmpTrapSession
      */
     public Trapd() {
+        //  super(LOG4J_CATEGORY);
+    }
+
+    public static String getLoggingCategory() {
+        return LOG4J_CATEGORY;
     }
 
     /**
@@ -122,24 +137,27 @@ public class Trapd implements TrapProcessorFactory, TrapNotificationListener {
      */
     @Override
     public TrapProcessor createTrapProcessor() {
-        return new EventCreator(trapdIpMgr);
+        return new EventCreator(m_trapdIpMgr);
     }
 
-    /** {@inheritDoc} */
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public void trapReceived(TrapNotification trapNotification) {
-
-        backlogQ.submit(processorFactory.getInstance(trapNotification));
-
+        m_backlogQ.submit(m_processorFactory.getInstance(trapNotification));
     }
 
     /**
      * <p>onInit</p>
      */
     public synchronized void onInit() {
+        BeanUtils.assertAutowiring(this);
+
+        Assert.state(m_backlogQ != null, "backlogQ must be set");
 
         try {
-            trapdIpMgr.dataSourceSync();
+            m_trapdIpMgr.dataSourceSync();
         } catch (final SQLException e) {
             LOG.error("init: Failed to load known IP address list", e);
             throw new UndeclaredThrowableException(e);
@@ -147,13 +165,9 @@ public class Trapd implements TrapProcessorFactory, TrapNotificationListener {
 
         try {
             InetAddress address = getInetAddress();
-            LOG.info("Listening on %s:%d", address == null ? "[all interfaces]" : InetAddressUtils.str(address), snmpTrapPort);
-            //SnmpUtils.registerForTraps(this, address, snmpTrapPort, snmpV3Users);
-
-            strategy = new Snmp4JStrategy();
-            strategy.registerForTraps(this, this, address, snmpTrapPort, snmpV3Users);
-
-            registeredForTraps = true;
+            LOG.info("Listening on {}:{}", address == null ? "[all interfaces]" : InetAddressUtils.str(address), m_snmpTrapPort);
+            SnmpUtils.registerForTraps(this, this, address, m_snmpTrapPort, m_snmpV3Users);
+            m_registeredForTraps = true;
 
             LOG.debug("init: Creating the trap session");
         } catch (final IOException e) {
@@ -165,32 +179,42 @@ public class Trapd implements TrapProcessorFactory, TrapNotificationListener {
                     }
                 });
                 LOG.error("init: Failed to listen on SNMP trap port, perhaps something else is already listening?", e);
+            } else {
+                LOG.error("init: Failed to initialize SNMP trap socket", e);
             }
             throw new UndeclaredThrowableException(e);
         }
 
+        try {
+            m_eventReader.open();
+        } catch (final Throwable e) {
+            LOG.error("init: Failed to open event reader", e);
+            throw new UndeclaredThrowableException(e);
+        }
     }
 
     private InetAddress getInetAddress() {
-        if (snmpTrapAddress.equals("*")) {
+        if (m_snmpTrapAddress.equals("*")) {
             return null;
         }
-        return InetAddressUtils.addr(snmpTrapAddress);
+        return InetAddressUtils.addr(m_snmpTrapAddress);
     }
 
     /**
      * Create the SNMP trap session and create the communication channel
      * to communicate with eventd.
      *
-     * @exception java.lang.reflect.UndeclaredThrowableException
-     *                if an unexpected database, or IO exception occurs.
+     * @throws java.lang.reflect.UndeclaredThrowableException if an unexpected database, or IO exception occurs.
+     * @see org.opennms.protocols.snmp.SnmpTrapSession
+     * @see org.opennms.protocols.snmp.SnmpTrapHandler
      */
+
     public synchronized void onStart() {
-        status = STARTING;
+        m_status = STARTING;
 
         LOG.debug("start: Initializing the trapd config factory");
 
-        status = RUNNING;
+        m_status = RUNNING;
 
         LOG.debug("start: Trapd ready to receive traps");
     }
@@ -199,15 +223,15 @@ public class Trapd implements TrapProcessorFactory, TrapNotificationListener {
      * Pauses Trapd
      */
     public void onPause() {
-        if (status != RUNNING) {
+        if (m_status != RUNNING) {
             return;
         }
 
-        status = PAUSE_PENDING;
+        m_status = PAUSE_PENDING;
 
         LOG.debug("pause: Calling pause on processor");
 
-        status = PAUSED;
+        m_status = PAUSED;
 
         LOG.debug("pause: Trapd paused");
     }
@@ -216,15 +240,15 @@ public class Trapd implements TrapProcessorFactory, TrapNotificationListener {
      * Resumes Trapd
      */
     public void onResume() {
-        if (status != PAUSED) {
+        if (m_status != PAUSED) {
             return;
         }
 
-        status = RESUME_PENDING;
+        m_status = RESUME_PENDING;
 
         LOG.debug("resume: Calling resume on processor");
 
-        status = RUNNING;
+        m_status = RUNNING;
 
         LOG.debug("resume: Trapd resumed");
     }
@@ -234,22 +258,19 @@ public class Trapd implements TrapProcessorFactory, TrapNotificationListener {
      * the command is silently discarded.
      */
     public synchronized void onStop() {
-        status = STOP_PENDING;
+        m_status = STOP_PENDING;
 
         // shutdown and wait on the background processing thread to exit.
         LOG.debug("stop: closing communication paths.");
 
         try {
-            if (registeredForTraps) {
+            if (m_registeredForTraps) {
                 LOG.debug("stop: Closing SNMP trap session.");
-
-                strategy.unregisterForTraps(this,getInetAddress(),snmpTrapPort);
-             //   SnmpUtils.unregisterForTraps(getInetAddress(), snmpTrapPort);
+                SnmpUtils.unregisterForTraps(this, getInetAddress(), m_snmpTrapPort);
                 LOG.debug("stop: SNMP trap session closed.");
             } else {
                 LOG.debug("stop: not attemping to closing SNMP trap session--it was never opened");
             }
-
         } catch (final IOException e) {
             LOG.warn("stop: exception occurred closing session", e);
         } catch (final IllegalStateException e) {
@@ -258,9 +279,11 @@ public class Trapd implements TrapProcessorFactory, TrapNotificationListener {
 
         LOG.debug("stop: Stopping queue processor.");
 
-        backlogQ.shutdown();
+        m_backlogQ.shutdown();
 
-        status = STOPPED;
+        m_eventReader.close();
+
+        m_status = STOPPED;
 
         LOG.debug("stop: Trapd stopped");
     }
@@ -271,37 +294,70 @@ public class Trapd implements TrapProcessorFactory, TrapNotificationListener {
      * @return The service's status.
      */
     public synchronized int getStatus() {
-        return status;
+        return m_status;
     }
 
-    /** {@inheritDoc} */
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public void trapError(final int error, final String msg) {
-        LOG.warn("Error Processing Received Trap: error = " + error + (msg != null ? ", ref = " + msg : ""));
+        LOG.warn("Error Processing Received Trap: error = {} {}", error, (msg != null ? ", ref = " + msg : ""));
     }
 
-    public void setTrapdIpMgr(TrapdIpMgr trapdIpMgr) {
-        this.trapdIpMgr = trapdIpMgr;
+    /**
+     * <p>getEventReader</p>
+     *
+     * @return a {@link org.opennms.netmgt.trapd.BroadcastEventProcessor} object.
+     */
+    public BroadcastEventProcessor getEventReader() {
+        return m_eventReader;
     }
 
-    public void setSnmpTrapAddress(String snmpTrapAddress) {
-        this.snmpTrapAddress = snmpTrapAddress;
+    /**
+     * <p>setEventReader</p>
+     *
+     * @param eventReader a {@link org.opennms.netmgt.trapd.BroadcastEventProcessor} object.
+     */
+    public void setEventReader(BroadcastEventProcessor eventReader) {
+        m_eventReader = eventReader;
     }
 
-    public void setSnmpTrapPort(Integer snmpTrapPort) {
-        this.snmpTrapPort = snmpTrapPort;
+    /**
+     * <p>getBacklogQ</p>
+     *
+     * @return a {@link java.util.concurrent.ExecutorService} object.
+     */
+    public ExecutorService getBacklogQ() {
+        return m_backlogQ;
     }
 
-    public void setSnmpV3Users(List<SnmpV3User> snmpV3Users) {
-        this.snmpV3Users = snmpV3Users;
-    }
-
+    /**
+     * <p>setBacklogQ</p>
+     *
+     * @param backlogQ a {@link java.util.concurrent.ExecutorService} object.
+     */
     public void setBacklogQ(ExecutorService backlogQ) {
-        this.backlogQ = backlogQ;
+        m_backlogQ = backlogQ;
     }
 
-    public void setProcessorFactory(TrapQueueProcessorFactory processorFactory) {
-        this.processorFactory = processorFactory;
+    public void setProcessorFactory(TrapQueueProcessorFactory m_processorFactory) {
+        this.m_processorFactory = m_processorFactory;
     }
 
+    public void setTrapdIpMgr(TrapdIpMgr m_trapdIpMgr) {
+        this.m_trapdIpMgr = m_trapdIpMgr;
+    }
+
+    public void setSnmpTrapAddress(String m_snmpTrapAddress) {
+        this.m_snmpTrapAddress = m_snmpTrapAddress;
+    }
+
+    public void setSnmpTrapPort(Integer m_snmpTrapPort) {
+        this.m_snmpTrapPort = m_snmpTrapPort;
+    }
+
+    public void setSnmpV3Users(List<SnmpV3User> m_snmpV3Users) {
+        this.m_snmpV3Users = m_snmpV3Users;
+    }
 }
