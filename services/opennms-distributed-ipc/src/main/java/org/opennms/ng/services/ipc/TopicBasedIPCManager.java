@@ -15,11 +15,14 @@ import org.opennms.netmgt.model.events.EventListener;
 import org.opennms.netmgt.model.events.EventProxyException;
 import org.opennms.netmgt.xml.event.Event;
 import org.opennms.netmgt.xml.event.Log;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class TopicBasedIPCManager implements EventIpcManager, EventIpcBroadcaster {
 
     private CamelContext camelContext;
     private ObjectPool producers;
+    Logger logger = LoggerFactory.getLogger(TopicBasedIPCManager.class);
 
     public TopicBasedIPCManager(CamelContext camelContext) {
         this.camelContext = camelContext;
@@ -33,13 +36,13 @@ public class TopicBasedIPCManager implements EventIpcManager, EventIpcBroadcaste
             template = (ProducerTemplate) producers.borrowObject();
             template.sendBodyAndHeader(IPCConstants.EVENTBROADCAST, event, IPCConstants.UEI, event.getUei());
         } catch (Exception e) {
-            e.printStackTrace();  //TODO
+            logger.error(e.getMessage());
         } finally {
             if (template != null) {
                 try {
                     producers.returnObject(template);
                 } catch (Exception e) {
-                    e.printStackTrace();  //TODO
+                    logger.error(e.getMessage());
                 }
             }
         }
@@ -47,7 +50,9 @@ public class TopicBasedIPCManager implements EventIpcManager, EventIpcBroadcaste
 
     @Override
     public void sendNow(Log log) {
-        //TODO
+        for (Event event : log.getEvents().getEventCollection()) {
+            sendNow(event);
+        }
     }
 
     @Override
@@ -57,7 +62,7 @@ public class TopicBasedIPCManager implements EventIpcManager, EventIpcBroadcaste
 
     @Override
     public void send(Log log) throws EventProxyException {
-        //TODO
+        sendNow(log);
     }
 
     @Override
@@ -75,7 +80,7 @@ public class TopicBasedIPCManager implements EventIpcManager, EventIpcBroadcaste
             camelContext.addRoutes(routeBuilder);
             camelContext.startRoute(routeBuilder.routeId);
         } catch (Exception e) {
-            e.printStackTrace();  //TODO
+            logger.error(e.getMessage());
         }
     }
 
@@ -91,7 +96,7 @@ public class TopicBasedIPCManager implements EventIpcManager, EventIpcBroadcaste
         try {
             camelContext.removeRoute(eventListener.getName());
         } catch (Exception e) {
-            e.printStackTrace();  //TODO
+            logger.error(e.getMessage());
         }
     }
 
@@ -115,6 +120,6 @@ public class TopicBasedIPCManager implements EventIpcManager, EventIpcBroadcaste
 
     @Override
     public void broadcastNow(Event event) {
-        //TODO
+        sendNow(event);
     }
 }
