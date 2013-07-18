@@ -653,6 +653,14 @@
                 <version>${opennms.version}</version>
             </dependency>
 
+            <!-- TESTING -->
+
+            <dependency>
+                <groupId>org.opennms.ng</groupId>
+                <artifactId>jms-test-support</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+
             <!-- standard dependencies -->
             <dependency>
                 <groupId>bsf</groupId>

@@ -17,6 +17,7 @@
     <packaging>pom</packaging>
     <modules>
         <module>eventd-generation</module>
+        <module>jms-test-support</module>
     </modules>
 
 </project>
