@@ -25,6 +25,7 @@
         <module>trapd</module>
         <module>collectd</module>
         <module>threshd</module>
+        <module>opennms-distributed-ipc</module>
     </modules>
 
 </project>
