@@ -1,0 +1,65 @@
+<blueprint xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+           xmlns:cm="http://aries.apache.org/blueprint/xmlns/blueprint-cm/v1.1.0"
+           xmlns="http://www.osgi.org/xmlns/blueprint/v1.0.0"
+           xsi:schemaLocation="http://www.osgi.org/xmlns/blueprint/v1.0.0 http://www.osgi.org/xmlns/blueprint/v1.0.0/blueprint.xsd">
+
+    <cm:property-placeholder persistent-id="org.opennms.ng.trapd" id="trapdConfigprops" update-strategy="reload">
+        <cm:default-properties>
+            <cm:property name="opennms.trapd.snmpTrapAddress" value="127.0.0.1"/>
+            <cm:property name="opennms.trapd.snmpTrapPort" value="10062"/>
+            <cm:property name="opennms.trapd.newSuspectOnTrap" value="false"/>
+        </cm:default-properties>
+    </cm:property-placeholder>
+
+    <bean id="daemon" class="org.opennms.netmgt.trapd.Trapd">
+        <property name="eventReader" ref="eventReader"/>
+        <property name="backlogQ" ref="trapdBacklogQ"/>
+    </bean>
+
+
+
+    <bean id="configLocation" class="org.opennms.ng.services.trapd.TrapdConfigStream" />
+    <bean id="extBean" factory-ref="configLocation" factory-method="getConfig"/>
+
+    <bean id="trapdConfig" class="org.opennms.netmgt.config.TrapdConfigFactory" init-method="init">
+        <argument ref="extBean" />
+    </bean>
+
+    <bean id="eventReader" class="org.opennms.netmgt.trapd.BroadcastEventProcessor">
+        <argument ref="eventIpcManager"/>
+        <argument ref="trapdIpMgr"/>
+    </bean>
+
+    <bean id="processorFactory" class="org.opennms.netmgt.trapd.TrapQueueProcessorFactory">
+        <property name="eventManager" ref="eventIpcManager"/>
+    </bean>
+
+    <bean id="newSuspectOnTrap" factory-ref="trapdConfig" factory-method="getNewSuspectOnTrap"/>
+
+    <bean id="snmpTrapAddress" factory-ref="trapdConfig" factory-method="getSnmpTrapAddress"/>
+
+    <bean id="snmpTrapPort" factory-ref="trapdConfig" factory-method="getSnmpTrapPort"/>
+
+    <bean id="snmpV3Users" factory-ref="trapdConfig" factory-method="getSnmpV3Users"/>
+
+    <!--
+    <reference id="snmp4jStrategy" interface="org.opennms.netmgt.snmp.SnmpStrategy" availability="mandatory"/>
+        -->
+
+    <reference id="jta" interface="javax.sql.DataSource"
+               filter="(transactional=true)" availability="mandatory"/>
+
+    <reference id="nonJTA" interface="javax.sql.DataSource"
+               filter="(transactional=false)" availability="mandatory"/>
+
+    <bean id="trapdIpMgr" class="org.opennms.netmgt.trapd.JdbcTrapdIpMgr">
+        <property name="dataSource" ref="nonJTA"/>
+    </bean>
+
+    <bean id="trapdBacklogQ" class="java.util.concurrent.Executors" factory-method="newFixedThreadPool">
+        <argument value="2"/>
+    </bean>
+
+    <reference id="eventIpcManager" interface="org.opennms.netmgt.model.events.EventIpcManager"/>
+
+</blueprint>
