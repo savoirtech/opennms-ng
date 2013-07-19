@@ -17,6 +17,7 @@
             org.hibernate*;resolution:=optional,
             org.springframework.security.core*;resolution:=optional,
             org.opennms.netmgt.snmp.snmp4j,
+            org.postgresql*;resolution:=optional,
             *
         </opennms.osgi.import.pkg>
 

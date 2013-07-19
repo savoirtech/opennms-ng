@@ -1,11 +1,15 @@
 package org.opennms.ng.services.trapd;
 
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.Map;
 import javax.sql.DataSource;
 
 import org.opennms.netmgt.trapd.TrapdIpMgr;
 import org.springframework.beans.factory.InitializingBean;
+import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.core.RowCallbackHandler;
 import org.springframework.util.Assert;
 
 /**
@@ -48,14 +52,14 @@ public class JdbcTrapdIpMgr implements TrapdIpMgr, InitializingBean {
     public synchronized void dataSourceSync() {
         m_knownips.clear();
 
-       /**
+
         new JdbcTemplate(m_dataSource).query(IP_LOAD_SQL, new RowCallbackHandler() {
             @Override
             public void processRow(ResultSet rs) throws SQLException {
                 m_knownips.put(rs.getString(1), rs.getLong(2));
             }
         });
-        */
+
 
     }
 
