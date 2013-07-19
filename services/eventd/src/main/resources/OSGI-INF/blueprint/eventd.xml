@@ -1,36 +1,139 @@
-<blueprint xmlns="http://www.osgi.org/xmlns/blueprint/v1.0.0"
-           xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+<blueprint xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
            xmlns:cm="http://aries.apache.org/blueprint/xmlns/blueprint-cm/v1.1.0"
-           xmlns:camel="http://camel.apache.org/schema/blueprint"
+           xmlns="http://www.osgi.org/xmlns/blueprint/v1.0.0"
            xsi:schemaLocation="http://www.osgi.org/xmlns/blueprint/v1.0.0 http://www.osgi.org/xmlns/blueprint/v1.0.0/blueprint.xsd">
 
-    <cm:property-placeholder persistent-id="org.opennms.ng.services.eventd" id="eventd" update-strategy="reload">
+    <cm:property-placeholder persistent-id="org.opennms.ng.eventd" id="eventdConfigprops" update-strategy="reload">
         <cm:default-properties>
-            <cm:property name="openjpa.jdbc.DBDictionary" value="hsql"/>
+            <cm:property name="opennms.trapd.snmpTrapAddress" value="127.0.0.1"/>
+            <cm:property name="opennms.trapd.snmpTrapPort" value="10062"/>
+            <cm:property name="opennms.trapd.newSuspectOnTrap" value="false"/>
         </cm:default-properties>
     </cm:property-placeholder>
-
-    <bean id="eventdProcessor" class="org.opennms.ng.services.eventd.EventTranslator"/>
-
-    <bean id="eventdRoute" class="org.opennms.ng.services.eventd.EventDRoute">
-        <property name="location" value="jms:eventd?concurrentConsumers=5"/>
-        <property name="processor" ref="eventdEventHandler"/>
-    </bean>
-
-    <!-- The original eventd processors that we will call in the route -->
 
     <reference id="eventdConfigManager" interface="org.opennms.ng.services.eventconfig.EventdConfigManagement"/>
 
     <reference id="eventConfDao" interface="org.opennms.ng.services.eventconfig.EventConfDao"/>
 
-    <bean id="eventWriter" class="org.opennms.ng.services.eventd.processor.JdbcEventWriter">
+    <reference id="eventIpcManagerImpl" interface="org.opennms.netmgt.model.events.EventIpcManager"/>
+
+    <reference id="jta" interface="javax.sql.DataSource"
+               filter="(transactional=true)" availability="mandatory"/>
+
+    <reference id="nonJTA" interface="javax.sql.DataSource"
+               filter="(transactional=false)" availability="mandatory"/>
+
+    <bean id="daemon" class="org.opennms.ng.services.eventd.Eventd">
+        <property name="eventdServiceManager" ref="eventdServiceManager"/>
+        <property name="eventReceivers">
+            <list>
+                <ref component-id="tcpReceiver"/>
+                <ref component-id="udpReceiver"/>
+            </list>
+        </property>
+        <property name="receiver" ref="broadcastEventProcessor"/>
+    </bean>
+
+    <bean id="configLocation" class="org.opennms.ng.services.eventd.EventdConfigStream"/>
+    <bean id="extBean" factory-ref="configLocation" factory-method="getConfig"/>
+
+    <bean id="eventConfig" class="org.opennms.ng.services.eventconfig.EventdConfigFactory" init-method="init">
+        <argument ref="extBean"/>
+    </bean>
+
+    <bean id="eventExpander" class="org.opennms.ng.services.eventconfig.EventExpander" init-method="afterPropertiesSet">
+        <property name="eventConfDao" ref="eventConfDao"/>
+    </bean>
+
+    <!--
+
+    <bean id="eventExpander" class="org.opennms.netmgt.config.EventExpander">
+        <property name="eventConfDao" ref="eventConfDao"/>
+    </bean>
+        -->
+
+    <!--
+    <bean id="eventParmRegexFilter" class="org.opennms.netmgt.eventd.processor.EventParmRegexFilterProcessor">
+        <property name="eventConfDao" ref="eventConfDao"/>
+    </bean>
+        -->
+    <bean id="eventIpcManagerHandlerPoolSize" factory-ref="eventdConfigManager" factory-method="getReceivers"/>
+    <bean id="eventIpcManagerHandlerQueueLength" factory-ref="eventdConfigManager" factory-method="getQueueLength"/>
+
+    <!--
+      <bean id="eventdServiceManager" class="org.opennms.netmgt.eventd.DaoEventdServiceManager">
+          <property name="serviceTypeDao" ref="serviceTypeDao"/>
+      </bean>
+        -->
+    <bean id="eventdEventHandler" class="org.opennms.netmgt.eventd.DefaultEventHandlerImpl">
+        <property name="eventProcessors">
+            <list>
+                <!--
+                  This EventProcessor can be used to perform regex replacements on incoming parm values.
+                  It was added in 1.11 and because of performance concerns, it is commented-out for now.
+                -->
+                <!-- <ref local="eventParmRegexFilter"/> -->
+                <ref component-id="eventExpander"/>
+                <ref component-id="eventWriter"/>
+                <!--
+                <ref component-id="eventIpcBroadcastProcessor"/>
+                -->
+            </list>
+        </property>
+    </bean>
+
+    <bean id="eventWriter" class="org.opennms.netmgt.eventd.processor.JdbcEventWriter">
         <property name="getNextIdString" ref="getNextEventIdSql"/>
         <property name="dataSource" ref="nonJTA"/>
         <property name="eventdServiceManager" ref="eventdServiceManager"/>
     </bean>
 
-    <bean id="eventExpander" class="org.opennms.ng.services.eventconfig.EventExpander" init-method="afterPropertiesSet">
-        <property name="eventConfDao" ref="eventConfDao"/>
+    <bean id="getNextEventIdSql" factory-ref="eventdConfigManager" factory-method="getGetNextEventID"/>
+
+    <!--
+    <bean id="eventIpcBroadcastProcessor" class="org.opennms.netmgt.eventd.processor.EventIpcBroadcastProcessor">
+        <property name="eventIpcBroadcaster" ref="eventIpcManagerImpl"/>
+    </bean>
+        -->
+    <bean id="eventHandler" class="org.opennms.netmgt.eventd.adaptors.EventIpcManagerEventHandlerProxy" depends-on="eventIpcManagerImpl">
+        <property name="eventIpcManager" ref="eventIpcManagerImpl"/>
+    </bean>
+
+    <bean id="tcpReceiver" class="org.opennms.netmgt.eventd.adaptors.tcp.TcpEventReceiver">
+        <property name="port" ref="tcpPort"/>
+        <property name="ipAddress" ref="tcpIpAddress"/>
+        <property name="eventHandlers">
+            <list>
+                <ref component-id="eventHandler"/>
+            </list>
+        </property>
+    </bean>
+
+    <bean id="udpReceiver" class="org.opennms.netmgt.eventd.adaptors.udp.UdpEventReceiver">
+        <property name="port" ref="udpPort"/>
+        <property name="ipAddress" ref="udpIpAddress"/>
+        <property name="eventHandlers">
+            <list>
+                <ref component-id="eventHandler"/>
+            </list>
+        </property>
+    </bean>
+
+    <bean id="tcpIpAddress" factory-ref="eventdConfigManager" factory-method="getTCPIpAddress"/>
+
+    <bean id="tcpPort" factory-ref="eventdConfigManager" factory-method="getTCPPort"/>
+
+    <bean id="udpIpAddress" factory-ref="eventdConfigManager" factory-method="getUDPIpAddress"/>
+
+    <bean id="udpPort" factory-ref="eventdConfigManager" factory-method="getUDPPort"/>
+
+    <bean id="broadcastEventProcessor" class="org.opennms.ng.services.eventd.BroadcastEventProcessor" depends-on="eventIpcManagerImpl">
+        <argument>
+            <ref component-id="eventIpcManagerImpl"/>
+        </argument>
+        <argument>
+            <ref component-id="eventConfDao"/>
+        </argument>
     </bean>
 
     <bean id="eventdServiceManager" class="org.opennms.ng.services.eventd.DaoEventdServiceManager">
@@ -39,54 +142,5 @@
 
          -->
     </bean>
-
-    <bean id="getNextEventIdSql" factory-ref="eventdConfigManager" factory-method="getGetNextEventID"/>
-
-    <reference id="jta" interface="javax.sql.DataSource"
-               filter="(transactional=true)" availability="mandatory"/>
-
-    <reference id="nonJTA" interface="javax.sql.DataSource"
-               filter="(transactional=false)" availability="mandatory"/>
-
-    <bean id="eventdEventHandler" class="org.opennms.ng.services.eventd.EventTranslator">
-
-        <!-- TODO - These right now are runnables that perform data manipulation, technically they could be processors.  (Same difference)-->
-
-        <property name="eventProcessors">
-            <list>
-                <!--
-                  This EventProcessor can be used to perform regex replacements on incoming parm values.
-                  It was added in 1.11 and because of performance concerns, it is commented-out for now.
-                -->
-                <!-- <ref local="eventParmRegexFilter"/> -->
-
-                <ref component-id="eventExpander"/>
-                <ref component-id="eventWriter"/>
-
-                <!-- TODO Turn this into a subscriber system -->
-
-                <!--
-                <ref local="eventIpcBroadcastProcessor"/>
-                -->
-            </list>
-        </property>
-    </bean>
-
-    <reference id="jmsConsumerPool" interface="javax.jms.ConnectionFactory" filter="(pooled=false)"/>
-
-    <reference id="jmsProducerPool" interface="javax.jms.ConnectionFactory" filter="(pooled=true)"/>
-
-    <bean id="jmsConfig" class="org.apache.camel.component.jms.JmsConfiguration">
-        <property name="connectionFactory" ref="jmsConsumerPool"/>
-        <property name="templateConnectionFactory" ref="jmsProducerPool"/>
-    </bean>
-
-    <bean id="jms" class="org.apache.camel.component.jms.JmsComponent">
-        <property name="configuration" ref="jmsConfig"/>
-    </bean>
-
-    <camel:camelContext xmlns="http://camel.apache.org/schema/blueprint" id="eventdRouteContext">
-        <routeBuilder ref="eventdRoute"/>
-    </camel:camelContext>
 
 </blueprint>

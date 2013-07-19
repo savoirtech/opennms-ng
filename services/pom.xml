@@ -16,8 +16,9 @@
     <description>OPENNMS Daemons</description>
 
     <modules>
-        <module>capsd</module>
+        <module>opennms-distributed-ipc</module>
         <module>eventd</module>
+        <module>capsd</module>
         <module>passive</module>
         <module>poller</module>
         <module>scheduler</module>
@@ -25,8 +26,6 @@
         <module>trapd</module>
         <module>collectd</module>
         <module>threshd</module>
-        <module>opennms-distributed-ipc</module>
-        <module>distributed-eventd</module>
     </modules>
 
 </project>

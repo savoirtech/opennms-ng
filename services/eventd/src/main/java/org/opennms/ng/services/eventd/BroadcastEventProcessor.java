@@ -28,6 +28,8 @@
 
 package org.opennms.ng.services.eventd;
 
+import java.util.List;
+
 import org.opennms.netmgt.EventConstants;
 import org.opennms.netmgt.model.events.EventBuilder;
 import org.opennms.netmgt.model.events.EventIpcManager;
@@ -39,8 +41,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.util.Assert;
 
-import java.util.List;
-
 /**
  * <p>BroadcastEventProcessor class.</p>
  *
@@ -48,9 +48,10 @@ import java.util.List;
  * @version $Id: $
  */
 public class BroadcastEventProcessor implements EventListener {
-
+    
+    
     private static final Logger LOG = LoggerFactory.getLogger(BroadcastEventProcessor.class);
-
+    
     private final EventIpcManager m_eventIpcManager;
     private final EventConfDao m_eventConfDao;
     
@@ -120,7 +121,7 @@ public class BroadcastEventProcessor implements EventListener {
     @Override
     public void onEvent(Event event) {
         
-        LOG.debug("onEvent: received event, UEI = " + event.getUei());
+        LOG.debug("onEvent: received event, UEI = {}", event.getUei());
         EventBuilder ebldr = null;
         
         if (isReloadConfigEvent(event)) {
@@ -130,7 +131,7 @@ public class BroadcastEventProcessor implements EventListener {
                 ebldr.addParam(EventConstants.PARM_DAEMON_NAME, "Eventd");
                 
             } catch (Throwable e) {
-                LOG.error("onEvent: Could not reload events config: " + e, e);
+                LOG.error("onEvent: Could not reload events config", e);
                 ebldr = new EventBuilder(EventConstants.RELOAD_DAEMON_CONFIG_SUCCESSFUL_UEI, getName());
                 ebldr.addParam(EventConstants.PARM_DAEMON_NAME, "Eventd");
                 ebldr.addParam(EventConstants.PARM_REASON, e.getLocalizedMessage().substring(0, 128));
@@ -162,6 +163,5 @@ public class BroadcastEventProcessor implements EventListener {
         
         return isTarget;
     }
-
 }
 

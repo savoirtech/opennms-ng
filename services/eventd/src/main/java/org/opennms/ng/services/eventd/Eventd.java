@@ -26,7 +26,7 @@
  *     http://www.opennms.com/
  *******************************************************************************/
 
-package org.opennms.ng.services.eventd2;
+package org.opennms.ng.services.eventd;
 
 import java.util.Collection;
 

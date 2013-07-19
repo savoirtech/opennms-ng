@@ -28,6 +28,8 @@
 
 package org.opennms.ng.services.eventd;
 
+import java.util.List;
+
 import org.opennms.netmgt.model.events.EventProcessor;
 import org.opennms.netmgt.model.events.EventProcessorException;
 import org.opennms.netmgt.xml.event.Event;
@@ -36,11 +38,7 @@ import org.opennms.netmgt.xml.event.Log;
 import org.opennms.netmgt.xml.event.Parm;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.InitializingBean;
 import org.springframework.util.Assert;
-
-import java.sql.SQLException;
-import java.util.List;
 
 /**
  * The EventHandler builds Runnables that essentially do all the work on an
@@ -53,9 +51,10 @@ import java.util.List;
  * @author <A HREF="mailto:sowmya@opennms.org">Sowmya Nataraj </A>
  * @author <A HREF="http://www.opennms.org">OpenNMS.org </A>
  */
-public final class DefaultEventHandlerImpl implements InitializingBean, EventHandler {
-
+public final class DefaultEventHandlerImpl  {
+    
     private static final Logger LOG = LoggerFactory.getLogger(DefaultEventHandlerImpl.class);
+    
     private List<EventProcessor> m_eventProcessors;
 
     /**
@@ -68,7 +67,6 @@ public final class DefaultEventHandlerImpl implements InitializingBean, EventHan
      * @see org.opennms.netmgt.eventd.EventHandler#createRunnable(org.opennms.netmgt.xml.event.Log)
      */
     /** {@inheritDoc} */
-    @Override
     public EventHandlerRunnable createRunnable(Log eventLog) {
         return new EventHandlerRunnable(eventLog);
     }
@@ -104,16 +102,16 @@ public final class DefaultEventHandlerImpl implements InitializingBean, EventHan
                     // Log the uei, source, and other important aspects
                     final String uuid = event.getUuid();
                     LOG.debug("Event {");
-                    LOG.debug("  uuid  = " + (uuid != null && uuid.length() > 0 ? uuid : "<not-set>"));
-                    LOG.debug("  uei   = " + event.getUei());
-                    LOG.debug("  src   = " + event.getSource());
-                    LOG.debug("  iface = " + event.getInterface());
-                    LOG.debug("  time  = " + event.getTime());
+                    LOG.debug("  uuid  = {}", (uuid != null && uuid.length() > 0 ? uuid : "<not-set>"));
+                    LOG.debug("  uei   = {}", event.getUei());
+                    LOG.debug("  src   = {}", event.getSource());
+                    LOG.debug("  iface = {}", event.getInterface());
+                    LOG.debug("  time  = {}", event.getTime());
                     if (event.getParmCollection().size() > 0) {
                         LOG.debug("  parms {");
                         for (final Parm parm : event.getParmCollection()) {
                             if ((parm.getParmName() != null) && (parm.getValue().getContent() != null)) {
-                                LOG.debug("    (" + parm.getParmName().trim() + ", " + parm.getValue().getContent().trim() + ")");
+                                LOG.debug("    ({}, {})", parm.getParmName().trim(), parm.getValue().getContent().trim());
                             }
                         }
                         LOG.debug("  }");
@@ -125,10 +123,10 @@ public final class DefaultEventHandlerImpl implements InitializingBean, EventHan
                     try {
                         eventProcessor.process(m_eventLog.getHeader(), event);
                     } catch (EventProcessorException e) {
-                        LOG.warn("Unable to process event using processor " + eventProcessor + "; not processing with any later processors.  Exception: " + e, e);
+                        LOG.warn("Unable to process event using processor {}; not processing with any later processors.", eventProcessor, e);
                         break;
                     } catch (Throwable t) {
-                        LOG.warn("Unknown exception processing event with processor " + eventProcessor + "; not processing with any later processors.  Exception: " + t, t);
+                        LOG.warn("Unknown exception processing event with processor {}; not processing with any later processors.", eventProcessor, t);
                         break;
                     }
                 }
@@ -137,15 +135,7 @@ public final class DefaultEventHandlerImpl implements InitializingBean, EventHan
 
     }
 
-    /**
-     * <p>afterPropertiesSet</p>
-     *
-     * @throws IllegalStateException if any.
-     */
-    @Override
-    public void afterPropertiesSet() throws IllegalStateException {
-        Assert.state(m_eventProcessors != null, "property eventPersisters must be set");
-    }
+    
 
     /**
      * <p>getEventProcessors</p>

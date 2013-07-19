@@ -11,8 +11,8 @@
 
     <artifactId>eventd</artifactId>
 
-    <name>OPENNMS :: Daemons :: Eventd</name>
-    <description>OPENNMS Daemons :: Eventd</description>
+    <name>OPENNMS :: Daemons :: Eventd - Distributed</name>
+    <description>OPENNMS Daemons :: Eventd - Distributed</description>
 
     <packaging>bundle</packaging>
     <properties>
@@ -33,10 +33,6 @@
     </properties>
 
     <dependencies>
-        <dependency>
-            <groupId>org.apache.camel</groupId>
-            <artifactId>camel-jms</artifactId>
-        </dependency>
 
         <dependency>
             <groupId>org.opennms.ng</groupId>
@@ -46,6 +42,11 @@
         <dependency>
             <groupId>org.opennms</groupId>
             <artifactId>opennms-dao</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>org.opennms.bundles</groupId>
+            <artifactId>opennms-services-bundle</artifactId>
         </dependency>
 
     </dependencies>

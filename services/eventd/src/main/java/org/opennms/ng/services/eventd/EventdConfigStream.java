@@ -1,4 +1,4 @@
-package org.opennms.ng.services.eventd2;
+package org.opennms.ng.services.eventd;
 
 import java.io.IOException;
 

@@ -31,6 +31,7 @@ package org.opennms.ng.services.eventd;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.opennms.netmgt.dao.api.EventdServiceManager;
 import org.opennms.netmgt.model.OnmsServiceType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
