@@ -50,9 +50,7 @@
 
     <bean id="snmpV3Users" factory-ref="trapdConfig" factory-method="getSnmpV3Users"/>
 
-    <!--
-    <reference id="snmp4jStrategy" interface="org.opennms.netmgt.snmp.SnmpStrategy" availability="mandatory"/>
-        -->
+
 
     <reference id="jta" interface="javax.sql.DataSource"
                filter="(transactional=true)" availability="mandatory"/>
@@ -66,7 +64,7 @@
     </bean>
         -->
 
-    <bean id="trapdIpMgr" class="org.opennms.ng.services.trapd.JdbcTrapdIpMgr">
+    <bean id="trapdIpMgr" class="org.opennms.ng.services.trapd.JdbcTrapdIpMgr" init-method="afterPropertiesSet">
         <property name="dataSource" ref="nonJTA"/>
     </bean>
 

@@ -24,9 +24,8 @@
             org.opennms.ng.services.trapd*
         </opennms.osgi.export.pkg>
 
-        <!-- Trying to get around dynamic class.forname loading
+        <!-- Trying to get around dynamic class.forname loading -->
         <opennms.osgi.dynamic>*</opennms.osgi.dynamic>
-        -->
 
     </properties>
 
@@ -48,15 +47,14 @@
             <artifactId>opennms-util</artifactId>
         </dependency>
 
-
         <dependency>
             <groupId>org.opennms.ng</groupId>
             <artifactId>event-config</artifactId>
         </dependency>
 
         <dependency>
-                   <groupId>org.opennms.bundles</groupId>
-                   <artifactId>opennms-services-bundle</artifactId>
-               </dependency>
+            <groupId>org.opennms.bundles</groupId>
+            <artifactId>opennms-services-bundle</artifactId>
+        </dependency>
     </dependencies>
 </project>
