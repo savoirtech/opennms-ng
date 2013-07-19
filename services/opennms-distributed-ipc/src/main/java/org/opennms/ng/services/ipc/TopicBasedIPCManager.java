@@ -1,7 +1,7 @@
 package org.opennms.ng.services.ipc;
 
+import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.List;
 
 import org.apache.camel.CamelContext;
@@ -68,7 +68,7 @@ public class TopicBasedIPCManager implements EventIpcManager, EventIpcBroadcaste
     @Override
     public void addEventListener(EventListener eventListener) {
 
-        List<String> list = Collections.emptyList();
+        List<String> list = new ArrayList<String>();
         addEventListener(eventListener, list);
     }
 
@@ -86,7 +86,7 @@ public class TopicBasedIPCManager implements EventIpcManager, EventIpcBroadcaste
 
     @Override
     public void addEventListener(EventListener eventListener, String s) {
-        List<String> list = Collections.emptyList();
+        List<String> list = new ArrayList<String>();
         list.add(s);
         addEventListener(eventListener, list);
     }
@@ -102,7 +102,7 @@ public class TopicBasedIPCManager implements EventIpcManager, EventIpcBroadcaste
 
     @Override
     public void removeEventListener(EventListener eventListener, Collection<String> strings) {
-        removeEventListener(eventListener, strings);
+        removeEventListener(eventListener);
     }
 
     @Override

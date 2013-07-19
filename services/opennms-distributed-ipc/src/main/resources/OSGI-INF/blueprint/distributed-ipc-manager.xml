@@ -33,7 +33,7 @@
         <argument ref="ipcMessagingRouteContext"/>
     </bean>
 
-    <service ref="topicBasedIPCManager" interface="org.opennms.netmgt.model.events.EventIpcManager">
+    <service ref="topicBasedIPCManager"  auto-export="all-classes">
         <service-properties>
             <entry key="topicBasedipcManager" value="true"/>
         </service-properties>

@@ -26,6 +26,7 @@
         <module>collectd</module>
         <module>threshd</module>
         <module>opennms-distributed-ipc</module>
+        <module>distributed-eventd</module>
     </modules>
 
 </project>

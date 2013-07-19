@@ -65,7 +65,7 @@ public class EventdConfigManager implements EventdConfigManagement {
      * @throws org.exolab.castor.xml.ValidationException if any.
      * @throws java.io.IOException if any.
      */
-    protected EventdConfigManager(final InputStream stream) throws MarshalException, ValidationException, IOException {
+    public EventdConfigManager(final InputStream stream) throws MarshalException, ValidationException, IOException {
         m_config = CastorUtils.unmarshal(EventdConfiguration.class, stream);
 
     }
