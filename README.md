@@ -1,4 +1,4 @@
-OpenNMS-NG
+opennms-ng
 ==========
 --
 What is OpenNMS-NG?
