@@ -104,12 +104,13 @@ public final class Eventd {
     /**
      * <p>onInit</p>
      */
-    protected void onInit() {
+    public void onInit() {
         Assert.state(m_eventdServiceManager != null, "property eventdServiceManager must be set");
         Assert.state(m_eventReceivers != null, "property eventReceivers must be set");
         Assert.state(m_receiver != null, "property receiver must be set");
         
         m_eventdServiceManager.dataSourceSync();
+        onStart();
     }
 
     /**
@@ -128,7 +129,7 @@ public final class Eventd {
     /**
      * <p>onStop</p>
      */
-    protected void onStop() {
+    public void onStop() {
         LOG.debug("calling shutdown on tcp/udp listener threads");
 
         // Stop listener threads

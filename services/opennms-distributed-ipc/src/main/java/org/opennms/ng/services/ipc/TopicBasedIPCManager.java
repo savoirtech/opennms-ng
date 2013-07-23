@@ -36,7 +36,7 @@ public class TopicBasedIPCManager implements EventIpcManager, EventIpcBroadcaste
             template = (ProducerTemplate) producers.borrowObject();
             template.sendBodyAndHeader(IPCConstants.EVENTBROADCAST, event, IPCConstants.UEI, event.getUei());
         } catch (Exception e) {
-            logger.error(e.getMessage());
+            logger.error("Could not produce message " + e);
         } finally {
             if (template != null) {
                 try {
@@ -80,7 +80,7 @@ public class TopicBasedIPCManager implements EventIpcManager, EventIpcBroadcaste
             camelContext.addRoutes(routeBuilder);
             camelContext.startRoute(routeBuilder.routeId);
         } catch (Exception e) {
-            logger.error(e.getMessage());
+            logger.error("Error adding eventListener " + e);
         }
     }
 

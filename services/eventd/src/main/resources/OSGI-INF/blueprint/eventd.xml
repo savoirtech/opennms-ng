@@ -23,7 +23,7 @@
     <reference id="nonJTA" interface="javax.sql.DataSource"
                filter="(transactional=false)" availability="mandatory"/>
 
-    <bean id="daemon" class="org.opennms.ng.services.eventd.Eventd">
+    <bean id="daemon" class="org.opennms.ng.services.eventd.Eventd" init-method="onInit" destroy-method="onStop">
         <property name="eventdServiceManager" ref="eventdServiceManager"/>
         <property name="eventReceivers">
             <list>
@@ -65,6 +65,11 @@
           <property name="serviceTypeDao" ref="serviceTypeDao"/>
       </bean>
         -->
+
+    <bean id="publishEvent" class="org.opennms.ng.services.eventd.EventToTopic">
+        <property name="ipcManager" ref="eventIpcManagerImpl"/>
+    </bean>
+
     <bean id="eventdEventHandler" class="org.opennms.netmgt.eventd.DefaultEventHandlerImpl">
         <property name="eventProcessors">
             <list>
@@ -75,6 +80,9 @@
                 <!-- <ref local="eventParmRegexFilter"/> -->
                 <ref component-id="eventExpander"/>
                 <ref component-id="eventWriter"/>
+
+                <ref component-id="publishEvent"/>
+
                 <!--
                 <ref component-id="eventIpcBroadcastProcessor"/>
                 -->

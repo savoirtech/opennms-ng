@@ -29,7 +29,7 @@
 
     <!-- Actual event manager -->
 
-    <bean id="topicBasedIPCManager" class="org.opennms.ng.services.ipc.TopicBasedIPCManager">
+    <bean id="topicBasedIPCManager" class="org.opennms.ng.services.ipc.TopicBasedIPCManager" init-method="init">
         <argument ref="ipcMessagingRouteContext"/>
     </bean>
 
