@@ -156,6 +156,28 @@
 
     </feature>
 
+    <feature name="collectd" version="${project.version}">
+        <feature>collectd-config</feature>
+
+        <bundle>mvn:org.apache.servicemix.bundles/org.apache.servicemix.bundles.antlr/${antlr.version}</bundle>
+        <bundle>mvn:org.apache.servicemix.bundles/org.apache.servicemix.bundles.jcifs/${jcifs.version}</bundle>
+        <bundle>mvn:org.apache.servicemix.bundles/org.apache.servicemix.bundles.aspectj/${aspectj.version}</bundle>
+        <bundle>mvn:org.opennms.bundles/jldap/${jldap.version}</bundle>
+
+        <bundle>mvn:org.opennms.bundles/opennms-services-common/${opennms.version}</bundle>
+        <bundle>mvn:org.opennms.bundles/opennms-javamail-api/${opennms.version}</bundle>
+        <bundle>mvn:org.apache.httpcomponents/httpcore-osgi/${httpcore.version}</bundle>
+        <bundle>mvn:org.apache.httpcomponents/httpclient-osgi/${httpclient.version}</bundle>
+        <bundle>mvn:org.opennms.ng/scheduler/${project.version}</bundle>
+        <bundle>mvn:org.opennms.bundles/bsf/${bsf.version}</bundle>
+        <bundle>mvn:org.opennms.bundles/opennms-protocols/${opennms.version}</bundle>
+        <bundle>mvn:org.opennms/opennms-icmp-api/${opennms.version}</bundle>
+        <bundle>mvn:org.opennms.features/org.opennms.features.phonebook/${opennms.version}</bundle>
+
+        <bundle>mvn:org.opennms.ng/collectd/${project.version}</bundle>
+
+    </feature>
+
     <feature name="eventd" version="${project.version}">
         <feature>event-config</feature>
         <bundle>mvn:org.opennms.ng/opennms-distributed-ipc/${project.version}</bundle>
