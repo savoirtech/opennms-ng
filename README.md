@@ -65,6 +65,49 @@ The available OpenNMS-NG features can be found in the <code>opennms-ng</code> di
 
 <code>features:install eventd</code>
 
-If everything was set up and install correctly, you should see the following:
+If everything was set up and install correctly, you should see something similar to the following:
 
+<pre>
+                                                    ///,        ////
+ ________   ______   _________  ______   ______      \  /,      /  >.
+/_______/\ /_____/\ /________/\/_____/\ /_____/\      \  /,   _/  /.
+\::: _  \ \\::::_\/_\__.::.__\/\:::_ \ \\::::_\/_      \_  /_/   /.
+ \::(_)  \ \\:\/___/\  \::\ \   \:\ \ \ \\:\/___/\      \__/_   <
+  \:: __  \ \\::___\/_  \::\ \   \:\ \ \ \\_::._\:\     /<<< \_\_
+   \:.\ \  \ \\:\____/\  \::\ \   \:\_\ \ \ /____\:\   /,)^>>_._ \
+    \__\/\__\/ \_____\/   \__\/    \_____\/ \_____\/   (/   \\ /\\\
+                                                            // ````
+                   Integration Platform                   ((`
+     Savoir Technologies - http://www.savoirtech.com
+                  (version 1.3.0-SNAPSHOT)
+
+Hit '<tab>' for a list of available commands
+and '[cmd] --help' for help on a specific command.
+Hit '<ctrl-d>' or 'osgi:shutdown' to shutdown
+
+
+karaf@savoir> features:install eventd
+Refreshing bundles org.springframework.context (136), org.springframework.aop (135), org.springframework.core (132), org.springframework.context.support (137)
+Adding eventlistener for jms:topic:broadcast_events?selector=uei='uei.opennms.org/internal/eventsConfigChange'
+karaf@savoir>
+</pre>
+
+Doing a <code>list</code> should show the modules working, running and ready to work ;-)
+
+<pre>
+karaf@savoir> list
+START LEVEL 100 , List Threshold: 50
+   ID   State         Blueprint      Spring    Level  Name
+
+<snip>
+
+[ 232] [Active     ] [            ] [       ] [   80] OpenNMS Phonebook (1.13.0.SNAPSHOT)
+[ 233] [Active     ] [            ] [       ] [   80] opennms-services-bundle (1.13.0.SNAPSHOT)
+[ 234] [Active     ] [            ] [       ] [   80] opennms-model (1.13.0.SNAPSHOT)
+[ 235] [Active     ] [            ] [       ] [   80] opennms-config-model (1.13.0.SNAPSHOT)
+[ 236] [Active     ] [Created     ] [       ] [   80] event-config (1.0.0.SNAPSHOT)
+[ 237] [Active     ] [Created     ] [       ] [   80] opennms-distributed-ipc (1.0.0.SNAPSHOT)
+[ 238] [Active     ] [Created     ] [       ] [   80] eventd (1.0.0.SNAPSHOT)
+karaf@savoir>
+</pre>
 
