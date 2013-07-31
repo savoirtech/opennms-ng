@@ -28,6 +28,7 @@
             *
         </opennms.osgi.import.pkg>
         <opennms.osgi.export.pkg>
+            org.opennms.ng.util.xml;version="${parent.version}",
             org.opennms.core.concurrent;version="${opennms.version}",
             org.opennms.core.fiber;version="${opennms.version}",
             org.opennms.core.queue;version="${opennms.version}",
@@ -38,6 +39,7 @@
             org.opennms.core.xml;version="${opennms.version}",
             org.opennms.core.xml.bind;version="${opennms.version}",
             org.opennms.core.db;version="${opennms.version}",
+
         </opennms.osgi.export.pkg>
 
 

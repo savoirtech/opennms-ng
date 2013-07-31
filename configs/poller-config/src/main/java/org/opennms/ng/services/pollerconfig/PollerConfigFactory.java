@@ -40,19 +40,20 @@ import org.apache.commons.io.IOUtils;
 import org.exolab.castor.xml.MarshalException;
 import org.exolab.castor.xml.ValidationException;
 import org.opennms.core.utils.ConfigFileConstants;
-import org.opennms.core.xml.CastorUtils;
 import org.opennms.netmgt.config.poller.PollerConfiguration;
-import org.opennms.ng.services.opennmsserverconfig.OpennmsServerConfigFactory;
+import org.opennms.ng.services.opennmsserverconfig.OpennmsServerConfig;
+import org.opennms.ng.util.xml.CastorUtils;
+import org.osgi.framework.BundleContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
  * This is the singleton class used to load the configuration for the OpenNMS
  * Poller service from the poller-configuration xml file.
- *
+ * <p/>
  * A mapping of the configured URLs to the iplist they contain is built at
  * init() time so as to avoid numerous file reads.
- *
+ * <p/>
  * <strong>Note: </strong>Users of this class should make sure the
  * <em>init()</em> is called before calling any other method to ensure the
  * config is loaded before accessing other convenience methods.
@@ -62,61 +63,75 @@ import org.slf4j.LoggerFactory;
  * @author <a href="mailto:sowmya@opennms.org">Sowmya Nataraj </a>
  * @author <a href="http://www.opennms.org/">OpenNMS </a>
  */
-public final class PollerConfigFactory extends PollerConfigManager {
-    private static final Logger LOG = LoggerFactory.getLogger(PollerConfigFactory.class);
+public class PollerConfigFactory extends PollerConfigManager {
+
+    private final Logger LOG = LoggerFactory.getLogger(PollerConfigFactory.class);
     /**
      * The singleton instance of this factory
      */
-    private static PollerConfig m_singleton = null;
-
+    private PollerConfig m_singleton = null;
     /**
      * This member is set to true if the configuration file has been loaded.
      */
-    private static boolean m_loaded = false;
-    
+    private boolean m_loaded = false;
     /**
      * Loaded version
      */
     private long m_currentVersion = -1L;
 
-    /**
-     * <p>Constructor for PollerConfigFactory.</p>
-     *
-     * @param currentVersion a long.
-     * @param stream a {@link java.io.InputStream} object.
-     * @param localServer a {@link String} object.
-     * @param verifyServer a boolean.
-     * @throws org.exolab.castor.xml.MarshalException if any.
-     * @throws org.exolab.castor.xml.ValidationException if any.
-     */
-    public PollerConfigFactory(final long currentVersion, final InputStream stream, final String localServer, final boolean verifyServer) throws MarshalException, ValidationException {
-        super(stream, localServer, verifyServer);
+    public PollerConfigFactory() {}
+
+    public PollerConfigFactory(final long currentVersion, final InputStream stream, final String localServer, final boolean verifyServer,
+                               BundleContext bundleContext, OpennmsServerConfig opennmsServerConfig) throws MarshalException, ValidationException {
+        super(stream, localServer, verifyServer, bundleContext, opennmsServerConfig);
         m_currentVersion = currentVersion;
+    }
+
+    /**
+     * Return the singleton instance of this factory.
+     *
+     * @return The current factory instance.
+     * @throws IllegalStateException Thrown if the factory has not yet been initialized.
+     */
+    public synchronized PollerConfig getInstance() {
+        if (!m_loaded) {
+            throw new IllegalStateException("The factory has not been initialized");
+        }
+
+        return m_singleton;
+    }
+
+    /**
+     * <p>setInstance</p>
+     *
+     * @param instance a {@link org.opennms.netmgt.config.PollerConfig} object.
+     */
+    public synchronized void setInstance(final PollerConfig instance) {
+        m_singleton = instance;
+        m_loaded = true;
+    }
+
+    public PollerConfig getConf() {
+        return m_singleton;
     }
 
     /**
      * Load the config from the default config file and create the singleton
      * instance of this factory.
      *
-     * @exception java.io.IOException
-     *                Thrown if the specified config file cannot be read
-     * @exception org.exolab.castor.xml.MarshalException
-     *                Thrown if the file does not conform to the schema.
-     * @exception org.exolab.castor.xml.ValidationException
-     *                Thrown if the contents do not match the required schema.
-     * @throws java.io.IOException if any.
-     * @throws org.exolab.castor.xml.MarshalException if any.
+     * @throws java.io.IOException                       Thrown if the specified config file cannot be read
+     * @throws org.exolab.castor.xml.MarshalException    Thrown if the file does not conform to the schema.
+     * @throws org.exolab.castor.xml.ValidationException Thrown if the contents do not match the required schema.
+     * @throws java.io.IOException                       if any.
+     * @throws org.exolab.castor.xml.MarshalException    if any.
      * @throws org.exolab.castor.xml.ValidationException if any.
      */
-    public static synchronized void init() throws IOException, MarshalException, ValidationException {
+    public synchronized void init() throws IOException, MarshalException, ValidationException {
         if (m_loaded) {
             // init already called - return
             // to reload, reload() will need to be called
             return;
         }
-
-        OpennmsServerConfigFactory.init();
-        OpennmsServerConfigFactory onmsSvrConfig = OpennmsServerConfigFactory.getInstance();
 
         final File cfgFile = ConfigFileConstants.getFile(ConfigFileConstants.POLLER_CONFIG_FILE_NAME);
 
@@ -124,9 +139,14 @@ public final class PollerConfigFactory extends PollerConfigManager {
 
         InputStream stream = null;
         PollerConfigFactory config = null;
+
+        if (getOpennmsServerConfig() == null) {
+            LOG.error("ServerConfigFactory is null");
+        }
         try {
             stream = new FileInputStream(cfgFile);
-            config = new PollerConfigFactory(cfgFile.lastModified(), stream, onmsSvrConfig.getServerName(), onmsSvrConfig.verifyServer());
+            config = new PollerConfigFactory(cfgFile.lastModified(), stream, getOpennmsServerConfig().getServerName(),
+                getOpennmsServerConfig().verifyServer(), getBundleContext(), getOpennmsServerConfig());
         } finally {
             IOUtils.closeQuietly(stream);
         }
@@ -136,10 +156,9 @@ public final class PollerConfigFactory extends PollerConfigManager {
                 for (final org.opennms.netmgt.config.poller.Parameter parm : service.getParameterCollection()) {
                     if (parm.getKey().equals("ds-name")) {
                         if (parm.getValue().length() > ConfigFileConstants.RRD_DS_MAX_SIZE) {
-                            throw new ValidationException(
-                                String.format("ds-name '%s' in service '%s' (poller package '%s') is greater than %d characters",
-                                parm.getValue(), service.getName(), pollerPackage.getName(), ConfigFileConstants.RRD_DS_MAX_SIZE)
-                            );
+                            throw new ValidationException(String.format(
+                                "ds-name '%s' in service '%s' (poller package '%s') is greater than %d characters", parm.getValue(),
+                                service.getName(), pollerPackage.getName(), ConfigFileConstants.RRD_DS_MAX_SIZE));
                         }
                     }
                 }
@@ -152,47 +171,21 @@ public final class PollerConfigFactory extends PollerConfigManager {
     /**
      * Reload the config from the default config file
      *
-     * @exception java.io.IOException
-     *                Thrown if the specified config file cannot be read/loaded
-     * @exception org.exolab.castor.xml.MarshalException
-     *                Thrown if the file does not conform to the schema.
-     * @exception org.exolab.castor.xml.ValidationException
-     *                Thrown if the contents do not match the required schema.
-     * @throws java.io.IOException if any.
-     * @throws org.exolab.castor.xml.MarshalException if any.
+     * @throws java.io.IOException                       Thrown if the specified config file cannot be read/loaded
+     * @throws org.exolab.castor.xml.MarshalException    Thrown if the file does not conform to the schema.
+     * @throws org.exolab.castor.xml.ValidationException Thrown if the contents do not match the required schema.
+     * @throws java.io.IOException                       if any.
+     * @throws org.exolab.castor.xml.MarshalException    if any.
      * @throws org.exolab.castor.xml.ValidationException if any.
      */
-    public static synchronized void reload() throws IOException, MarshalException, ValidationException {
+    public synchronized void reload() throws IOException, MarshalException, ValidationException {
         init();
         getInstance().update();
     }
 
     /**
-     * Return the singleton instance of this factory.
-     *
-     * @return The current factory instance.
-     * @throws IllegalStateException
-     *             Thrown if the factory has not yet been initialized.
+     * {@inheritDoc}
      */
-    public static synchronized PollerConfig getInstance() {
-        if (!m_loaded) {
-            throw new IllegalStateException("The factory has not been initialized");
-        }
-
-        return m_singleton;
-    }
-    
-    /**
-     * <p>setInstance</p>
-     *
-     * @param instance a {@link org.opennms.netmgt.config.PollerConfig} object.
-     */
-    public static synchronized void setInstance(final PollerConfig instance) {
-        m_singleton = instance;
-        m_loaded = true;
-    }
-
-    /** {@inheritDoc} */
     @Override
     protected void saveXml(final String xml) throws IOException {
         if (xml != null) {
@@ -215,8 +208,8 @@ public final class PollerConfigFactory extends PollerConfigManager {
     /**
      * <p>update</p>
      *
-     * @throws java.io.IOException if any.
-     * @throws org.exolab.castor.xml.MarshalException if any.
+     * @throws java.io.IOException                       if any.
+     * @throws org.exolab.castor.xml.MarshalException    if any.
      * @throws org.exolab.castor.xml.ValidationException if any.
      */
     @Override

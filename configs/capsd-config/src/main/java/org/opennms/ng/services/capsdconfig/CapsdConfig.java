@@ -28,13 +28,18 @@
 
 package org.opennms.ng.services.capsdconfig;
 
-import org.exolab.castor.xml.MarshalException;
-import org.exolab.castor.xml.ValidationException;
-import org.opennms.netmgt.config.capsd.*;
-
 import java.io.IOException;
 import java.net.InetAddress;
 import java.util.List;
+
+import org.exolab.castor.xml.MarshalException;
+import org.exolab.castor.xml.ValidationException;
+import org.opennms.netmgt.config.capsd.CapsdConfiguration;
+import org.opennms.netmgt.config.capsd.Property;
+import org.opennms.netmgt.config.capsd.ProtocolConfiguration;
+import org.opennms.netmgt.config.capsd.ProtocolPlugin;
+import org.opennms.netmgt.config.capsd.Range;
+import org.opennms.netmgt.config.capsd.SmbAuth;
 
 /**
  * <p>CapsdConfig interface.</p>
@@ -53,8 +58,8 @@ public interface CapsdConfig {
     /**
      * Saves the current in-memory configuration to disk and reloads
      *
-     * @throws org.exolab.castor.xml.MarshalException if any.
-     * @throws java.io.IOException if any.
+     * @throws org.exolab.castor.xml.MarshalException    if any.
+     * @throws java.io.IOException                       if any.
      * @throws org.exolab.castor.xml.ValidationException if any.
      */
     void save() throws MarshalException, IOException, ValidationException;
@@ -68,7 +73,7 @@ public interface CapsdConfig {
 
     /**
      * Finds the SMB authentication object using the netbios name.
-     *
+     * <p/>
      * The target of the search.
      *
      * @param target a {@link String} object.
@@ -80,8 +85,7 @@ public interface CapsdConfig {
      * Checks the configuration to determine if the target is managed or
      * unmanaged.
      *
-     * @param target
-     *            The target to check against.
+     * @param target The target to check against.
      * @return a boolean.
      */
     boolean isAddressUnmanaged(InetAddress target);
@@ -159,12 +163,12 @@ public interface CapsdConfig {
      * @param plugin a {@link org.opennms.netmgt.config.capsd.ProtocolPlugin} object.
      */
     void addProtocolPlugin(ProtocolPlugin plugin);
-    
+
     /**
      * <p>determinePrimarySnmpInterface</p>
      *
      * @param addressList a {@link java.util.List} object.
-     * @param strict a boolean.
+     * @param strict      a boolean.
      * @return a {@link java.net.InetAddress} object.
      */
     InetAddress determinePrimarySnmpInterface(List<InetAddress> addressList, boolean strict);

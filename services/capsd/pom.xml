@@ -10,7 +10,11 @@
     <modelVersion>4.0.0</modelVersion>
 
     <artifactId>capsd</artifactId>
+
     <packaging>bundle</packaging>
+
+    <name>OPENNMS :: Daemons :: Capsd</name>
+    <description>OPENNMS Daemons :: Capsd</description>
 
     <properties>
         <opennms.osgi.import.pkg>
@@ -21,66 +25,37 @@
         </opennms.osgi.import.pkg>
 
         <opennms.osgi.export.pkg>
-            org.opennms.ng.services.capsd*
+            org.opennms.ng.services.capsd
         </opennms.osgi.export.pkg>
 
-        <!-- Trying to get around dynamic class.forname loading -->
+        <!-- Trying to get around dynamic class.forname loading
+        -->
+
         <opennms.osgi.dynamic>*</opennms.osgi.dynamic>
 
     </properties>
 
-    <name>OPENNMS :: Daemons :: Capsd</name>
-    <description>OPENNMS Daemons :: Capsd</description>
-
     <dependencies>
-        <dependency>
-            <groupId>com.novell.ldap</groupId>
-            <artifactId>jldap</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.camel</groupId>
-            <artifactId>camel-core</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.servicemix.bundles</groupId>
-            <artifactId>org.apache.servicemix.bundles.jcifs</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.opennms.core.snmp</groupId>
-            <artifactId>org.opennms.core.snmp.implementations.snmp4j</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.opennms.bundles</groupId>
-            <artifactId>opennms-util</artifactId>
-        </dependency>
+
         <dependency>
             <groupId>org.opennms.ng</groupId>
             <artifactId>capsd-config</artifactId>
         </dependency>
+
         <dependency>
             <groupId>org.opennms.ng</groupId>
-            <artifactId>event-config</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.opennms.ng</groupId>
-            <artifactId>snmp-config</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.slf4j</groupId>
-            <artifactId>slf4j-api</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.opennms.bundles</groupId>
-            <artifactId>opennms-protocols</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.opennms</groupId>
-            <artifactId>opennms-icmp-api</artifactId>
+            <artifactId>collectd-config</artifactId>
         </dependency>
 
         <dependency>
             <groupId>org.opennms.ng</groupId>
-            <artifactId>poller</artifactId>
+            <artifactId>poller-config</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>org.opennms.bundles</groupId>
+            <artifactId>opennms-services-bundle</artifactId>
         </dependency>
     </dependencies>
+
 </project>

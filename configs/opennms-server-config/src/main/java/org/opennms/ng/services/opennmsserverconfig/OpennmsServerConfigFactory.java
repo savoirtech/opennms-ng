@@ -28,14 +28,14 @@
 
 package org.opennms.ng.services.opennmsserverconfig;
 
-import org.exolab.castor.xml.MarshalException;
-import org.exolab.castor.xml.ValidationException;
-import org.opennms.core.utils.ConfigFileConstants;
-
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+
+import org.exolab.castor.xml.MarshalException;
+import org.exolab.castor.xml.ValidationException;
+import org.opennms.core.utils.ConfigFileConstants;
 
 /**
  * This is the singleton class used to load the configuration for the OpenNMS
@@ -47,7 +47,7 @@ import java.io.InputStream;
  *
  * @author <a href="mailto:jamesz@opennms.com">James Zuo </a>
  */
-public final class OpennmsServerConfigFactory extends OpennmsServerConfigManager {
+public class OpennmsServerConfigFactory extends OpennmsServerConfigManager {
     /**
      * The singleton instance of this factory
      */
@@ -83,7 +83,7 @@ public final class OpennmsServerConfigFactory extends OpennmsServerConfigManager
      * @throws org.exolab.castor.xml.MarshalException if any.
      * @throws org.exolab.castor.xml.ValidationException if any.
      */
-    public static synchronized void init() throws IOException, MarshalException, ValidationException {
+    public synchronized void init() throws IOException, MarshalException, ValidationException {
         if (m_loaded) {
             // init already called - return
             // to reload, reload() will need to be called
@@ -112,7 +112,7 @@ public final class OpennmsServerConfigFactory extends OpennmsServerConfigManager
      * @throws org.exolab.castor.xml.MarshalException if any.
      * @throws org.exolab.castor.xml.ValidationException if any.
      */
-    public static synchronized void reload() throws IOException, MarshalException, ValidationException {
+    public  synchronized void reload() throws IOException, MarshalException, ValidationException {
         m_singleton = null;
         m_loaded = false;
 

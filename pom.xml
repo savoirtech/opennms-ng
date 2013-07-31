@@ -575,6 +575,12 @@
 
             <dependency>
                 <groupId>org.opennms.ng</groupId>
+                <artifactId>poller-config</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>org.opennms.ng</groupId>
                 <artifactId>scheduler</artifactId>
                 <version>${project.version}</version>
             </dependency>

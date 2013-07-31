@@ -28,15 +28,15 @@
 
 package org.opennms.ng.services.capsdconfig;
 
+import java.io.File;
+import java.io.IOException;
+
 import org.exolab.castor.xml.MarshalException;
 import org.exolab.castor.xml.ValidationException;
 import org.opennms.core.utils.ConfigFileConstants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.util.Assert;
-
-import java.io.File;
-import java.io.IOException;
 
 /**
  * This is the singleton class used to load the configuration for the OpenNMS
@@ -52,7 +52,7 @@ import java.io.IOException;
  * @author <a href="http://www.opennms.org/">OpenNMS </a>
  * @version $Id: $
  */
-public final class CapsdConfigFactory {
+public  class CapsdConfigFactory {
     private static final Logger LOG = LoggerFactory.getLogger(CapsdConfigFactory.class);
     /**
      * The singleton instance of this factory
@@ -62,7 +62,7 @@ public final class CapsdConfigFactory {
     /**
      * This class only has static methods.
      */
-    private CapsdConfigFactory() {
+    public CapsdConfigFactory() {
         
     }
 
@@ -98,6 +98,8 @@ public final class CapsdConfigFactory {
         setInstance(capsdConfig);
     }
 
+
+
     private static boolean isLoaded() {
         return s_singleton != null;
     }
@@ -130,6 +132,12 @@ public final class CapsdConfigFactory {
      */
     public static synchronized CapsdConfig getInstance() {
         Assert.state(isLoaded(), "The factory has not been initialized");
+
+        return s_singleton;
+    }
+
+
+    public CapsdConfig getConf() {
 
         return s_singleton;
     }

@@ -28,15 +28,20 @@
 
 package org.opennms.ng.services.snmpconfig;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStreamWriter;
+import java.io.Writer;
+
 import org.apache.commons.io.IOUtils;
 import org.exolab.castor.xml.MarshalException;
 import org.exolab.castor.xml.ValidationException;
 import org.opennms.core.utils.ConfigFileConstants;
-import org.opennms.ng.services.opennmsserverconfig.OpennmsServerConfigFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.io.*;
 
 /**
  * This is the singleton class used to load the configuration for the OpenNMS
@@ -121,17 +126,19 @@ public final class SnmpInterfacePollerConfigFactory extends SnmpInterfacePollerC
             return;
         }
 
-        OpennmsServerConfigFactory.init();
-        OpennmsServerConfigFactory onmsSvrConfig = OpennmsServerConfigFactory.getInstance();
+        //TODO - INJECT
+       // OpennmsServerConfigFactory.init();
+       // OpennmsServerConfigFactory onmsSvrConfig = OpennmsServerConfigFactory.getInstance();
 
         File cfgFile = ConfigFileConstants.getFile(ConfigFileConstants.SNMP_INTERFACE_POLLER_CONFIG_FILE_NAME);
 
         LOG.debug("init: config file path: {}", cfgFile.getPath());
 
+        //TODO SERVER NAME
         InputStream stream = null;
         try {
             stream = new FileInputStream(cfgFile);
-            SnmpInterfacePollerConfigFactory config = new SnmpInterfacePollerConfigFactory(cfgFile.lastModified(), stream, onmsSvrConfig.getServerName(), onmsSvrConfig.verifyServer());
+            SnmpInterfacePollerConfigFactory config = new SnmpInterfacePollerConfigFactory(cfgFile.lastModified(), stream, "NMS1", false);
             setInstance(config);
         } finally {
             if (stream != null) {

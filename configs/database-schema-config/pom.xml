@@ -42,6 +42,11 @@
 
         <dependency>
             <groupId>org.opennms.bundles</groupId>
+            <artifactId>opennms-util</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>org.opennms.bundles</groupId>
             <artifactId>opennms-rrd-api</artifactId>
         </dependency>
 

@@ -1,5 +1,14 @@
 package org.opennms.ng.services.capsdconfig;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStreamWriter;
+import java.io.Writer;
+
 import org.apache.commons.io.IOUtils;
 import org.exolab.castor.xml.MarshalException;
 import org.exolab.castor.xml.ValidationException;
@@ -7,15 +16,13 @@ import org.opennms.core.utils.ConfigFileConstants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.*;
-
 /**
  * <p>DefaultCapsdConfigManager class.</p>
  *
  * @author ranger
  * @version $Id: $
  */
-public class DefaultCapsdConfigManager extends CapsdConfigManager {
+public class DefaultCapsdConfigManager extends CapsdConfigManager implements CapsdConfig {
     private static final Logger LOG = LoggerFactory.getLogger(DefaultCapsdConfigManager.class);
     /**
      * Timestamp of the file for the currently loaded configuration
@@ -33,7 +40,7 @@ public class DefaultCapsdConfigManager extends CapsdConfigManager {
      * <p>Constructor for DefaultCapsdConfigManager.</p>
      *
      * @param is a {@link java.io.InputStream} object.
-     * @throws org.exolab.castor.xml.MarshalException if any.
+     * @throws org.exolab.castor.xml.MarshalException    if any.
      * @throws org.exolab.castor.xml.ValidationException if any.
      */
     public DefaultCapsdConfigManager(InputStream is) throws MarshalException, ValidationException {
@@ -43,13 +50,13 @@ public class DefaultCapsdConfigManager extends CapsdConfigManager {
     /**
      * <p>update</p>
      *
-     * @throws java.io.IOException if any.
-     * @throws java.io.FileNotFoundException if any.
-     * @throws org.exolab.castor.xml.MarshalException if any.
+     * @throws java.io.IOException                       if any.
+     * @throws java.io.FileNotFoundException             if any.
+     * @throws org.exolab.castor.xml.MarshalException    if any.
      * @throws org.exolab.castor.xml.ValidationException if any.
      */
     @Override
-    protected synchronized void update() throws IOException, FileNotFoundException, MarshalException, ValidationException {
+    public synchronized void update() throws IOException, FileNotFoundException, MarshalException, ValidationException {
         File configFile = ConfigFileConstants.getFile(ConfigFileConstants.CAPSD_CONFIG_FILE_NAME);
 
         LOG.debug("Checking to see if capsd configuration should be reloaded from {}", configFile);
@@ -76,7 +83,11 @@ public class DefaultCapsdConfigManager extends CapsdConfigManager {
         }
     }
 
-    /** {@inheritDoc} */
+
+
+    /**
+     * {@inheritDoc}
+     */
     @Override
     protected synchronized void saveXml(String xml) throws IOException {
         if (xml != null) {
@@ -87,4 +98,8 @@ public class DefaultCapsdConfigManager extends CapsdConfigManager {
             fileWriter.close();
         }
     }
+
+
+
+
 }

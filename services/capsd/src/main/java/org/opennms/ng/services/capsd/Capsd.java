@@ -36,10 +36,12 @@ import java.util.concurrent.ExecutorService;
 import org.opennms.core.logging.Logging;
 import org.opennms.core.utils.BeanUtils;
 import org.opennms.core.utils.InetAddressUtils;
+import org.opennms.netmgt.capsd.CapsdDbSyncer;
+import org.opennms.netmgt.capsd.RescanProcessor;
+
 import org.opennms.netmgt.model.events.StoppableEventListener;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.util.Assert;
 
 /**
@@ -59,15 +61,15 @@ import org.springframework.util.Assert;
  */
 public class Capsd {
 
-    private static final Logger LOG = LoggerFactory.getLogger(org.opennms.ng.services.capsd.Capsd.class);
+    private String name = "CAPSD";
 
+    private static final Logger LOG = LoggerFactory.getLogger(Capsd.class);
     /**
      * Database synchronization lock for synchronizing write access to the
      * database between the SuspectEventProcessor and RescanProcessor thread
      * pools
      */
     private static Object m_dbSyncLock = new Object();
-
     /**
      * <p/>
      * Contains dotted-decimal representation of the IP address where Capsd is
@@ -75,40 +77,29 @@ public class Capsd {
      * </P>
      */
     private static String m_address = null;
-
     /**
      * Rescan scheduler thread
      */
-    @Autowired
     private Scheduler m_scheduler;
-
     /**
      * Event receiver.
      */
     private StoppableEventListener m_eventListener;
-
     /**
      * The pool of threads that are used to executed the SuspectEventProcessor
      * instances queued by the event processor (BroadcastEventProcessor).
      */
     private ExecutorService m_suspectRunner;
-
     /**
      * The pool of threads that are used to executed RescanProcessor instances
      * queued by the rescan scheduler thread.
      */
     private ExecutorService m_rescanRunner;
-
     /*
      * Injected properties, the should be asserted in onInit
      */
-    @Autowired
     private SuspectEventProcessorFactory m_suspectEventProcessorFactory;
-
-    @Autowired
     private CapsdDbSyncer m_capsdDbSyncer;
-
-    private final String m_name;
 
     /**
      * <P>
@@ -120,12 +111,28 @@ public class Capsd {
         m_address = InetAddressUtils.getLocalHostAddressAsString();
     } // end static class initialization
 
+
+
     /**
      * Constructs the Capsd objec
      */
     public Capsd() {
-        m_name = "capsd";
+        //super("capsd");
         m_scheduler = null;
+    }
+
+    /**
+     * Used to retrieve the local host name/address. The name/address of the
+     * machine on which Capsd is running.
+     *
+     * @return a {@link String} object.
+     */
+    public static String getLocalHostAddress() {
+        return m_address;
+    }
+
+    static Object getDbSyncLock() {
+        return m_dbSyncLock;
     }
 
     /**
@@ -165,8 +172,8 @@ public class Capsd {
                 "org.opennms.provisiond.enableDiscovery=false in opennms.properties!");
         }
 
-	    
-	    /* 
+
+	    /*
          * First any new services are added to the services table
          * with a call to syncServices().
          *
@@ -199,7 +206,7 @@ public class Capsd {
 
         // Set the Set that SuspectEventProcessor will use to track
         // suspect scans that are in progress
-        SuspectEventProcessor.setQueuedSuspectsTracker(new HashSet<String>());
+
 
         // Likewise, a separate Set for the RescanProcessor
         RescanProcessor.setQueuedRescansTracker(new HashSet<Integer>());
@@ -222,20 +229,6 @@ public class Capsd {
      */
     protected void onResume() {
         // XXX Resume all threads?
-    }
-
-    /**
-     * Used to retrieve the local host name/address. The name/address of the
-     * machine on which Capsd is running.
-     *
-     * @return a {@link String} object.
-     */
-    public static String getLocalHostAddress() {
-        return m_address;
-    }
-
-    static Object getDbSyncLock() {
-        return m_dbSyncLock;
     }
 
     /**
@@ -305,6 +298,8 @@ public class Capsd {
         m_eventListener = eventListener;
     }
 
-    final public String getName() { return m_name; }
+    public String getName() {
+        return name;
+    }
 } // end Capsd class
 

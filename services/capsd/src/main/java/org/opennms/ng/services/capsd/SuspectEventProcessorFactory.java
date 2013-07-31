@@ -40,7 +40,8 @@ public interface SuspectEventProcessorFactory {
      * <p>createSuspectEventProcessor</p>
      *
      * @param ifAddress a {@link String} object.
-     * @return a {@link SuspectEventProcessor} object.
+     * @return a {@link org.opennms.netmgt.capsd.SuspectEventProcessor} object.
      */
     public abstract SuspectEventProcessor createSuspectEventProcessor(String ifAddress);
+
 }

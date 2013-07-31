@@ -37,16 +37,16 @@ import java.util.TreeMap;
 
 import org.exolab.castor.xml.ValidationException;
 import org.opennms.core.utils.InetAddressUtils;
+import org.opennms.netmgt.capsd.CapsdProtocolInfo;
+import org.opennms.netmgt.capsd.CapsdProtocolInfo.Action;
+import org.opennms.netmgt.capsd.Plugin;
 import org.opennms.netmgt.config.capsd.Property;
 import org.opennms.netmgt.config.capsd.ProtocolConfiguration;
 import org.opennms.netmgt.config.capsd.ProtocolPlugin;
 import org.opennms.netmgt.config.capsd.Range;
-import org.opennms.ng.services.capsd.CapsdProtocolInfo.Action;
 import org.opennms.ng.services.capsdconfig.CapsdConfig;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.InitializingBean;
-import org.springframework.util.Assert;
 
 /**
  * <p>PluginManager class.</p>
@@ -54,12 +54,10 @@ import org.springframework.util.Assert;
  * @author ranger
  * @version $Id: $
  */
-public class PluginManager implements InitializingBean {
+public class PluginManager {
 
-    private static final Logger LOG = LoggerFactory.getLogger(org.opennms.ng.services.capsd.PluginManager.class);
-
-    private CapsdConfig m_capsdConfig;
-
+    private static final Logger LOG = LoggerFactory.getLogger(PluginManager.class);
+    private CapsdConfig capsdConfig;
     /**
      * The map of capsd plugins indexed by protocol.
      */
@@ -69,11 +67,12 @@ public class PluginManager implements InitializingBean {
      */
     private Map<String, Plugin> m_pluginsByClass = new TreeMap<String, Plugin>();
 
-    /**
-     * <p>Constructor for PluginManager.</p>
-     */
-    public PluginManager() {
-        super();
+
+
+    private static void addProperties(List<Property> properties, Map<String, Object> params) {
+        for (Property property : properties) {
+            params.put(property.getKey(), property.getValue());
+        }
     }
 
     /**
@@ -135,7 +134,7 @@ public class PluginManager implements InitializingBean {
         while (pluginIter.hasNext()) {
             ProtocolPlugin plugin = pluginIter.next();
             boolean found = false;
-    
+
             /*
              * Loop through the specific and ranges to find out
              * if there is a particular protocol specification
@@ -161,14 +160,14 @@ public class PluginManager implements InitializingBean {
                     InetAddress start = null;
                     start = InetAddressUtils.addr(rng.getBegin());
                     if (start == null) {
-                        LOG.warn("CapsdConfigFactory: failed to convert address " + rng.getBegin() + " to InetAddress");
+                        LOG.warn("CapsdConfigFactory: failed to convert address {} to InetAddress", rng.getBegin());
                         continue;
                     }
 
                     InetAddress stop = null;
                     stop = InetAddressUtils.addr(rng.getEnd());
                     if (stop == null) {
-                        LOG.warn("CapsdConfigFactory: failed to convert address " + rng.getEnd() + " to InetAddress");
+                        LOG.warn("CapsdConfigFactory: failed to convert address {} to InetAddress", rng.getEnd());
                         continue;
                     }
 
@@ -176,7 +175,7 @@ public class PluginManager implements InitializingBean {
                         found = true;
                     }
                 }
-    
+
                 /*
                  * if it has not be found yet then it's not
                  * in this particular plugin conf, check the
@@ -185,8 +184,8 @@ public class PluginManager implements InitializingBean {
                 if (!found) {
                     continue;
                 }
-    
-                /* 
+
+                /*
                  * if found then build protocol
                  * specification if on, else next protocol.
                  */
@@ -236,7 +235,7 @@ public class PluginManager implements InitializingBean {
                 lprotos.add(new CapsdProtocolInfo(plugin.getProtocol(), m_pluginsByProtocol.get(plugin.getProtocol()), params, Action.SCAN));
             }
         } // end ProtocolPlugin
-    
+
         /*
          * copy the protocol information to
          * the approriate array and return that
@@ -247,39 +246,27 @@ public class PluginManager implements InitializingBean {
         return lprotos.toArray(result);
     }
 
-    private static void addProperties(List<Property> properties, Map<String, Object> params) {
-        for (Property property : properties) {
-            params.put(property.getKey(), property.getValue());
-        }
-    }
-
     /**
      * <p>getCapsdConfig</p>
      *
-     * @return a {@link org.opennms.ng.services.capsdconfig.CapsdConfig} object.
+     * @return a {@link org.opennms.netmgt.config.CapsdConfig} object.
      */
-    public CapsdConfig getCapsdConfig() {
-        return m_capsdConfig;
-    }
-
-    /**
-     * <p>setCapsdConfig</p>
-     *
-     * @param capsdConfig a {@link org.opennms.ng.services.capsdconfig.CapsdConfig} object.
-     */
-    public void setCapsdConfig(CapsdConfig capsdConfig) {
-        m_capsdConfig = capsdConfig;
-    }
 
     /**
      * <p>afterPropertiesSet</p>
      *
      * @throws org.exolab.castor.xml.ValidationException if any.
      */
-    @Override
-    public void afterPropertiesSet() throws ValidationException {
-        Assert.state(m_capsdConfig != null, "property capsdConfig must be set to a non-null value");
 
-        instantiatePlugins();
+    public void afterPropertiesSet() throws ValidationException {
+         instantiatePlugins();
+    }
+
+    public CapsdConfig getCapsdConfig() {
+        return capsdConfig;
+    }
+
+    public void setCapsdConfig(CapsdConfig capsdConfig) {
+        this.capsdConfig = capsdConfig;
     }
 }

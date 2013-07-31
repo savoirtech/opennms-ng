@@ -37,8 +37,8 @@ import jcifs.smb.SmbAuthException;
 import jcifs.smb.SmbException;
 import jcifs.smb.SmbFile;
 import org.opennms.core.utils.InetAddressUtils;
+import org.opennms.netmgt.config.CapsdConfigFactory;
 import org.opennms.netmgt.config.capsd.SmbAuth;
-import org.opennms.ng.services.capsdconfig.CapsdConfigFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -46,15 +46,16 @@ import org.slf4j.LoggerFactory;
  * This class is designed to collect the necessary SMB information from the
  * target address and store the collected information. When the class is
  * initially constructed no information is collected.
- *
+ * 
  * @author <a href="mailto:weave@oculan.com">Weave </a>
  * @author <a href="mailto:mike@opennms.org">Mike </a>
  * @author <a href="http://www.opennms.org">OpenNMS </a>
+ * 
  */
 final class IfSmbCollector implements Runnable {
-
-    private static final Logger LOG = LoggerFactory.getLogger(org.opennms.ng.services.capsd.IfSmbCollector.class);
-
+    
+    private static final Logger LOG = LoggerFactory.getLogger(IfSmbCollector.class);
+    
     /**
      * The MAC address that is returned from a Samba server
      */
@@ -103,17 +104,18 @@ final class IfSmbCollector implements Runnable {
     /**
      * This method is used to convert a 6 byte MAC address into a colon
      * separated string.
-     *
-     * @param mac The 6 byte MAC address
+     * 
+     * @param mac
+     *            The 6 byte MAC address
+     * 
      * @return The formatted MAC address.
      */
     private String toMacString(byte[] mac) {
         StringBuffer mbuf = new StringBuffer();
-        for (int i = 0;i < mac.length;i++) {
+        for (int i = 0; i < mac.length; i++) {
             mbuf.append((int) (mac[i] >> 4) & 0x0f).append((int) mac[i] & 0x0f);
-            if (i != 5) {
+            if (i != 5)
                 mbuf.append(':');
-            }
         }
         return mbuf.toString();
     }
@@ -121,8 +123,10 @@ final class IfSmbCollector implements Runnable {
     /**
      * Constructs a new SMB collector targeted at the passed address. The
      * presence of an Exchange server is set to false.
-     *
-     * @param target The target IP address.
+     * 
+     * @param target
+     *            The target IP address.
+     * 
      */
     IfSmbCollector(InetAddress target) {
         m_target = target;
@@ -138,9 +142,12 @@ final class IfSmbCollector implements Runnable {
     /**
      * Constructs a new SMB collector targeted at the passed address. The
      * presence of an Exchange server is set to passed value.
-     *
-     * @param target      The target IP address.
-     * @param hasExchange Sets the presence or absence of an exchange server.
+     * 
+     * @param target
+     *            The target IP address.
+     * @param hasExchange
+     *            Sets the presence or absence of an exchange server.
+     * 
      */
     IfSmbCollector(InetAddress target, boolean hasExchange) {
         m_target = target;
@@ -185,11 +192,10 @@ final class IfSmbCollector implements Runnable {
      * Retrns the NetBIOS name associated with the primary NetBIOS address.
      */
     String getNbtName() {
-        if (m_addr != null) {
+        if (m_addr != null)
             return m_addr.getHostName().trim();
-        } else {
+        else
             return null;
-        }
     }
 
     /**
@@ -225,16 +231,17 @@ final class IfSmbCollector implements Runnable {
     /**
      * This method inspects the provided netBIOS name for control characters
      * (chars w/ decimal value less than 20/ <SPACE>
-     *
-     * @param nbName NetBIOS name to check
+     * 
+     * @param nbName
+     *            NetBIOS name to check
+     * 
      * @return true if string contains control chars, false otherwise.
      */
     boolean containsCtrlChars(String nbName) {
         byte[] bytes = nbName.getBytes();
-        for (int i = 0;i < bytes.length;i++) {
-            if (bytes[i] < 20) {
+        for (int i = 0; i < bytes.length; i++) {
+            if (bytes[i] < 20)
                 return true;
-            }
         }
 
         return false;
@@ -263,13 +270,12 @@ final class IfSmbCollector implements Runnable {
         }
 
         if (m_addr != null && containsCtrlChars(m_addr.getHostName())) {
-            LOG.warn("IfSmbCollector: Retrieved SMB name for address " + InetAddressUtils.str(m_target) + " contains control chars: '" + m_addr
-                .getHostName() + "', discarding.");
+            LOG.warn("IfSmbCollector: Retrieved SMB name for address {} contains control chars: '{}', discarding.", InetAddressUtils.str(m_target), m_addr.getHostName());
             m_addr = null;
         }
 
         if (m_addr != null) {
-            LOG.debug("IfSmbCollector: SMB name of " + InetAddressUtils.str(m_target) + " is: " + m_addr.getHostName());
+            LOG.debug("IfSmbCollector: SMB name of {} is: {}", InetAddressUtils.str(m_target), m_addr.getHostName());
             try {
                 // Attempt to resolve the Media Access Control Address
                 //
@@ -280,7 +286,7 @@ final class IfSmbCollector implements Runnable {
                     m_mac = null;
                 }
             } catch (UnknownHostException e) {
-                LOG.debug("IfSmbCollector: failed to get MAC for " + InetAddressUtils.str(m_target) + " due to address failure", e);
+                LOG.debug("IfSmbCollector: failed to get MAC for {} due to address failure", InetAddressUtils.str(m_target), e);
             }
 
             // Domain name
@@ -290,30 +296,27 @@ final class IfSmbCollector implements Runnable {
                 //
                 m_allAddrs = NbtAddress.getAllByAddress(m_addr);
                 m_domain = SmbUtils.getAuthenticationDomainName(m_allAddrs, m_addr.getHostName());
-                LOG.debug("IfSmbCollector: domain name: '" + m_domain + "'");
+                LOG.debug("IfSmbCollector: domain name: '{}'", m_domain);
             } catch (UnknownHostException e) {
-                LOG.debug("IfSmbCollector: failed to get all the addresses for the interface " + InetAddressUtils.str(m_target), e);
+                LOG.debug("IfSmbCollector: failed to get all the addresses for the interface {}", InetAddressUtils.str(m_target), e);
             }
 
             // get the SMB authentication object
             //
             SmbAuth authentication = null;
-            if (m_domain != null) {
+            if (m_domain != null)
                 authentication = CapsdConfigFactory.getInstance().getSmbAuth(m_domain);
-            }
 
-            if (authentication == null) {
+            if (authentication == null)
                 authentication = CapsdConfigFactory.getInstance().getSmbAuth(m_addr.getHostName());
-            }
 
             LOG.debug("IfSmbCollector: SMB authenticator: {}", authentication);
 
             // If SMB is not set in capsd-configuration, authentication could be
             // null. Then stop
             // SMB collectio.
-            if (authentication == null) {
+            if (authentication == null)
                 return;
-            }
 
             /*
              * --------------------------------------------------------------------- /*
@@ -335,8 +338,9 @@ final class IfSmbCollector implements Runnable {
                 LOG.debug("IfSmbCollector: got SmbFile object, retrieving share list...");
                 m_shares = sfile.list();
                 LOG.debug("IfSmbCollector: shares list retrieved...");
+
             } catch (MalformedURLException e) {
-                LOG.debug("IfSmbCollector: failed to get SMB resource and OS name for host " + InetAddressUtils.str(m_target), e);
+                LOG.debug("IfSmbCollector: failed to get SMB resource and OS name for host {}", InetAddressUtils.str(m_target), e);
             } catch (SmbAuthException e) {
                 LOG.debug("IfSmbCollector: unable to list SMB shares, authentication failed, reason: {}", e.getMessage());
             } catch (SmbException e) {
@@ -345,5 +349,6 @@ final class IfSmbCollector implements Runnable {
             /*---------------------------------------------------------------------*/
 
         } // end if(addr != null)
+
     } // end run
 }

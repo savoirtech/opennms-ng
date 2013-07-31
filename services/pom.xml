@@ -18,14 +18,16 @@
     <modules>
         <module>opennms-distributed-ipc</module>
         <module>eventd</module>
-        <module>capsd</module>
         <module>passive</module>
         <module>poller</module>
         <module>scheduler</module>
+
         <module>syslogd</module>
         <module>trapd</module>
         <module>collectd</module>
         <module>threshd</module>
+        <module>capsd</module>
+
     </modules>
 
 </project>

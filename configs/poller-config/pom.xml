@@ -17,13 +17,23 @@
     <description>OPENNMS Configs :: Poller Config</description>
 
     <properties>
+        <opennms.osgi.import.pkg>
+            org.opennms.netmgt.poller.monitors,
+            *
+        </opennms.osgi.import.pkg>
+
         <opennms.osgi.export.pkg>
             org.opennms.ng.services.pollerconfig
         </opennms.osgi.export.pkg>
-
+        <opennms.osgi.dynamic>*</opennms.osgi.dynamic>
     </properties>
 
     <dependencies>
+
+        <dependency>
+            <groupId>org.apache.felix</groupId>
+            <artifactId>org.apache.felix.framework</artifactId>
+        </dependency>
 
         <dependency>
             <groupId>org.opennms.bundles</groupId>

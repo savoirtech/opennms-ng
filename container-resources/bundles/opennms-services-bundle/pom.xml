@@ -72,6 +72,7 @@
         </opennms.osgi.import.pkg>
         <opennms.osgi.export>
             org.opennms;version="${opennms.version}",
+
             org.opennms.netmgt*;version="${opennms.version}",
             org.opennms.protocols*;version="${opennms.version}",
             org.opennms.spring*;version="${opennms.version}",

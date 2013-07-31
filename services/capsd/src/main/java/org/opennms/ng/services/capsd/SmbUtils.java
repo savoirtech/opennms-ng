@@ -41,181 +41,111 @@ import org.opennms.netmgt.config.capsd.SmbAuth;
 public abstract class SmbUtils {
     // NetBIOS Node Name Suffix Codes
     //
-    /**
-     * Constant <code>WORKSTATION_SERVICE=0x00</code>
-     */
+    /** Constant <code>WORKSTATION_SERVICE=0x00</code> */
     public static final int WORKSTATION_SERVICE = 0x00; // <computername>
 
-    /**
-     * Constant <code>MESSENGER_SERVICE_A=0x01</code>
-     */
+    /** Constant <code>MESSENGER_SERVICE_A=0x01</code> */
     public static final int MESSENGER_SERVICE_A = 0x01; // <computername>
 
-    /**
-     * Constant <code>MASTER_BROWSER_G=0x01</code>
-     */
+    /** Constant <code>MASTER_BROWSER_G=0x01</code> */
     public static final int MASTER_BROWSER_G = 0x01; // \\--__MSBROWSE__
 
-    /**
-     * Constant <code>MESSENGER_SERVICE_B=0x03</code>
-     */
+    /** Constant <code>MESSENGER_SERVICE_B=0x03</code> */
     public static final int MESSENGER_SERVICE_B = 0x03; // <computername>
 
-    /**
-     * Constant <code>RAS_SERVER_SERVICE=0x06</code>
-     */
+    /** Constant <code>RAS_SERVER_SERVICE=0x06</code> */
     public static final int RAS_SERVER_SERVICE = 0x06; // <computername>
 
-    /**
-     * Constant <code>NETDDE_SERVICE=0x1F</code>
-     */
+    /** Constant <code>NETDDE_SERVICE=0x1F</code> */
     public static final int NETDDE_SERVICE = 0x1F; // <computername>
 
-    /**
-     * Constant <code>FILE_SERVER_SERVICE=0x20</code>
-     */
+    /** Constant <code>FILE_SERVER_SERVICE=0x20</code> */
     public static final int FILE_SERVER_SERVICE = 0x20; // <computername>
 
-    /**
-     * Constant <code>RAS_CLIENT_SERVICE=0x21</code>
-     */
+    /** Constant <code>RAS_CLIENT_SERVICE=0x21</code> */
     public static final int RAS_CLIENT_SERVICE = 0x21; // <computername>
 
-    /**
-     * Constant <code>MS_EXCHANGE_INTERCHANGE=0x22</code>
-     */
+    /** Constant <code>MS_EXCHANGE_INTERCHANGE=0x22</code> */
     public static final int MS_EXCHANGE_INTERCHANGE = 0x22; // <computername>
 
-    /**
-     * Constant <code>MS_EXCHANGE_STORE=0x23</code>
-     */
+    /** Constant <code>MS_EXCHANGE_STORE=0x23</code> */
     public static final int MS_EXCHANGE_STORE = 0x23; // <computername>
 
-    /**
-     * Constant <code>MS_EXCHANGE_DIRECTORY=0x24</code>
-     */
+    /** Constant <code>MS_EXCHANGE_DIRECTORY=0x24</code> */
     public static final int MS_EXCHANGE_DIRECTORY = 0x24; // <computername>
 
-    /**
-     * Constant <code>MODEM_SHARING_SERVER_SERVICE=0x30</code>
-     */
+    /** Constant <code>MODEM_SHARING_SERVER_SERVICE=0x30</code> */
     public static final int MODEM_SHARING_SERVER_SERVICE = 0x30; // <computername>
 
-    /**
-     * Constant <code>MODEM_SHARING_CLIENT_SERVICE=0x31</code>
-     */
+    /** Constant <code>MODEM_SHARING_CLIENT_SERVICE=0x31</code> */
     public static final int MODEM_SHARING_CLIENT_SERVICE = 0x31; // <computername>
 
-    /**
-     * Constant <code>SMS_CLIENT_REMOTE_CONTROL=0x43</code>
-     */
+    /** Constant <code>SMS_CLIENT_REMOTE_CONTROL=0x43</code> */
     public static final int SMS_CLIENT_REMOTE_CONTROL = 0x43; // <computername>
 
-    /**
-     * Constant <code>SMS_ADMIN_REMOTE_CONTROL_TOOL=0x44</code>
-     */
+    /** Constant <code>SMS_ADMIN_REMOTE_CONTROL_TOOL=0x44</code> */
     public static final int SMS_ADMIN_REMOTE_CONTROL_TOOL = 0x44; // <computername>
 
-    /**
-     * Constant <code>SMS_CLIENTS_REMOTE_CHAT=0x45</code>
-     */
+    /** Constant <code>SMS_CLIENTS_REMOTE_CHAT=0x45</code> */
     public static final int SMS_CLIENTS_REMOTE_CHAT = 0x45; // <computername>
 
-    /**
-     * Constant <code>SMS_CLIENTS_REMOTE_TRANSFER=0x46</code>
-     */
+    /** Constant <code>SMS_CLIENTS_REMOTE_TRANSFER=0x46</code> */
     public static final int SMS_CLIENTS_REMOTE_TRANSFER = 0x46; // <computername>
 
-    /**
-     * Constant <code>DEC_PATHWORKS_TCPIP_SERVICE_A=0x4C</code>
-     */
+    /** Constant <code>DEC_PATHWORKS_TCPIP_SERVICE_A=0x4C</code> */
     public static final int DEC_PATHWORKS_TCPIP_SERVICE_A = 0x4C; // <computername>
 
-    /**
-     * Constant <code>DEC_PATHWORKS_TCPIP_SERVICE_B=0x52</code>
-     */
+    /** Constant <code>DEC_PATHWORKS_TCPIP_SERVICE_B=0x52</code> */
     public static final int DEC_PATHWORKS_TCPIP_SERVICE_B = 0x52; // <computername>
 
-    /**
-     * Constant <code>MS_EXCHANGE_MTA=0x87</code>
-     */
+    /** Constant <code>MS_EXCHANGE_MTA=0x87</code> */
     public static final int MS_EXCHANGE_MTA = 0x87; // <computername>
 
-    /**
-     * Constant <code>MS_EXCHANGE_IMC=0x6A</code>
-     */
+    /** Constant <code>MS_EXCHANGE_IMC=0x6A</code> */
     public static final int MS_EXCHANGE_IMC = 0x6A; // <computername>
 
-    /**
-     * Constant <code>NETWORK_MONITOR_AGENT=0xBE</code>
-     */
+    /** Constant <code>NETWORK_MONITOR_AGENT=0xBE</code> */
     public static final int NETWORK_MONITOR_AGENT = 0xBE; // <computername>
 
-    /**
-     * Constant <code>NETWORK_MONITOR_APPLICATION=0xBF</code>
-     */
+    /** Constant <code>NETWORK_MONITOR_APPLICATION=0xBF</code> */
     public static final int NETWORK_MONITOR_APPLICATION = 0xBF; // <computername>
 
-    /**
-     * Constant <code>MESSENGER_SERVICE=0x03</code>
-     */
+    /** Constant <code>MESSENGER_SERVICE=0x03</code> */
     public static final int MESSENGER_SERVICE = 0x03; // <username>
 
-    /**
-     * Constant <code>DOMAIN_NAME=0x00</code>
-     */
+    /** Constant <code>DOMAIN_NAME=0x00</code> */
     public static final int DOMAIN_NAME = 0x00; // <domain>
 
-    /**
-     * Constant <code>DOMAIN_MASTER_BROWSER=0x1B</code>
-     */
+    /** Constant <code>DOMAIN_MASTER_BROWSER=0x1B</code> */
     public static final int DOMAIN_MASTER_BROWSER = 0x1B; // <domain>
 
-    /**
-     * Constant <code>DOMAIN_CONTROLLERS=0x1C</code>
-     */
+    /** Constant <code>DOMAIN_CONTROLLERS=0x1C</code> */
     public static final int DOMAIN_CONTROLLERS = 0x1C; // <domain>
 
-    /**
-     * Constant <code>MASTER_BROWSER_U=0x1D</code>
-     */
+    /** Constant <code>MASTER_BROWSER_U=0x1D</code> */
     public static final int MASTER_BROWSER_U = 0x1D; // <domain>
 
-    /**
-     * Constant <code>BROWSER_SERVICE_ELECTIONS=0x1E</code>
-     */
+    /** Constant <code>BROWSER_SERVICE_ELECTIONS=0x1E</code> */
     public static final int BROWSER_SERVICE_ELECTIONS = 0x1E; // <domain>
 
-    /**
-     * Constant <code>INTERNET_INFORMATION_SERVER_G=0x1C</code>
-     */
+    /** Constant <code>INTERNET_INFORMATION_SERVER_G=0x1C</code> */
     public static final int INTERNET_INFORMATION_SERVER_G = 0x1C; // INET~SERVICES
-    // (GROUP)
+                                                                    // (GROUP)
 
-    /**
-     * Constant <code>INTERNET_INFORMATION_SERVER_U=0x00</code>
-     */
+    /** Constant <code>INTERNET_INFORMATION_SERVER_U=0x00</code> */
     public static final int INTERNET_INFORMATION_SERVER_U = 0x00; // IS~<computername>
-    // (UNIQUE)
+                                                                    // (UNIQUE)
 
-    /**
-     * Constant <code>LOTUS_NOTES_SERVER_SERVICE=0x2B</code>
-     */
+    /** Constant <code>LOTUS_NOTES_SERVER_SERVICE=0x2B</code> */
     public static final int LOTUS_NOTES_SERVER_SERVICE = 0x2B; // <computername>
 
-    /**
-     * Constant <code>LOTUS_NOTES_IRIS_MULTICAST=0x2F</code>
-     */
+    /** Constant <code>LOTUS_NOTES_IRIS_MULTICAST=0x2F</code> */
     public static final int LOTUS_NOTES_IRIS_MULTICAST = 0x2F; // IRISMULTICAST
 
-    /**
-     * Constant <code>LOTUS_NOTES_IRIS_NAME_SERVER=0x33</code>
-     */
+    /** Constant <code>LOTUS_NOTES_IRIS_NAME_SERVER=0x33</code> */
     public static final int LOTUS_NOTES_IRIS_NAME_SERVER = 0x33; // IRISNAMESERVER
 
-    /**
-     * Constant <code>DCA_IRMALAN_GATEWAY_SERVER_SERVICE=0x20</code>
-     */
+    /** Constant <code>DCA_IRMALAN_GATEWAY_SERVER_SERVICE=0x20</code> */
     public static final int DCA_IRMALAN_GATEWAY_SERVER_SERVICE = 0x20; // FORTE_$ND800ZA
 
     /**
@@ -224,15 +154,18 @@ public abstract class SmbUtils {
      * entry with a DOMAIN_NAME (0x00) suffix. WORKSTATION_SERVICE and
      * INTERNET_INFORMATION_SERVER share the same 0x00 suffix so these entries
      * must be ignored while processing the address list.
-     *
-     * @param addresses List of NbtAddress objects associated with the remote host.
-     * @param cname     NetBIOS name of the remote host.
+     * 
+     * @param addresses
+     *            List of NbtAddress objects associated with the remote host.
+     * @param cname
+     *            NetBIOS name of the remote host.
+     * 
      * @return remote host's authentication domain or null if unavailable.
      */
     static String getAuthenticationDomainName(NbtAddress[] addresses, String cname) {
         String domain = null;
         if (addresses != null) {
-            for (int i = 0;i < addresses.length && domain == null;i++) {
+            for (int i = 0; i < addresses.length && domain == null; i++) {
                 NbtAddress addr = addresses[i];
 
                 // look at the domain name type and search for
@@ -268,14 +201,19 @@ public abstract class SmbUtils {
      * table in the databse. This call should be made after an attempt to
      * determine if the interface supports Microsoft Exchange. This is
      * determined by the {@link MSExchangePlugin MSExchangePlugin}class.
-     *
-     * @param nativeOS    OS string returned by jCIFS following SMB session
-     *                    establishment with the remote host.
-     * @param addresses   array of NbtAddress objects associated with the remote host
-     *                    being tested.
-     * @param isSamba     <em>true</em> if it has been derived that the remote system
-     *                    is running Samba.
-     * @param hasExchange <em>true</em> if the service supports microsoft exhange.
+     * 
+     * @param nativeOS
+     *            OS string returned by jCIFS following SMB session
+     *            establishment with the remote host.
+     * @param addresses
+     *            array of NbtAddress objects associated with the remote host
+     *            being tested.
+     * @param isSamba
+     *            <em>true</em> if it has been derived that the remote system
+     *            is running Samba.
+     * @param hasExchange
+     *            <em>true</em> if the service supports microsoft exhange.
+     * 
      * @return The Operating system label
      */
     static String getOsLabel(String nativeOS, NbtAddress[] addresses, boolean isSamba, boolean hasExchange) {
@@ -294,54 +232,42 @@ public abstract class SmbUtils {
             //
             if (isSamba) {
                 osLabel = "Linux/UNIX";
-            } else {
-                if (hasExchange) {
-                    osLabel = "Windows Server"; // Don't know if we have Win 2000 or
-                    // NT 4.0
-                }
+            } else if (hasExchange) {
+                osLabel = "Windows Server"; // Don't know if we have Win 2000 or
+                                            // NT 4.0
             }
-        } else {
-            if (nativeOS.length() == 0) {
-                // HACK: Windows 95/98 boxes don't appear to give us the operating
-                // system so if we have successfully enumerate the shares on a
-                // server
-                // but the operating system return is an emtpy string then we will
-                // assume
-                // it is a Win 95/98 box.
-                //
-                osLabel = "Windows 95/98";
-            } else {
-                if (nativeOS.equalsIgnoreCase("Unix")) {
-                    // jCIFS reports "Unix" but the remote OS may actually
-                    // be Linux.
-                    //
-                    osLabel = "Linux/UNIX";
-                } else {
-                    if (nativeOS.equalsIgnoreCase("Windows 5.0")) {
-                        // jCIFS reports "Windows 5.0"...switch this to "Windows 2000"
-                        //
-                        nativeOS = "Windows 2000";
+        } else if (nativeOS.length() == 0) {
+            // HACK: Windows 95/98 boxes don't appear to give us the operating
+            // system so if we have successfully enumerate the shares on a
+            // server
+            // but the operating system return is an emtpy string then we will
+            // assume
+            // it is a Win 95/98 box.
+            //
+            osLabel = "Windows 95/98";
+        } else if (nativeOS.equalsIgnoreCase("Unix")) {
+            // jCIFS reports "Unix" but the remote OS may actually
+            // be Linux.
+            //
+            osLabel = "Linux/UNIX";
+        } else if (nativeOS.equalsIgnoreCase("Windows 5.0")) {
+            // jCIFS reports "Windows 5.0"...switch this to "Windows 2000"
+            //
+            nativeOS = "Windows 2000";
 
-                        if (hasExchange || isNTServer(addresses)) {
-                            osLabel = nativeOS.concat(" Server");
-                        } else {
-                            osLabel = nativeOS;
-                        }
-                    } else {
-                        if (nativeOS.startsWith("Windows NT")) {
-                            // Windows NT
-                            //
-                            if (hasExchange || isNTServer(addresses)) {
-                                osLabel = nativeOS.concat(" Server");
-                            } else {
-                                osLabel = nativeOS;
-                            }
-                        } else {
-                            osLabel = nativeOS;
-                        }
-                    }
-                }
-            }
+            if (hasExchange || isNTServer(addresses))
+                osLabel = nativeOS.concat(" Server");
+            else
+                osLabel = nativeOS;
+        } else if (nativeOS.startsWith("Windows NT")) {
+            // Windows NT
+            //
+            if (hasExchange || isNTServer(addresses))
+                osLabel = nativeOS.concat(" Server");
+            else
+                osLabel = nativeOS;
+        } else {
+            osLabel = nativeOS;
         }
 
         return osLabel;
@@ -352,19 +278,21 @@ public abstract class SmbUtils {
      * objects associated with a particular node and determining if that node is
      * an NT server versus an NT workstation based on the services it has
      * registered.
-     * <p/>
+     * 
      * If the remote host is registered as a DOMAIN_CONTROLLERS or a
      * MS_EXCHANGE_MTA we return 'true'; otherwise, 'false' is returned.
-     *
-     * @param addresses Array of NbtAddress objects associated with the remote host
-     *                  being tested.
+     * 
+     * @param addresses
+     *            Array of NbtAddress objects associated with the remote host
+     *            being tested.
+     * 
      * @return <em>true</em> if NT Server, <em>false</em> otherwise.
      */
     static boolean isNTServer(NbtAddress[] addresses) {
         boolean isNTServer = false;
 
         if (addresses != null) {
-            for (int i = 0;i < addresses.length;i++) {
+            for (int i = 0; i < addresses.length; i++) {
                 NbtAddress nbtAddr = addresses[i];
 
                 // Domain Controller
@@ -431,9 +359,12 @@ public abstract class SmbUtils {
      * information and the NetBIOS name for a remote server and builds the
      * appropriate SMB url string which can be used to enumerate the server's
      * shares.
-     *
-     * @param smbAuth SMB Authentication object w/ userid/password info
-     * @param cname   NetBIOS address of remote server
+     * 
+     * @param smbAuth
+     *            SMB Authentication object w/ userid/password info
+     * @param cname
+     *            NetBIOS address of remote server
+     * 
      * @return URL string which can be used in a subsequent SmbFile() call.
      */
     static String getSmbURL(SmbAuth smbAuth, String cname) {
@@ -456,28 +387,23 @@ public abstract class SmbUtils {
         if (smbAuth != null) {
             useridParm = smbAuth.getUser();
             passwordParm = smbAuth.getPassword();
-            if (smbAuth.getType().equalsIgnoreCase("domain")) {
+            if (smbAuth.getType().equalsIgnoreCase("domain"))
                 domainParm = smbAuth.getContent();
-            }
         }
 
         // Build url from parms
         String url = "smb://";
-        if (domainParm != null) {
+        if (domainParm != null)
             url = url.concat(domainParm + ";");
-        }
 
-        if (useridParm != null) {
+        if (useridParm != null)
             url = url.concat(useridParm);
-        }
 
-        if (passwordParm != null) {
+        if (passwordParm != null)
             url = url.concat(":" + passwordParm);
-        }
 
-        if (useridParm != null) {
+        if (useridParm != null)
             url = url.concat("@");
-        }
 
         url = url.concat(cname);
 

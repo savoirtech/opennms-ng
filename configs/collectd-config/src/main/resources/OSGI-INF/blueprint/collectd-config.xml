@@ -1,0 +1,36 @@
+<blueprint xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+           xmlns:cm="http://aries.apache.org/blueprint/xmlns/blueprint-cm/v1.1.0"
+           xmlns="http://www.osgi.org/xmlns/blueprint/v1.0.0"
+           xsi:schemaLocation="http://www.osgi.org/xmlns/blueprint/v1.0.0 http://www.osgi.org/xmlns/blueprint/v1.0.0/blueprint.xsd">
+
+    <cm:property-placeholder persistent-id="org.opennms.ng.collectdconfig" id="collectdconfig" update-strategy="reload">
+        <cm:default-properties>
+            <cm:property name="openjpa.jdbc.DBDictionary" value="hsql"/>
+        </cm:default-properties>
+    </cm:property-placeholder>
+
+    <bean id="configLocation" class="org.opennms.ng.services.collectdconfig.ConfigStream"/>
+    <bean id="extBean" factory-ref="configLocation" factory-method="getConfig"/>
+
+
+
+    <bean id="collectdConfig" factory-ref="collectorConfigDao" factory-method="agetConfig"/>
+
+    <bean id="collectorConfigDao" class="org.opennms.ng.services.collectdconfig.CollectorConfigDaoImpl" init-method="loadConfigFactory">
+        <property name="opennmsServerConfig" ref="opennmsServerConfig"/>
+    </bean>
+
+    <service ref="collectdConfig" interface="org.opennms.ng.services.collectdconfig.CollectdConfig"/>
+
+    <service ref="collectorConfigDao" interface="org.opennms.ng.services.collectdconfig.CollectorConfigDao"/>
+
+
+    <reference id="opennmsServerConfig" interface="org.opennms.ng.services.opennmsserverconfig.OpennmsServerConfig"/>
+    <!--
+
+    <bean id="collectdConfigFactory" class="org.opennms.ng.services.collectdconfig.CollectdConfigFactory" init-method="init">
+            <argument ref="extBean"/>
+        </bean>
+    <service ref="collectdConfigFactory" interface="org.opennms.ng.services.collectdconfig.CollectdConfigFactory"/>
+        -->
+</blueprint>

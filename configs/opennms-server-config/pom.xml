@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0"
-         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+<project xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xmlns="http://maven.apache.org/POM/4.0.0"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <parent>
         <artifactId>configs</artifactId>
@@ -16,28 +16,29 @@
     <name>OPENNMS :: Configs :: OpenNMS Server Config</name>
     <description>OPENNMS Configs :: OpenNMS Server Config</description>
 
-
     <properties>
+        <opennms.osgi.import.pkg>
+            org.hibernate*;resolution:=optional,
+            org.springframework.security.core*;resolution:=optional,
+            org.opennms.netmgt.snmp.snmp4j,
+            org.postgresql*;resolution:=optional,
+            *
+        </opennms.osgi.import.pkg>
         <opennms.osgi.export.pkg>
             org.opennms.ng.services.opennmsserverconfig
         </opennms.osgi.export.pkg>
-
     </properties>
 
     <dependencies>
-        <dependency>
-            <groupId>org.opennms.core</groupId>
-            <artifactId>org.opennms.core.xml</artifactId>
-        </dependency>
 
         <dependency>
-            <groupId>org.opennms</groupId>
+            <groupId>org.opennms.bundles</groupId>
             <artifactId>opennms-config-model</artifactId>
         </dependency>
 
         <dependency>
-            <groupId>org.springframework</groupId>
-            <artifactId>spring-core</artifactId>
+            <groupId>org.opennms.bundles</groupId>
+            <artifactId>opennms-util</artifactId>
         </dependency>
 
     </dependencies>

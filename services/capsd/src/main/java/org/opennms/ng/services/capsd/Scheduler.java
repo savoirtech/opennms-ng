@@ -45,7 +45,8 @@ import java.util.concurrent.RejectedExecutionException;
 import org.opennms.core.db.DataSourceFactory;
 import org.opennms.core.fiber.PausableFiber;
 import org.opennms.core.utils.DBUtils;
-import org.opennms.ng.services.capsdconfig.CapsdConfigFactory;
+import org.opennms.netmgt.capsd.ReparentViaSmb;
+import org.opennms.ng.services.capsdconfig.CapsdConfig;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -56,151 +57,69 @@ import org.slf4j.LoggerFactory;
  * @author <a href="mailto:mike@opennms.org">Mike Davidson </a>
  * @author <a href="http://www.opennms.org/">OpenNMS </a>
  */
-final class Scheduler implements Runnable, PausableFiber {
+public class Scheduler implements Runnable, PausableFiber {
 
-    private static final Logger LOG = LoggerFactory.getLogger(org.opennms.ng.services.capsd.Scheduler.class);
-
+    private static final Logger LOG = LoggerFactory.getLogger(Scheduler.class);
     /**
      * The prefix for the fiber name.
      */
     private static final String FIBER_NAME = "Capsd Scheduler";
-
     /**
      * SQL used to retrieve list of nodes from the node table.
      */
     private static final String SQL_RETRIEVE_NODES = "SELECT nodeid FROM node WHERE nodetype != 'D'";
-
     /**
      * SQL used to retrieve the last poll time for all the managed interfaces
      * belonging to a particular node.
      */
     private static final String SQL_GET_LAST_POLL_TIME = "SELECT iplastcapsdpoll FROM ipinterface WHERE nodeid=? AND (ismanaged = 'M' OR ismanaged "
         + "= 'N')";
-
     /**
      * Special identifier used in place of a valid node id in order to schedule
      * an SMB reparenting using the rescan scheduler.
      */
     private static final int SMB_REPARENTING_IDENTIFIER = -1;
-
     /**
      * The status for this fiber.
      */
     private int m_status;
-
     /**
      * The worker thread that executes this instance.
      */
     private Thread m_worker;
-
     /**
      * List of NodeInfo objects representing each of the nodes in the database
      * capability of being scheduled.
      */
     private List<NodeInfo> m_knownNodes;
-
     /**
      * The configured interval (in milliseconds) between rescans
      */
     private long m_interval;
-
     /**
      * The configured initial sleep (in milliseconds) prior to scheduling
      * rescans
      */
     private long m_initialSleep;
-
     /**
      * The rescan queue where new RescanProcessor objects are enqueued for
      * execution.
      */
     private ExecutorService m_rescanQ;
-
     private RescanProcessorFactory m_rescanProcessorFactory;
-
-    /**
-     * This class encapsulates the information about a node necessary to
-     * schedule the node for rescans.
-     */
-    final class NodeInfo implements Runnable {
-        int m_nodeId;
-
-        Timestamp m_lastScanned;
-
-        long m_interval;
-
-        boolean m_scheduled;
-
-        NodeInfo(int nodeId, Timestamp lastScanned, long interval) {
-            m_nodeId = nodeId;
-            m_lastScanned = lastScanned;
-            m_interval = interval;
-            m_scheduled = false;
-        }
-
-        NodeInfo(int nodeId, Date lastScanned, long interval) {
-            m_nodeId = nodeId;
-            m_lastScanned = new Timestamp(lastScanned.getTime());
-            m_interval = interval;
-            m_scheduled = false;
-        }
-
-        boolean isScheduled() {
-            return m_scheduled;
-        }
-
-        int getNodeId() {
-            return m_nodeId;
-        }
-
-        Timestamp getLastScanned() {
-            return m_lastScanned;
-        }
-
-        long getRescanInterval() {
-            return m_interval;
-        }
-
-        void setScheduled(boolean scheduled) {
-            m_scheduled = scheduled;
-        }
-
-        void setLastScanned(Date lastScanned) {
-            m_lastScanned = new Timestamp(lastScanned.getTime());
-        }
-
-        void setLastScanned(Timestamp lastScanned) {
-            m_lastScanned = lastScanned;
-        }
-
-        boolean timeForRescan() {
-            if (System.currentTimeMillis() >= (m_lastScanned.getTime() + m_interval)) {
-                return true;
-            } else {
-                return false;
-            }
-        }
-
-        @Override
-        public void run() {
-            try {
-                m_rescanProcessorFactory.createRescanProcessor(getNodeId()).run();
-            } finally {
-                setLastScanned(new Date());
-                setScheduled(false);
-            }
-        }
-    }
+    private CapsdConfig capsdConfig;
 
     /**
      * Constructs a new instance of the scheduler.
      *
      * @param rescanProcessorFactory TODO
      */
-    Scheduler(ExecutorService rescanQ, RescanProcessorFactory rescanProcessorFactory) throws SQLException {
+    public Scheduler(ExecutorService rescanQ, RescanProcessorFactory rescanProcessorFactory, CapsdConfig capsdConfig) throws SQLException {
 
         m_rescanQ = rescanQ;
         m_rescanProcessorFactory = rescanProcessorFactory;
+
+        this.capsdConfig = capsdConfig;
 
         m_status = START_PENDING;
         m_worker = null;
@@ -209,12 +128,12 @@ final class Scheduler implements Runnable, PausableFiber {
 
         // Get rescan interval from configuration factory
         //
-        m_interval = CapsdConfigFactory.getInstance().getRescanFrequency();
+        m_interval = capsdConfig.getRescanFrequency();
         LOG.debug("Scheduler: rescan interval(millis): {}", m_interval);
 
         // Get initial rescan sleep time from configuration factory
         //
-        m_initialSleep = CapsdConfigFactory.getInstance().getInitialSleepTime();
+        m_initialSleep = capsdConfig.getInitialSleepTime();
         LOG.debug("Scheduler: initial rescan sleep time(millis): {}", m_initialSleep);
 
         // Schedule SMB Reparenting using special nodeId (-1)
@@ -232,6 +151,14 @@ final class Scheduler implements Runnable, PausableFiber {
         //
         loadKnownNodes();
         LOG.debug("Scheduler: done loading known nodes, node count: {}", m_knownNodes.size());
+    }
+
+    public CapsdConfig getCapsdConfig() {
+        return capsdConfig;
+    }
+
+    public void setCapsdConfig(CapsdConfig capsdConfig) {
+        this.capsdConfig = capsdConfig;
     }
 
     /**
@@ -270,20 +197,20 @@ final class Scheduler implements Runnable, PausableFiber {
 
                 int nodeId = rs.getInt(1);
                 ifStmt.setInt(1, nodeId); // set nodeid
-                LOG.debug("loadKnownNodes: retrieved nodeid " + nodeId + ", now getting last poll time.");
+                LOG.debug("loadKnownNodes: retrieved nodeid {}, now getting last poll time.", nodeId);
 
                 rset = ifStmt.executeQuery();
                 d.watch(rs);
                 if (rset.next()) {
                     Timestamp lastPolled = rset.getTimestamp(1);
                     if (lastPolled != null && rset.wasNull() == false) {
-                        LOG.debug("loadKnownNodes: adding node " + nodeId + " with last poll time " + lastPolled);
+                        LOG.debug("loadKnownNodes: adding node {} with last poll time {}", nodeId, lastPolled);
                         NodeInfo nodeInfo = new NodeInfo(nodeId, lastPolled, m_interval);
                         m_knownNodes.add(nodeInfo);
                     }
                 } else {
-                    LOG.debug("Node w/ nodeid " + nodeId
-                        + " has no managed interfaces from which to retrieve a last poll time...it will not be scheduled.");
+                    LOG.debug("Node w/ nodeid {} has no managed interfaces from which to retrieve a last poll time...it will not be scheduled.",
+                        nodeId);
                 }
             }
         } finally {
@@ -314,7 +241,7 @@ final class Scheduler implements Runnable, PausableFiber {
             if (rset.next()) {
                 Timestamp lastPolled = rset.getTimestamp(1);
                 if (lastPolled != null && rset.wasNull() == false) {
-                    LOG.debug("scheduleNode: adding node " + nodeId + " with last poll time " + lastPolled);
+                    LOG.debug("scheduleNode: adding node {} with last poll time {}", nodeId, lastPolled);
                     m_knownNodes.add(new NodeInfo(nodeId, lastPolled, m_interval));
                 }
             } else {
@@ -336,7 +263,7 @@ final class Scheduler implements Runnable, PausableFiber {
             while (iter.hasNext()) {
                 NodeInfo nodeInfo = iter.next();
                 if (nodeInfo.getNodeId() == nodeId) {
-                    LOG.debug("unscheduleNode: removing node " + nodeId + " from the scheduler.");
+                    LOG.debug("unscheduleNode: removing node {} from the scheduler.", nodeId);
                     m_knownNodes.remove(nodeInfo);
                     break;
                 }
@@ -354,7 +281,7 @@ final class Scheduler implements Runnable, PausableFiber {
         try {
             m_rescanQ.execute(m_rescanProcessorFactory.createForcedRescanProcessor(nodeId));
         } catch (RejectedExecutionException e) {
-            LOG.error("forceRescan: Failed to add node " + nodeId + " to the rescan queue.", e);
+            LOG.error("forceRescan: Failed to add node {} to the rescan queue.", nodeId, e);
         }
     }
 
@@ -490,7 +417,7 @@ final class Scheduler implements Runnable, PausableFiber {
             //
             synchronized (this) {
                 if (m_status != RUNNING && m_status != PAUSED && m_status != PAUSE_PENDING && m_status != RESUME_PENDING) {
-                    LOG.debug("Scheduler.run: status = " + m_status + ", time to exit");
+                    LOG.debug("Scheduler.run: status = {}, time to exit", m_status);
                     break;
                 }
             }
@@ -503,7 +430,7 @@ final class Scheduler implements Runnable, PausableFiber {
                 firstPass = false;
                 synchronized (this) {
                     try {
-                        LOG.debug("Scheduler.run: initial sleep configured for " + m_initialSleep + "ms...sleeping...");
+                        LOG.debug("Scheduler.run: initial sleep configured for {}ms...sleeping...", m_initialSleep);
                         wait(m_initialSleep);
                     } catch (InterruptedException ex) {
                         LOG.debug("Scheduler.run: interrupted exception during initial sleep...exiting.");
@@ -570,7 +497,7 @@ final class Scheduler implements Runnable, PausableFiber {
 
                             // Update the schedule information for the SMB
                             // reparenting node
-                            // 
+                            //
                             node.setLastScanned(new Date());
                             node.setScheduled(false);
 
@@ -580,7 +507,7 @@ final class Scheduler implements Runnable, PausableFiber {
                         // a rescanProcessor and run it
                         //
                         else {
-                            LOG.debug("Scheduler.run: adding node " + node.getNodeId() + " to the rescan queue.");
+                            LOG.debug("Scheduler.run: adding node {} to the rescan queue.", node.getNodeId());
                             m_rescanQ.execute(node);
                             added++;
                         }
@@ -611,4 +538,75 @@ final class Scheduler implements Runnable, PausableFiber {
             m_status = STOPPED;
         }
     } // end run
+
+    /**
+     * This class encapsulates the information about a node necessary to
+     * schedule the node for rescans.
+     */
+    final class NodeInfo implements Runnable {
+        int m_nodeId;
+        Timestamp m_lastScanned;
+        long m_interval;
+        boolean m_scheduled;
+
+        NodeInfo(int nodeId, Timestamp lastScanned, long interval) {
+            m_nodeId = nodeId;
+            m_lastScanned = lastScanned;
+            m_interval = interval;
+            m_scheduled = false;
+        }
+
+        NodeInfo(int nodeId, Date lastScanned, long interval) {
+            m_nodeId = nodeId;
+            m_lastScanned = new Timestamp(lastScanned.getTime());
+            m_interval = interval;
+            m_scheduled = false;
+        }
+
+        boolean isScheduled() {
+            return m_scheduled;
+        }
+
+        void setScheduled(boolean scheduled) {
+            m_scheduled = scheduled;
+        }
+
+        int getNodeId() {
+            return m_nodeId;
+        }
+
+        Timestamp getLastScanned() {
+            return m_lastScanned;
+        }
+
+        void setLastScanned(Timestamp lastScanned) {
+            m_lastScanned = lastScanned;
+        }
+
+        long getRescanInterval() {
+            return m_interval;
+        }
+
+        void setLastScanned(Date lastScanned) {
+            m_lastScanned = new Timestamp(lastScanned.getTime());
+        }
+
+        boolean timeForRescan() {
+            if (System.currentTimeMillis() >= (m_lastScanned.getTime() + m_interval)) {
+                return true;
+            } else {
+                return false;
+            }
+        }
+
+        @Override
+        public void run() {
+            try {
+                m_rescanProcessorFactory.createRescanProcessor(getNodeId()).run();
+            } finally {
+                setLastScanned(new Date());
+                setScheduled(false);
+            }
+        }
+    }
 }

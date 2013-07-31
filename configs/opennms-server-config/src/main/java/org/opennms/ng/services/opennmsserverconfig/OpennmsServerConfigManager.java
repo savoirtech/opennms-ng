@@ -28,17 +28,17 @@
 
 package org.opennms.ng.services.opennmsserverconfig;
 
+import java.io.InputStream;
+
 import org.exolab.castor.xml.MarshalException;
 import org.exolab.castor.xml.ValidationException;
-import org.opennms.core.xml.CastorUtils;
 import org.opennms.netmgt.config.server.LocalServer;
-
-import java.io.InputStream;
+import org.opennms.ng.util.xml.CastorUtils;
 
 /**
  * <p>OpennmsServerConfigManager class.</p>
  */
-public class OpennmsServerConfigManager {
+public class OpennmsServerConfigManager implements OpennmsServerConfig {
     /**
      * The config class loaded from the config file
      */
@@ -52,6 +52,7 @@ public class OpennmsServerConfigManager {
      * @throws org.exolab.castor.xml.ValidationException if any.
      */
     protected OpennmsServerConfigManager(final InputStream is) throws MarshalException, ValidationException {
+
         m_config = CastorUtils.unmarshal(LocalServer.class, is);
     }
 
@@ -60,6 +61,7 @@ public class OpennmsServerConfigManager {
      *
      * @return the name of the local opennms server
      */
+    @Override
     public String getServerName() {
         return m_config.getServerName();
     }
@@ -69,6 +71,7 @@ public class OpennmsServerConfigManager {
      *
      * @return the default critical path IP
      */
+    @Override
     public String getDefaultCriticalPathIp() {
         return m_config.getDefaultCriticalPathIp();
     }
@@ -78,6 +81,7 @@ public class OpennmsServerConfigManager {
      *
      * @return the default critical path service
      */
+    @Override
     public String getDefaultCriticalPathService() {
         return m_config.getDefaultCriticalPathService();
     }
@@ -87,6 +91,7 @@ public class OpennmsServerConfigManager {
      *
      * @return the default critical path timeout
      */
+    @Override
     public int getDefaultCriticalPathTimeout() {
         return m_config.getDefaultCriticalPathTimeout();
     }
@@ -96,6 +101,7 @@ public class OpennmsServerConfigManager {
      *
      * @return the default critical path retries
      */
+    @Override
     public int getDefaultCriticalPathRetries() {
         return m_config.getDefaultCriticalPathRetries();
     }
@@ -106,6 +112,7 @@ public class OpennmsServerConfigManager {
      *
      * @return boolean flag
      */
+    @Override
     public boolean verifyServer() {
         return Boolean.valueOf(m_config.getVerifyServer());
     }
