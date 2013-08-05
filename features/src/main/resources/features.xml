@@ -152,6 +152,12 @@
         <bundle>mvn:org.opennms/opennms-icmp-api/${opennms.version}</bundle>
         <bundle>mvn:org.opennms.features/org.opennms.features.phonebook/${opennms.version}</bundle>
 
+        <bundle>mvn:org.opennms/opennms-icmp-api/${opennms.version}</bundle>
+        <bundle>mvn:org.opennms/opennms-icmp-jni6/${opennms.version}</bundle>
+        <bundle>mvn:org.opennms/opennms-icmp-jni/${opennms.version}</bundle>
+
+        <bundle>mvn:org.opennms.bundles/opennms-jicmp-api/${jicmp.version}</bundle>
+        <bundle>mvn:org.opennms.bundles/opennms-lib-rt/${lib-rt.version}</bundle>
         <bundle>mvn:org.opennms.ng/capsd/${project.version}</bundle>
 
     </feature>

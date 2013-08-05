@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <parent>
+        <artifactId>bundles</artifactId>
+        <groupId>org.opennms.ng</groupId>
+        <version>1.0-SNAPSHOT</version>
+    </parent>
+    <modelVersion>4.0.0</modelVersion>
+
+
+    <name>OPENNMS :: JICMP API</name>
+       <description>OPENNMS JICMP API</description>
+
+       <groupId>org.opennms.bundles</groupId>
+
+    <artifactId>opennms-jicmp-api</artifactId>
+       <version>${jicmp.version}</version>
+
+       <packaging>bundle</packaging>
+
+       <properties>
+           <pkgGroupId>org.opennms.bundles</pkgGroupId>
+           <pkgArtifactId>opennms-jicmp-api</pkgArtifactId>
+           <pkgVersion>${jicmp.version}</pkgVersion>
+
+           <opennms.osgi.import>
+
+               *
+
+           </opennms.osgi.import>
+           <opennms.osgi.export.pkg>
+
+               org.opennms.protocols.ip,
+               org.opennms.protocols.icmp,
+
+           </opennms.osgi.export.pkg>
+
+           <opennms.osgi.include.resource>{maven-resources},{maven-dependencies}</opennms.osgi.include.resource>
+           <opennms.osgi.failok>true</opennms.osgi.failok>
+
+       </properties>
+
+       <dependencies>
+
+           <dependency>
+               <groupId>org.opennms</groupId>
+               <artifactId>jicmp-api</artifactId>
+               <version>${jicmp.version}</version>
+           </dependency>
+
+       </dependencies>
+
+       <build>
+           <plugins>
+               <plugin>
+                   <groupId>org.apache.maven.plugins</groupId>
+                   <artifactId>maven-shade-plugin</artifactId>
+                   <version>${maven.shade.plugin.version}</version>
+                   <executions>
+                       <execution>
+                           <phase>package</phase>
+                           <goals>
+                               <goal>shade</goal>
+                           </goals>
+                           <configuration>
+                               <artifactSet>
+                                   <includes>
+                                       <include>${pkgGroupId}:${pkgArtifactId}</include>
+
+                                   </includes>
+                               </artifactSet>
+
+                               <promoteTransitiveDependencies>true</promoteTransitiveDependencies>
+                               <createDependencyReducedPom>true</createDependencyReducedPom>
+                           </configuration>
+                       </execution>
+                   </executions>
+               </plugin>
+           </plugins>
+       </build>
+
+</project>

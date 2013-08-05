@@ -1,0 +1,63 @@
+<blueprint xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+           xmlns:cm="http://aries.apache.org/blueprint/xmlns/blueprint-cm/v1.1.0"
+           xmlns="http://www.osgi.org/xmlns/blueprint/v1.0.0"
+           xsi:schemaLocation="http://www.osgi.org/xmlns/blueprint/v1.0.0 http://www.osgi.org/xmlns/blueprint/v1.0.0/blueprint.xsd">
+
+    <cm:property-placeholder persistent-id="org.opennms.ng.capsd" id="org.opennms.ng.capsd" update-strategy="reload">
+        <cm:default-properties>
+            <cm:property name="opennms.trapd.snmpTrapAddress" value="127.0.0.1"/>
+            <cm:property name="opennms.trapd.snmpTrapPort" value="10062"/>
+            <cm:property name="opennms.trapd.newSuspectOnTrap" value="false"/>
+        </cm:default-properties>
+    </cm:property-placeholder>
+
+    <reference id="opennmsServerConfig" interface="org.opennms.ng.services.opennmsserverconfig.OpennmsServerConfig" availability="mandatory"/>
+
+    <reference id="jta" interface="javax.sql.DataSource"
+               filter="(transactional=true)" availability="mandatory"/>
+
+    <reference id="nonJTA" interface="javax.sql.DataSource"
+               filter="(transactional=false)" availability="mandatory"/>
+
+    <reference id="capsdConfig" interface="org.opennms.ng.services.capsdconfig.CapsdConfig" availability="mandatory"/>
+
+    <reference id="pollerConfig" interface="org.opennms.ng.services.pollerconfig.PollerConfig" availability="mandatory"/>
+
+    <reference id="collectdConfig" interface="org.opennms.ng.services.collectdconfig.CollectdConfig" availability="mandatory"/>
+
+    <reference id="eventIpcManager" interface="org.opennms.netmgt.model.events.EventIpcManager" availability="mandatory"/>
+
+    <!--
+    <bean id="xmlRpcEnabled" factory-ref="capsdConfig" factory-method="isXmlRpcEnabled"/>
+        -->
+    <bean id="maxSuspectThreadPoolSize" factory-ref="capsdConfig" factory-method="getMaxSuspectThreadPoolSize"/>
+
+    <bean id="maxRescanThreadPoolSize" factory-ref="capsdConfig" factory-method="getMaxRescanThreadPoolSize"/>
+
+    <bean id="serverName" factory-ref="opennmsServerConfig" factory-method="getServerName"/>
+
+    <bean id="xmlRpcNotifier" class="org.opennms.netmgt.capsd.XmlRpcEventHandlerNotifier">
+        <!--
+         <property name="xmlRpcEnabled" ref="xmlRpcEnabled"/>
+            -->
+        <property name="xmlRpcEnabled" value="false"/>
+
+    </bean>
+
+
+
+    <bean id="jdbcTemplate" class="org.springframework.jdbc.core.JdbcTemplate">
+        <argument ref="nonJTA"/>
+    </bean>
+
+    <bean id="collectorConfigDao" class="org.opennms.ng.services.collectd.CollectorConfigDaoImpl"/>
+
+    <bean id="daemon" class="org.opennms.ng.services.collectd.Collectd">
+        <property name="collectorConfigDao" ref="collectorConfigDao"/>
+        <property name="ipInterfaceDao" ref="ipInterfaceDao"/>
+        <property name="nodeDao" ref="nodeDao"/>
+        <property name="eventIpcManager" ref="eventIpcManager"/>
+        <property name="transactionTemplate" ref="transactionTemplate"/>
+    </bean>
+
+</blueprint>

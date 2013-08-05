@@ -68,9 +68,11 @@
         <httpclient.version>4.2.5</httpclient.version>
         <httpcore.version>4.2.4</httpcore.version>
         <jcifs.version>1.3.17_1</jcifs.version>
+        <jicmp.version>1.4.1</jicmp.version>
         <jldap.version>4.3</jldap.version>
         <junit.version>4.11</junit.version>
         <log4jVersion>1.2.16</log4jVersion>
+        <lib-rt.version>0.6</lib-rt.version>
         <openjpa.version>2.2.0</openjpa.version>
         <oracle.jdbc.version>6.0</oracle.jdbc.version>
 
@@ -379,6 +381,7 @@
                         <_failok>${opennms.osgi.failok}</_failok>
                         <!-- Will add a JPA context tag to the bundle, used by aries JPA -->
                         <Meta-Persistence>${opennms.osgi.jpa.context}</Meta-Persistence>
+                        <Embed-Dependency>${opennms.osgi.embed}</Embed-Dependency>
                     </instructions>
                 </configuration>
             </plugin>

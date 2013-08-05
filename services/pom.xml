@@ -21,7 +21,6 @@
         <module>passive</module>
         <module>poller</module>
         <module>scheduler</module>
-
         <module>syslogd</module>
         <module>trapd</module>
         <module>collectd</module>

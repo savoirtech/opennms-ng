@@ -1,0 +1,162 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xmlns="http://maven.apache.org/POM/4.0.0"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <parent>
+        <artifactId>bundles</artifactId>
+        <groupId>org.opennms.ng</groupId>
+        <version>1.0-SNAPSHOT</version>
+    </parent>
+    <modelVersion>4.0.0</modelVersion>
+
+    <artifactId>opennms-dao-bundle</artifactId>
+
+    <groupId>org.opennms.bundles</groupId>
+
+    <packaging>bundle</packaging>
+
+    <name>OPENNMS :: DAO bundle Jar</name>
+    <description>OPENNMS DAO BUNDLE - DAO UBER Jar</description>
+
+    <version>${opennms.version}</version>
+
+    <properties>
+        <pkgGroupId>org.opennms.bundles</pkgGroupId>
+        <pkgArtifactId>opennms-dao-bundle</pkgArtifactId>
+        <pkgVersion>${opennms.version}</pkgVersion>
+
+        <opennms.osgi.import.pkg>
+            !org.springframework*,
+            !com.sun*,
+            !org.jboss*,
+            com.fasterxml*;resolution:="optional",
+
+            javax.security.jacc;resolution:="optional",
+            javax.validation* ;resolution:="optional",
+            org.apache.tools.ant;resolution:="optional",
+            org.apache.tools.ant.taskdefs;resolution:="optional",
+            org.apache.tools.ant.types;resolution:="optional",
+
+            !org.hibernate*,
+            !org.opennms.core.criteria,
+            !org.opennms.core.criteria.restrictions,
+            *
+        </opennms.osgi.import.pkg>
+        <opennms.osgi.export>
+            !org.opennms.netmgt.dao.api,
+            !org.opennms.netmgt.dao.support,
+            org.opennms.netmgt.dao*;version="${opennms.version}",
+        </opennms.osgi.export>
+
+        <opennms.osgi.private.pkg>
+            org.springframework*
+            org.hibernate*,
+            org.opennms.core.criteria,
+            org.opennms.core.criteria.restrictions,
+
+        </opennms.osgi.private.pkg>
+
+        <opennms.osgi.embed>hibernate-core,hibernate-commons-annotations,hibernate-jpa-2.0-api,javassist</opennms.osgi.embed>
+
+        <opennms.osgi.failok>true</opennms.osgi.failok>
+        <!-- Trying to get around dynamic class.forname loading -->
+        <opennms.osgi.dynamic>*</opennms.osgi.dynamic>
+
+    </properties>
+
+    <dependencies>
+
+        <dependency>
+            <groupId>org.opennms</groupId>
+            <artifactId>opennms-dao</artifactId>
+            <version>${opennms.version}</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>org.apache.tomcat</groupId>
+                    <artifactId>jdbc-pool</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>org.snmp4j</groupId>
+                    <artifactId>snmp4j</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+
+        <dependency>
+            <groupId>org.hibernate</groupId>
+            <artifactId>hibernate-core</artifactId>
+            <version>3.6.10.Final</version>
+        </dependency>
+
+
+        <dependency>
+            <groupId>org.hibernate</groupId>
+            <artifactId>hibernate-commons-annotations</artifactId>
+            <version>3.2.0.Final</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.hibernate.javax.persistence</groupId>
+            <artifactId>hibernate-jpa-2.0-api</artifactId>
+            <version>1.0.1.Final</version>
+        </dependency>
+
+        <dependency>
+            <groupId>javassist</groupId>
+            <artifactId>javassist</artifactId>
+            <version>3.12.1.GA</version>
+        </dependency>
+
+        <!-- CORE LIBRARIES
+
+        org.hibernate,
+        	org.hibernate.criterion,
+        	org.hibernate.metadata,
+        	org.hibernate.transform,
+        	org.hibernate.type,
+        	org.opennms.core.criteria;version="[1.13,2)",
+        	org.opennms.core.criteria.restrictions;version="[1.13,2)",
+
+        -->
+
+    </dependencies>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-shade-plugin</artifactId>
+                <version>${maven.shade.plugin.version}</version>
+                <executions>
+                    <execution>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>shade</goal>
+                        </goals>
+                        <configuration>
+                            <artifactSet>
+                                <includes>
+                                    <include>org.opennms:opennms-dao</include>
+                                    <include>org.hibernate:hibernate-core</include>
+                                    <include>org.hibernate:hibernate-commons-annotations</include>
+                                    <include>org.opennms.dependencies:hibernate-dependencies</include>
+                                    <include>org.hibernate.javax.persistence:hibernate-jpa-2.0-api</include>
+
+                                </includes>
+
+                                <excludes>
+                                    <exclude>org.apache.tomcat:jdbc-pool</exclude>
+                                    <exclude>org.snmp4j:snmp4j</exclude>
+                                </excludes>
+                            </artifactSet>
+
+                            <promoteTransitiveDependencies>true</promoteTransitiveDependencies>
+                            <createDependencyReducedPom>true</createDependencyReducedPom>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
+
+</project>
