@@ -55,6 +55,7 @@ import org.opennms.netmgt.capsd.snmp.IfTableEntry;
 import org.opennms.netmgt.capsd.snmp.IfXTableEntry;
 import org.opennms.netmgt.capsd.snmp.IpAddrTable;
 import org.opennms.netmgt.capsd.snmp.SystemGroup;
+import org.opennms.netmgt.model.OnmsNode;
 import org.opennms.netmgt.model.capsd.DbIfServiceEntry;
 import org.opennms.netmgt.model.capsd.DbIpInterfaceEntry;
 import org.opennms.netmgt.model.capsd.DbNodeEntry;
@@ -91,17 +92,7 @@ public final class RescanProcessor implements Runnable {
     private static final InetAddress ZERO_ZERO_ZERO_ZERO = addr("0.0.0.0");
     private PollerConfig pollerConfig;
     private CapsdConfig capsdConfig;
-
     private EventIpcManager eventIpcManager;
-
-    public EventIpcManager getEventIpcManager() {
-        return eventIpcManager;
-    }
-
-    public void setEventIpcManager(EventIpcManager eventIpcManager) {
-        this.eventIpcManager = eventIpcManager;
-    }
-
     /**
      * SQL statement used to retrieve service IDs so that service name can be
      * determined from ID, and map of service names
@@ -345,7 +336,7 @@ public final class RescanProcessor implements Runnable {
             svcStmt.executeUpdate();
             snmpStmt.executeUpdate();
 
-            duplicateNode.setNodeType(DbNodeEntry.NODE_TYPE_DELETED);
+            duplicateNode.setNodeType(OnmsNode.NodeType.DELETED);
             duplicateNode.store(dbc);
         } catch (SQLException sqlE) {
             LOG.error("deleteDuplicateNode  SQLException while deleting duplicate node: {}", duplicateNode.getNodeId());
@@ -387,124 +378,6 @@ public final class RescanProcessor implements Runnable {
         } finally {
             d.cleanUp();
         }
-    }
-
-    /**
-     * Create IP interface entry representing latest information
-     * retrieved for the interface via the collector.  If doesSnmp is set to
-     * <i>true</i>, this entry must <b>not</b> be stored to the database until
-     * the corresponding DbSnmpInterfaceEntry is stored.
-     */
-    private  DbIpInterfaceEntry getNewDbIpInterfaceEntry(DbNodeEntry node, IfSnmpCollector snmpc, boolean doesSnmp, InetAddress ifaddr) {
-        CapsdConfig cFactory = CapsdConfigFactory.getInstance();
-        PollerConfig pollerCfgFactory = getPollerConfig();
-
-        int ifIndex = -1;
-
-        DbIpInterfaceEntry currIpIfEntry;
-        final String ifaddrString = str(ifaddr);
-        if (doesSnmp) {
-            if (snmpc != null && snmpc.hasIpAddrTable()) {
-                ifIndex = snmpc.getIfIndex(ifaddr);
-            }
-            if (ifIndex == -1) {
-                LOG.debug("updateInterfaceInfo: interface {} has no valid ifIndex. Assuming this is a lame SNMP host with no ipAddrTable",
-                    ifaddrString);
-                ifIndex = CapsdConfig.LAME_SNMP_HOST_IFINDEX;
-            }
-            currIpIfEntry = DbIpInterfaceEntry.create(node.getNodeId(), ifaddr, ifIndex);
-        } else {
-            currIpIfEntry = DbIpInterfaceEntry.create(node.getNodeId(), ifaddr);
-        }
-
-        // Hostname
-        currIpIfEntry.setHostname(ifaddr.getHostName());
-
-        /*
-         * Managed state
-         * NOTE: (reference internal bug# 201)
-         * If the ip is 'managed', it might still be 'not polled' based
-         * on the poller configuration.
-         *
-         * Try to avoid re-evaluating the ip against filters for
-         * each service, try to get the first package here and use
-         * that for service evaluation
-         *
-         * At this point IF the ip is already in the database, package filter
-         * evaluation should go through OK. New interfaces will be dealt with
-         * later
-         */
-        org.opennms.netmgt.config.poller.Package ipPkg = null;
-
-        if (cFactory.isAddressUnmanaged(ifaddr)) {
-            currIpIfEntry.setManagedState(DbIpInterfaceEntry.STATE_UNMANAGED);
-        } else {
-            boolean ipToBePolled = false;
-            ipPkg = ifaddrString == null ? null : pollerCfgFactory.getFirstPackageMatch(ifaddrString);
-            if (ipPkg != null) {
-                ipToBePolled = true;
-            }
-
-            if (ipToBePolled) {
-                currIpIfEntry.setManagedState(DbIpInterfaceEntry.STATE_MANAGED);
-            } else {
-                currIpIfEntry.setManagedState(DbIpInterfaceEntry.STATE_NOT_POLLED);
-            }
-
-            LOG.debug("updateInterfaceInfo: interface {} to be polled = {}", ifaddrString, ipToBePolled);
-        }
-
-        /*
-         * If SNMP data collection is available set SNMP Primary state
-         * as well as ifIndex and ifStatus.
-         *
-         * For all interfaces simply set 'isSnmpPrimary' field to
-         * not eligible for now. Following the interface updates
-         * the primary and secondary SNMP interfaces will be
-         * determined and the value of the 'isSnmpPrimary' field
-         * set accordingly for each interface. The old primary
-         * interface should have already been saved for future
-         * reference.
-         */
-        if (doesSnmp && snmpc != null && snmpc.hasIpAddrTable()) {
-            if (ifIndex != -1) {
-                if (snmpc.hasIfTable()) {
-                    int status = snmpc.getAdminStatus(ifIndex);
-                    currIpIfEntry.setStatus(status);
-                }
-            } else {
-                // No ifIndex found
-                LOG.debug("updateInterfaceInfo:  No ifIndex found for {}. Not eligible for primary SNMP interface.", ifaddrString);
-            }
-            currIpIfEntry.setPrimaryState(DbIpInterfaceEntry.SNMP_NOT_ELIGIBLE);
-        } else {
-            if (doesSnmp) {
-                currIpIfEntry.setPrimaryState(DbIpInterfaceEntry.SNMP_NOT_ELIGIBLE);
-            }
-        }
-        return currIpIfEntry;
-    }
-
-    private  boolean isServicePolled(String ifAddr, String svcName, org.opennms.netmgt.config.poller.Package ipPkg) {
-        boolean svcToBePolled = false;
-        if (ipPkg != null) {
-            svcToBePolled = getPollerConfig().isPolled(svcName, ipPkg);
-            if (!svcToBePolled) {
-                svcToBePolled = getPollerConfig().isPolled(ifAddr, svcName);
-            }
-        }
-        return svcToBePolled;
-    }
-
-    private boolean isServicePolledLocally(String ifAddr, String svcName, org.opennms.netmgt.config.poller.Package ipPkg) {
-        boolean svcToBePolled = false;
-        if (ipPkg != null && !ipPkg.getRemote()) {
-            svcToBePolled = getPollerConfig().isPolled(svcName, ipPkg);
-            if (!svcToBePolled) {
-                svcToBePolled = getPollerConfig().isPolledLocally(ifAddr, svcName);
-            }
-        }
-        return svcToBePolled;
     }
 
     /**
@@ -819,283 +692,6 @@ public final class RescanProcessor implements Runnable {
     }
 
     /**
-     * This method is responsible for determining the primary IP interface for
-     * the node being rescanned.
-     *
-     * @param collectorMap Map of IfCollector objects containing data collected from all
-     *                     of the node's interfaces.
-     * @return InetAddress The primary IP interface for the node or null if a
-     * primary interface for the node could not be determined.
-     */
-    InetAddress determinePrimaryIpInterface(Map<String, IfCollector> collectorMap) {
-        Collection<IfCollector> values = collectorMap.values();
-        Iterator<IfCollector> iter = values.iterator();
-        InetAddress primaryIf = null;
-        while (iter.hasNext()) {
-            IfCollector ifc = iter.next();
-            InetAddress currIf = ifc.getTarget();
-
-            if (primaryIf == null) {
-                primaryIf = currIf;
-                continue;
-            } else {
-                // Test the target interface of the collector first.
-                primaryIf = compareAndSelectPrimary(currIf, primaryIf);
-
-                // Now test each of the collected subtargets
-                if (ifc.hasAdditionalTargets()) {
-                    Map<InetAddress, List<IfCollector.SupportedProtocol>> subTargets = ifc.getAdditionalTargets();
-                    Iterator<InetAddress> siter = subTargets.keySet().iterator();
-
-                    while (siter.hasNext()) {
-                        currIf = siter.next();
-                        primaryIf = compareAndSelectPrimary(currIf, primaryIf);
-                    }
-                }
-            }
-        }
-
-        if (LOG.isDebugEnabled()) {
-            if (primaryIf != null) {
-                LOG.debug("determinePrimaryIpInterface: selected primary interface: {}", str(primaryIf));
-            } else {
-                LOG.debug("determinePrimaryIpInterface: no primary interface found");
-            }
-        }
-        return primaryIf;
-    }
-
-    /**
-         * Utility method which compares two InetAddress objects based on the
-         * provided method (MIN/MAX) and returns the InetAddress which is to be
-         * considered the primary interface. NOTE: In order for an interface to be
-         * considered primary it must be managed. This method will return null if
-         * the 'oldPrimary' address is null and the 'currentIf' address is
-         * unmanaged.
-         *
-         * @param currentIf  Interface with which to compare the 'oldPrimary' address.
-         * @param oldPrimary Primary interface to be compared against the 'currentIf'
-         *                   address.
-         * @param method     Comparison method to be used (either "min" or "max")
-         * @return InetAddress object of the primary interface based on the
-         * provided method or null if neither address is eligible to be
-         * primary.
-         */
-         InetAddress compareAndSelectPrimary(InetAddress currentIf, InetAddress oldPrimary) {
-            InetAddress newPrimary = null;
-            if (oldPrimary == null) {
-                if (!capsdConfig.isAddressUnmanaged(currentIf)) {
-                    return currentIf;
-                } else {
-                    return oldPrimary;
-                }
-            }
-
-            byte[] current = currentIf.getAddress();
-            byte[] primary = oldPrimary.getAddress();
-
-            // Smallest address wins
-            if (new ByteArrayComparator().compare(current, primary) < 0) {
-                // Replace the primary interface with the current
-                // interface only if the current interface is managed!
-                if (!capsdConfig.isAddressUnmanaged(currentIf)) {
-                    newPrimary = currentIf;
-                }
-            }
-
-            if (newPrimary != null) {
-                return newPrimary;
-            } else {
-                return oldPrimary;
-            }
-        }
-
-    /**
-     * Primarily, this method is responsible for assigning the node's nodeLabel
-     * value using information collected from the node's various interfaces.
-     * Additionally, if the node talks NetBIOS/SMB, then the node's NetBIOS name
-     * and operating system fields are assigned.
-     *
-     * @param collectorMap      Map of IfCollector objects, one per interface.
-     * @param dbNodeEntry       Node entry, as it exists in the database.
-     * @param currNodeEntry     Current node entry, as collected during the current rescan.
-     * @param currPrimarySnmpIf Primary SNMP interface, as determined from the collection
-     *                          retrieved during the current rescan.
-     */
-    private void setNodeLabelAndSmbInfo(Map<String, IfCollector> collectorMap, DbNodeEntry dbNodeEntry, DbNodeEntry currNodeEntry,
-                                               InetAddress currPrimarySnmpIf) {
-        boolean labelSet = false;
-
-        /*
-         * We are going to change the order in which labels are assigned.
-         * First, we check DNS - the hostname of the primary interface.
-         * Then we check SMB - next SNMP sysName - and finally IP address
-         * This is different then in 1.0 - when SMB came first.
-         */
-
-        InetAddress primaryIf = null;
-
-        if (!labelSet) {
-            /*
-             * If no label is set, attempt to get the hostname for the primary
-             * SNMP interface.
-             * Note: this was wrong prior to 1.0.1 - the method
-             * determinePrimaryIpInterface
-             * would return the lowest numbered interface, not necessarily the
-             * primary SNMP interface.
-             */
-            if (currPrimarySnmpIf != null) {
-                primaryIf = currPrimarySnmpIf;
-            } else {
-                primaryIf = determinePrimaryIpInterface(collectorMap);
-            }
-            if (primaryIf == null) {
-                LOG.error("setNodeLabelAndSmbInfo: failed to find primary interface...");
-            } else {
-                String hostName = primaryIf.getHostName();
-                if (!hostName.equals(str(primaryIf))) {
-                    labelSet = true;
-
-                    currNodeEntry.setLabel(hostName);
-                    currNodeEntry.setLabelSource(DbNodeEntry.LABEL_SOURCE_HOSTNAME);
-                }
-            }
-        }
-
-        IfSmbCollector savedSmbcRef = null;
-
-        // Does the node entry in database have a NetBIOS name?
-        if (dbNodeEntry.getNetBIOSName() != null) {
-            /*
-             * Yes it does, so search through collected info for all
-             * interfaces and see if any have a NetBIOS name
-             * which matches the existing one in the database
-             */
-            Collection<IfCollector> values = collectorMap.values();
-            Iterator<IfCollector> iter = values.iterator();
-            while (iter.hasNext() && !labelSet) {
-                IfCollector ifc = iter.next();
-                IfSmbCollector smbc = ifc.getSmbCollector();
-                if (smbc != null) {
-                    if (smbc.getNbtName() != null) {
-                        /*
-                         * Save reference to first IfSmbCollector object
-                         * for future use.
-                         */
-                        savedSmbcRef = smbc;
-
-                        String netbiosName = smbc.getNbtName().toUpperCase();
-                        if (netbiosName.equals(dbNodeEntry.getNetBIOSName())) {
-                            // Found a match.
-                            labelSet = true;
-
-                            currNodeEntry.setLabel(netbiosName);
-                            currNodeEntry.setLabelSource(DbNodeEntry.LABEL_SOURCE_NETBIOS);
-                            currNodeEntry.setNetBIOSName(netbiosName);
-
-                            if (smbc.getDomainName() != null) {
-                                currNodeEntry.setDomainName(smbc.getDomainName());
-                            }
-                        }
-                    }
-                }
-            }
-        } else {
-            /*
-             * No it does not, attempt to find an interface
-             * collector that does have a NetBIOS name and
-             * save a reference to that collector
-             */
-            Collection<IfCollector> values = collectorMap.values();
-            Iterator<IfCollector> iter = values.iterator();
-            while (iter.hasNext()) {
-                IfCollector ifc = iter.next();
-                IfSmbCollector smbc = ifc.getSmbCollector();
-                if (smbc != null && smbc.getNbtName() != null) {
-                    savedSmbcRef = smbc;
-                }
-            }
-        }
-
-        /*
-         * If node label has not yet been set and SMB info is available
-         * use that info to set the node label and NetBIOS name
-         */
-        if (!labelSet && savedSmbcRef != null) {
-            labelSet = true;
-
-            currNodeEntry.setLabel(savedSmbcRef.getNbtName());
-            currNodeEntry.setLabelSource(DbNodeEntry.LABEL_SOURCE_NETBIOS);
-            currNodeEntry.setNetBIOSName(currNodeEntry.getLabel());
-
-            if (savedSmbcRef.getDomainName() != null) {
-                currNodeEntry.setDomainName(savedSmbcRef.getDomainName());
-            }
-        }
-
-        /*
-         * If we get this far no IP hostname or SMB info was available. Next we
-         * want to use MIB-II sysName for the node label. The primary SNMP
-         * interface has already been determined so use it if available.
-         */
-        if (!labelSet && currPrimarySnmpIf != null) {
-            /*
-             * We prefer to use the collector for the primary SNMP interface
-             * however a collector for the primary SNMP interface may not exist
-             * in the map if a node has only recently had SNMP support enabled
-             * or if the new primary SNMP interface was only recently added to
-             * the node. At any rate if it exists use it, if not use the
-             * first collector which supports SNMP.
-             */
-            final String currPrimarySnmpAddress = str(currPrimarySnmpIf);
-            IfCollector ifc = currPrimarySnmpAddress == null ? null : collectorMap.get(currPrimarySnmpAddress);
-            if (ifc == null) {
-                Collection<IfCollector> collectors = collectorMap.values();
-                Iterator<IfCollector> iter = collectors.iterator();
-                while (iter.hasNext()) {
-                    ifc = iter.next();
-                    if (ifc.getSnmpCollector() != null) {
-                        break;
-                    }
-                }
-            }
-
-            // Sanity check
-            if (ifc == null || ifc.getSnmpCollector() == null) {
-                LOG.warn("setNodeLabelAndSmbInfo: primary SNMP interface set to {} but no SNMP collector found.", currPrimarySnmpAddress);
-            } else {
-                IfSnmpCollector snmpc = ifc.getSnmpCollector();
-                SystemGroup sysgrp = snmpc.getSystemGroup();
-
-                String str = sysgrp.getSysName();
-                if (str != null && str.length() > 0) {
-                    labelSet = true;
-                    currNodeEntry.setLabel(str);
-                    currNodeEntry.setLabelSource(DbNodeEntry.LABEL_SOURCE_SYSNAME);
-                }
-            }
-        }
-
-        if (!labelSet) {
-            /*
-             * If we get this far no SNMP info was available so we will default
-             * to the IP address of the primary interface.
-             */
-            if (primaryIf != null) {
-                currNodeEntry.setLabel(str(primaryIf));
-                currNodeEntry.setLabelSource(DbNodeEntry.LABEL_SOURCE_ADDRESS);
-            } else {
-                /*
-                 * If all else fails, just use the current values from
-                 * the database.
-                 */
-                currNodeEntry.setLabel(dbNodeEntry.getLabel());
-                currNodeEntry.setLabelSource(dbNodeEntry.getLabelSource());
-            }
-        }
-    }
-
-    /**
      * Utility method used to determine if the specified node has been marked as
      * deleted in the node table.
      *
@@ -1122,7 +718,7 @@ public final class RescanProcessor implements Runnable {
             String nodeTypeStr = rs.getString(1);
             if (!rs.wasNull()) {
                 char nodeType = nodeTypeStr.charAt(0);
-                if (nodeType == DbNodeEntry.NODE_TYPE_DELETED) {
+                if (OnmsNode.NodeType.DELETED.toString().equals(nodeType)) {
                     nodeDeleted = true;
                 }
             }
@@ -1273,12 +869,16 @@ public final class RescanProcessor implements Runnable {
 
         if (originalEntry.getLabel() != null) {
             bldr.addParam(EventConstants.PARM_OLD_NODE_LABEL, originalEntry.getLabel());
-            bldr.addParam(EventConstants.PARM_OLD_NODE_LABEL_SOURCE, originalEntry.getLabelSource());
+            if (originalEntry.getLabelSource() != null) {
+                bldr.addParam(EventConstants.PARM_OLD_NODE_LABEL_SOURCE, originalEntry.getLabelSource().toString());
+            }
         }
 
         if (updatedEntry.getLabel() != null) {
             bldr.addParam(EventConstants.PARM_NEW_NODE_LABEL, updatedEntry.getLabel());
-            bldr.addParam(EventConstants.PARM_NEW_NODE_LABEL_SOURCE, updatedEntry.getLabelSource());
+            if (updatedEntry.getLabelSource() != null) {
+                bldr.addParam(EventConstants.PARM_NEW_NODE_LABEL_SOURCE, updatedEntry.getLabelSource().toString());
+            }
         }
 
         LOG.debug("createNodeLabelChangedEvent: successfully created nodeLabelChanged event for nodeid: {}", updatedEntry.getNodeId());
@@ -1466,7 +1066,9 @@ public final class RescanProcessor implements Runnable {
         // Add node label and node label source
         if (newNode.getLabel() != null) {
             bldr.addParam(EventConstants.PARM_NODE_LABEL, newNode.getLabel());
-            bldr.addParam(EventConstants.PARM_NODE_LABEL_SOURCE, newNode.getLabelSource());
+            if (newNode.getLabelSource() != null) {
+                bldr.addParam(EventConstants.PARM_NODE_LABEL_SOURCE, newNode.getLabelSource().toString());
+            }
         }
 
         // Add nodeSysName
@@ -1772,6 +1374,409 @@ public final class RescanProcessor implements Runnable {
         }
     }
 
+    public EventIpcManager getEventIpcManager() {
+        return eventIpcManager;
+    }
+
+    public void setEventIpcManager(EventIpcManager eventIpcManager) {
+        this.eventIpcManager = eventIpcManager;
+    }
+
+    /**
+     * Create IP interface entry representing latest information
+     * retrieved for the interface via the collector.  If doesSnmp is set to
+     * <i>true</i>, this entry must <b>not</b> be stored to the database until
+     * the corresponding DbSnmpInterfaceEntry is stored.
+     */
+    private DbIpInterfaceEntry getNewDbIpInterfaceEntry(DbNodeEntry node, IfSnmpCollector snmpc, boolean doesSnmp, InetAddress ifaddr) {
+        CapsdConfig cFactory = CapsdConfigFactory.getInstance();
+        PollerConfig pollerCfgFactory = getPollerConfig();
+
+        int ifIndex = -1;
+
+        DbIpInterfaceEntry currIpIfEntry;
+        final String ifaddrString = str(ifaddr);
+        if (doesSnmp) {
+            if (snmpc != null && snmpc.hasIpAddrTable()) {
+                ifIndex = snmpc.getIfIndex(ifaddr);
+            }
+            if (ifIndex == -1) {
+                LOG.debug("updateInterfaceInfo: interface {} has no valid ifIndex. Assuming this is a lame SNMP host with no ipAddrTable",
+                    ifaddrString);
+                ifIndex = CapsdConfig.LAME_SNMP_HOST_IFINDEX;
+            }
+            currIpIfEntry = DbIpInterfaceEntry.create(node.getNodeId(), ifaddr, ifIndex);
+        } else {
+            currIpIfEntry = DbIpInterfaceEntry.create(node.getNodeId(), ifaddr);
+        }
+
+        // Hostname
+        currIpIfEntry.setHostname(ifaddr.getHostName());
+
+        /*
+         * Managed state
+         * NOTE: (reference internal bug# 201)
+         * If the ip is 'managed', it might still be 'not polled' based
+         * on the poller configuration.
+         *
+         * Try to avoid re-evaluating the ip against filters for
+         * each service, try to get the first package here and use
+         * that for service evaluation
+         *
+         * At this point IF the ip is already in the database, package filter
+         * evaluation should go through OK. New interfaces will be dealt with
+         * later
+         */
+        org.opennms.netmgt.config.poller.Package ipPkg = null;
+
+        if (cFactory.isAddressUnmanaged(ifaddr)) {
+            currIpIfEntry.setManagedState(DbIpInterfaceEntry.STATE_UNMANAGED);
+        } else {
+            boolean ipToBePolled = false;
+            ipPkg = ifaddrString == null ? null : pollerCfgFactory.getFirstPackageMatch(ifaddrString);
+            if (ipPkg != null) {
+                ipToBePolled = true;
+            }
+
+            if (ipToBePolled) {
+                currIpIfEntry.setManagedState(DbIpInterfaceEntry.STATE_MANAGED);
+            } else {
+                currIpIfEntry.setManagedState(DbIpInterfaceEntry.STATE_NOT_POLLED);
+            }
+
+            LOG.debug("updateInterfaceInfo: interface {} to be polled = {}", ifaddrString, ipToBePolled);
+        }
+
+        /*
+         * If SNMP data collection is available set SNMP Primary state
+         * as well as ifIndex and ifStatus.
+         *
+         * For all interfaces simply set 'isSnmpPrimary' field to
+         * not eligible for now. Following the interface updates
+         * the primary and secondary SNMP interfaces will be
+         * determined and the value of the 'isSnmpPrimary' field
+         * set accordingly for each interface. The old primary
+         * interface should have already been saved for future
+         * reference.
+         */
+        if (doesSnmp && snmpc != null && snmpc.hasIpAddrTable()) {
+            if (ifIndex != -1) {
+                if (snmpc.hasIfTable()) {
+                    int status = snmpc.getAdminStatus(ifIndex);
+                    currIpIfEntry.setStatus(status);
+                }
+            } else {
+                // No ifIndex found
+                LOG.debug("updateInterfaceInfo:  No ifIndex found for {}. Not eligible for primary SNMP interface.", ifaddrString);
+            }
+            currIpIfEntry.setPrimaryState(DbIpInterfaceEntry.SNMP_NOT_ELIGIBLE);
+        } else {
+            if (doesSnmp) {
+                currIpIfEntry.setPrimaryState(DbIpInterfaceEntry.SNMP_NOT_ELIGIBLE);
+            }
+        }
+        return currIpIfEntry;
+    }
+
+    private boolean isServicePolled(String ifAddr, String svcName, org.opennms.netmgt.config.poller.Package ipPkg) {
+        boolean svcToBePolled = false;
+        if (ipPkg != null) {
+            svcToBePolled = getPollerConfig().isPolled(svcName, ipPkg);
+            if (!svcToBePolled) {
+                svcToBePolled = getPollerConfig().isPolled(ifAddr, svcName);
+            }
+        }
+        return svcToBePolled;
+    }
+
+    private boolean isServicePolledLocally(String ifAddr, String svcName, org.opennms.netmgt.config.poller.Package ipPkg) {
+        boolean svcToBePolled = false;
+        if (ipPkg != null && !ipPkg.getRemote()) {
+            svcToBePolled = getPollerConfig().isPolled(svcName, ipPkg);
+            if (!svcToBePolled) {
+                svcToBePolled = getPollerConfig().isPolledLocally(ifAddr, svcName);
+            }
+        }
+        return svcToBePolled;
+    }
+
+    /**
+     * This method is responsible for determining the primary IP interface for
+     * the node being rescanned.
+     *
+     * @param collectorMap Map of IfCollector objects containing data collected from all
+     *                     of the node's interfaces.
+     * @return InetAddress The primary IP interface for the node or null if a
+     * primary interface for the node could not be determined.
+     */
+    InetAddress determinePrimaryIpInterface(Map<String, IfCollector> collectorMap) {
+        Collection<IfCollector> values = collectorMap.values();
+        Iterator<IfCollector> iter = values.iterator();
+        InetAddress primaryIf = null;
+        while (iter.hasNext()) {
+            IfCollector ifc = iter.next();
+            InetAddress currIf = ifc.getTarget();
+
+            if (primaryIf == null) {
+                primaryIf = currIf;
+                continue;
+            } else {
+                // Test the target interface of the collector first.
+                primaryIf = compareAndSelectPrimary(currIf, primaryIf);
+
+                // Now test each of the collected subtargets
+                if (ifc.hasAdditionalTargets()) {
+                    Map<InetAddress, List<IfCollector.SupportedProtocol>> subTargets = ifc.getAdditionalTargets();
+                    Iterator<InetAddress> siter = subTargets.keySet().iterator();
+
+                    while (siter.hasNext()) {
+                        currIf = siter.next();
+                        primaryIf = compareAndSelectPrimary(currIf, primaryIf);
+                    }
+                }
+            }
+        }
+
+        if (LOG.isDebugEnabled()) {
+            if (primaryIf != null) {
+                LOG.debug("determinePrimaryIpInterface: selected primary interface: {}", str(primaryIf));
+            } else {
+                LOG.debug("determinePrimaryIpInterface: no primary interface found");
+            }
+        }
+        return primaryIf;
+    }
+
+    /**
+     * Utility method which compares two InetAddress objects based on the
+     * provided method (MIN/MAX) and returns the InetAddress which is to be
+     * considered the primary interface. NOTE: In order for an interface to be
+     * considered primary it must be managed. This method will return null if
+     * the 'oldPrimary' address is null and the 'currentIf' address is
+     * unmanaged.
+     *
+     * @param currentIf  Interface with which to compare the 'oldPrimary' address.
+     * @param oldPrimary Primary interface to be compared against the 'currentIf'
+     *                   address.
+     * @param method     Comparison method to be used (either "min" or "max")
+     * @return InetAddress object of the primary interface based on the
+     * provided method or null if neither address is eligible to be
+     * primary.
+     */
+    InetAddress compareAndSelectPrimary(InetAddress currentIf, InetAddress oldPrimary) {
+        InetAddress newPrimary = null;
+        if (oldPrimary == null) {
+            if (!capsdConfig.isAddressUnmanaged(currentIf)) {
+                return currentIf;
+            } else {
+                return oldPrimary;
+            }
+        }
+
+        byte[] current = currentIf.getAddress();
+        byte[] primary = oldPrimary.getAddress();
+
+        // Smallest address wins
+        if (new ByteArrayComparator().compare(current, primary) < 0) {
+            // Replace the primary interface with the current
+            // interface only if the current interface is managed!
+            if (!capsdConfig.isAddressUnmanaged(currentIf)) {
+                newPrimary = currentIf;
+            }
+        }
+
+        if (newPrimary != null) {
+            return newPrimary;
+        } else {
+            return oldPrimary;
+        }
+    }
+
+    /**
+     * Primarily, this method is responsible for assigning the node's nodeLabel
+     * value using information collected from the node's various interfaces.
+     * Additionally, if the node talks NetBIOS/SMB, then the node's NetBIOS name
+     * and operating system fields are assigned.
+     *
+     * @param collectorMap      Map of IfCollector objects, one per interface.
+     * @param dbNodeEntry       Node entry, as it exists in the database.
+     * @param currNodeEntry     Current node entry, as collected during the current rescan.
+     * @param currPrimarySnmpIf Primary SNMP interface, as determined from the collection
+     *                          retrieved during the current rescan.
+     */
+    private void setNodeLabelAndSmbInfo(Map<String, IfCollector> collectorMap, DbNodeEntry dbNodeEntry, DbNodeEntry currNodeEntry,
+                                        InetAddress currPrimarySnmpIf) {
+        boolean labelSet = false;
+
+        /*
+         * We are going to change the order in which labels are assigned.
+         * First, we check DNS - the hostname of the primary interface.
+         * Then we check SMB - next SNMP sysName - and finally IP address
+         * This is different then in 1.0 - when SMB came first.
+         */
+
+        InetAddress primaryIf = null;
+
+        if (!labelSet) {
+            /*
+             * If no label is set, attempt to get the hostname for the primary
+             * SNMP interface.
+             * Note: this was wrong prior to 1.0.1 - the method
+             * determinePrimaryIpInterface
+             * would return the lowest numbered interface, not necessarily the
+             * primary SNMP interface.
+             */
+            if (currPrimarySnmpIf != null) {
+                primaryIf = currPrimarySnmpIf;
+            } else {
+                primaryIf = determinePrimaryIpInterface(collectorMap);
+            }
+            if (primaryIf == null) {
+                LOG.error("setNodeLabelAndSmbInfo: failed to find primary interface...");
+            } else {
+                String hostName = primaryIf.getHostName();
+                if (!hostName.equals(str(primaryIf))) {
+                    labelSet = true;
+
+                    currNodeEntry.setLabel(hostName);
+                    currNodeEntry.setLabelSource(OnmsNode.NodeLabelSource.HOSTNAME);
+                }
+            }
+        }
+
+        IfSmbCollector savedSmbcRef = null;
+
+        // Does the node entry in database have a NetBIOS name?
+        if (dbNodeEntry.getNetBIOSName() != null) {
+            /*
+             * Yes it does, so search through collected info for all
+             * interfaces and see if any have a NetBIOS name
+             * which matches the existing one in the database
+             */
+            Collection<IfCollector> values = collectorMap.values();
+            Iterator<IfCollector> iter = values.iterator();
+            while (iter.hasNext() && !labelSet) {
+                IfCollector ifc = iter.next();
+                IfSmbCollector smbc = ifc.getSmbCollector();
+                if (smbc != null) {
+                    if (smbc.getNbtName() != null) {
+                        /*
+                         * Save reference to first IfSmbCollector object
+                         * for future use.
+                         */
+                        savedSmbcRef = smbc;
+
+                        String netbiosName = smbc.getNbtName().toUpperCase();
+                        if (netbiosName.equals(dbNodeEntry.getNetBIOSName())) {
+                            // Found a match.
+                            labelSet = true;
+
+                            currNodeEntry.setLabel(netbiosName);
+                            currNodeEntry.setLabelSource(OnmsNode.NodeLabelSource.NETBIOS);
+                            currNodeEntry.setNetBIOSName(netbiosName);
+
+                            if (smbc.getDomainName() != null) {
+                                currNodeEntry.setDomainName(smbc.getDomainName());
+                            }
+                        }
+                    }
+                }
+            }
+        } else {
+            /*
+             * No it does not, attempt to find an interface
+             * collector that does have a NetBIOS name and
+             * save a reference to that collector
+             */
+            Collection<IfCollector> values = collectorMap.values();
+            Iterator<IfCollector> iter = values.iterator();
+            while (iter.hasNext()) {
+                IfCollector ifc = iter.next();
+                IfSmbCollector smbc = ifc.getSmbCollector();
+                if (smbc != null && smbc.getNbtName() != null) {
+                    savedSmbcRef = smbc;
+                }
+            }
+        }
+
+        /*
+         * If node label has not yet been set and SMB info is available
+         * use that info to set the node label and NetBIOS name
+         */
+        if (!labelSet && savedSmbcRef != null) {
+            labelSet = true;
+
+            currNodeEntry.setLabel(savedSmbcRef.getNbtName());
+            currNodeEntry.setLabelSource(OnmsNode.NodeLabelSource.NETBIOS);
+            currNodeEntry.setNetBIOSName(currNodeEntry.getLabel());
+
+            if (savedSmbcRef.getDomainName() != null) {
+                currNodeEntry.setDomainName(savedSmbcRef.getDomainName());
+            }
+        }
+
+        /*
+         * If we get this far no IP hostname or SMB info was available. Next we
+         * want to use MIB-II sysName for the node label. The primary SNMP
+         * interface has already been determined so use it if available.
+         */
+        if (!labelSet && currPrimarySnmpIf != null) {
+            /*
+             * We prefer to use the collector for the primary SNMP interface
+             * however a collector for the primary SNMP interface may not exist
+             * in the map if a node has only recently had SNMP support enabled
+             * or if the new primary SNMP interface was only recently added to
+             * the node. At any rate if it exists use it, if not use the
+             * first collector which supports SNMP.
+             */
+            final String currPrimarySnmpAddress = str(currPrimarySnmpIf);
+            IfCollector ifc = currPrimarySnmpAddress == null ? null : collectorMap.get(currPrimarySnmpAddress);
+            if (ifc == null) {
+                Collection<IfCollector> collectors = collectorMap.values();
+                Iterator<IfCollector> iter = collectors.iterator();
+                while (iter.hasNext()) {
+                    ifc = iter.next();
+                    if (ifc.getSnmpCollector() != null) {
+                        break;
+                    }
+                }
+            }
+
+            // Sanity check
+            if (ifc == null || ifc.getSnmpCollector() == null) {
+                LOG.warn("setNodeLabelAndSmbInfo: primary SNMP interface set to {} but no SNMP collector found.", currPrimarySnmpAddress);
+            } else {
+                IfSnmpCollector snmpc = ifc.getSnmpCollector();
+                SystemGroup sysgrp = snmpc.getSystemGroup();
+
+                String str = sysgrp.getSysName();
+                if (str != null && str.length() > 0) {
+                    labelSet = true;
+                    currNodeEntry.setLabel(str);
+                    currNodeEntry.setLabelSource(OnmsNode.NodeLabelSource.SYSNAME);
+                }
+            }
+        }
+
+        if (!labelSet) {
+            /*
+             * If we get this far no SNMP info was available so we will default
+             * to the IP address of the primary interface.
+             */
+            if (primaryIf != null) {
+                currNodeEntry.setLabel(str(primaryIf));
+                currNodeEntry.setLabelSource(OnmsNode.NodeLabelSource.ADDRESS);
+            } else {
+                /*
+                 * If all else fails, just use the current values from
+                 * the database.
+                 */
+                currNodeEntry.setLabel(dbNodeEntry.getLabel());
+                currNodeEntry.setLabelSource(dbNodeEntry.getLabelSource());
+            }
+        }
+    }
+
     public PollerConfig getPollerConfig() {
         return pollerConfig;
     }
@@ -1820,7 +1825,7 @@ public final class RescanProcessor implements Runnable {
          * information in the collector for this node
          */
         DbNodeEntry currNodeEntry = DbNodeEntry.create();
-        currNodeEntry.setNodeType(DbNodeEntry.NODE_TYPE_ACTIVE);
+        currNodeEntry.setNodeType(OnmsNode.NodeType.ACTIVE);
 
         // Set node label and SMB info based on latest collection
         setNodeLabelAndSmbInfo(collectorMap, dbNodeEntry, currNodeEntry, currPrimarySnmpIf);
@@ -1918,7 +1923,7 @@ public final class RescanProcessor implements Runnable {
          * Only update node label/source if original node entry is
          * not set to user-defined.
          */
-        if (dbNodeEntry.getLabelSource() != DbNodeEntry.LABEL_SOURCE_USER) {
+        if (dbNodeEntry.getLabelSource() != OnmsNode.NodeLabelSource.USER) {
             dbNodeEntry.updateLabel(currNodeEntry.getLabel());
             dbNodeEntry.updateLabelSource(currNodeEntry.getLabelSource());
         }

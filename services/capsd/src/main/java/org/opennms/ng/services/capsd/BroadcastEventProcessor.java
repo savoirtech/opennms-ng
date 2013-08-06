@@ -48,6 +48,7 @@ import org.opennms.netmgt.EventConstants;
 import org.opennms.netmgt.capsd.EventUtils;
 import org.opennms.netmgt.capsd.FailedOperationException;
 import org.opennms.netmgt.capsd.InsufficientInformationException;
+import org.opennms.netmgt.model.OnmsNode;
 import org.opennms.netmgt.model.capsd.DbIfServiceEntry;
 import org.opennms.netmgt.model.capsd.DbIpInterfaceEntry;
 import org.opennms.netmgt.model.capsd.DbNodeEntry;
@@ -359,9 +360,9 @@ public class BroadcastEventProcessor implements InitializingBean {
         DbNodeEntry node = DbNodeEntry.create();
         Date now = new Date();
         node.setCreationTime(now);
-        node.setNodeType(DbNodeEntry.NODE_TYPE_ACTIVE);
+        node.setNodeType(OnmsNode.NodeType.ACTIVE);
         node.setLabel(nodeLabel);
-        node.setLabelSource(DbNodeEntry.LABEL_SOURCE_USER);
+        node.setLabelSource(OnmsNode.NodeLabelSource.USER);
         node.store(conn);
 
         Event newEvent = EventUtils.createNodeAddedEvent(node);

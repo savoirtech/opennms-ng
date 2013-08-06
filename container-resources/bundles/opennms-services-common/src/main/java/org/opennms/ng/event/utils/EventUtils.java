@@ -193,7 +193,7 @@ public abstract class EventUtils {
      * @param ifIndex the ifIndex of the interface being deleted
      * @param txNo    the transaction number to use for processing this event
      * @return an Event representing a deleteInterface event for the given
-     *         nodeId, ipaddr
+     * nodeId, ipaddr
      */
     public static Event createDeleteInterfaceEvent(String source, long nodeId, String ipAddr, int ifIndex, long txNo) {
         return createInterfaceEventBuilder(EventConstants.DELETE_INTERFACE_EVENT_UEI, source, nodeId, ipAddr, ifIndex, txNo).getEvent();
@@ -260,7 +260,7 @@ public abstract class EventUtils {
      * @param ipAddr the ipAdddr of the event
      * @param txNo   a transaction number associated with the event
      * @return Event
-     *         an interfaceDeleted event for the given interface
+     * an interfaceDeleted event for the given interface
      */
     public static Event createInterfaceDeletedEvent(String source, long nodeId, String ipAddr, long txNo) {
         return createInterfaceDeletedEvent(source, nodeId, ipAddr, -1, txNo);
@@ -275,7 +275,7 @@ public abstract class EventUtils {
      * @param ifIndex the ifIndex of the event
      * @param txNo    a transaction number associated with the event
      * @return Event
-     *         an interfaceDeleted event for the given interface
+     * an interfaceDeleted event for the given interface
      */
     public static Event createInterfaceDeletedEvent(String source, long nodeId, String ipAddr, int ifIndex, long txNo) {
         return createInterfaceEventBuilder(EventConstants.INTERFACE_DELETED_EVENT_UEI, source, nodeId, ipAddr, ifIndex, txNo).getEvent();
@@ -303,7 +303,7 @@ public abstract class EventUtils {
      * @param service the name of the service that was deleted
      * @param txNo    a transaction number associated with the event
      * @return an Event that represents the serviceDeleted event for the give
-     *         triple
+     * triple
      */
     public static Event createServiceDeletedEvent(String source, long nodeId, String ipAddr, String service, long txNo) {
         return createServiceEventBuilder(EventConstants.SERVICE_DELETED_EVENT_UEI, source, nodeId, ipAddr, service, txNo).getEvent();
@@ -410,7 +410,7 @@ public abstract class EventUtils {
      * @param parmName     the name of the parameter to retrieve
      * @param defaultValue the default value to return if the parameter is not set
      * @return the value of the parameter, or defalutValue if the parameter is
-     *         not set
+     * not set
      */
     public static String getParm(Event e, String parmName, String defaultValue) {
         return org.opennms.netmgt.model.events.EventUtils.getParm(e, parmName, defaultValue);
@@ -460,7 +460,8 @@ public abstract class EventUtils {
                 int status = EventConstants.XMLRPC_NOTIFY_FAILURE;
 
                 //TODO - XML EVENT
-               // XmlrpcUtil.createAndSendXmlrpcNotificationEvent(txNo, callerUei, "caught unexpected throwable exception.", status, "OpenNMS.Capsd");
+                // XmlrpcUtil.createAndSendXmlrpcNotificationEvent(txNo, callerUei, "caught unexpected throwable exception.", status,
+                // "OpenNMS.Capsd");
             }
         }
     }
@@ -697,8 +698,13 @@ public abstract class EventUtils {
 
         bldr.addParam(EventConstants.PARM_IP_HOSTNAME, ifaddr.getHostName());
         bldr.addParam(EventConstants.PARM_NODE_LABEL, nodeEntry.getLabel());
-        bldr.addParam(EventConstants.PARM_NODE_LABEL_SOURCE, nodeEntry.getLabelSource());
 
+        //TODO - Check this code.
+        //bldr.addParam(EventConstants.PARM_NODE_LABEL_SOURCE, nodeEntry.getLabelSource());
+
+        if (nodeEntry.getLabelSource() != null) {
+            bldr.addParam(EventConstants.PARM_NODE_LABEL_SOURCE, nodeEntry.getLabelSource().toString());
+        }
         return bldr.getEvent();
     }
 
@@ -782,7 +788,7 @@ public abstract class EventUtils {
      * @param service the service that is being deleted
      * @param txNo    the transaction number to use for processing this event
      * @return an Event representing a deleteInterface event for the given
-     *         nodeId, ipaddr
+     * nodeId, ipaddr
      */
     public static Event createDeleteServiceEvent(String source, long nodeId, String ipAddr, String service, long txNo) {
 

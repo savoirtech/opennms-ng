@@ -3,6 +3,7 @@ package org.opennms.ng.testing.eventd;
 import org.apache.camel.Exchange;
 import org.apache.camel.Processor;
 import org.apache.camel.builder.RouteBuilder;
+import org.opennms.netmgt.model.OnmsNode;
 import org.opennms.netmgt.model.events.EventUtils;
 import org.opennms.netmgt.xml.event.Events;
 import org.opennms.netmgt.xml.event.Header;
@@ -17,19 +18,15 @@ public class EventDTester extends RouteBuilder {
                 Log log = new Log();
                 Events events = new Events();
 
-                for(int i=0;i<1000;i++) {
-                    events.addEvent(EventUtils.createNodeAddedEvent("SAVOIR", 1, "LABEL", "BOB"));
+                for (int i = 0;i < 1000;i++) {
+                    events.addEvent(EventUtils.createNodeAddedEvent("SAVOIR", 1, "BOB", OnmsNode.NodeLabelSource.ADDRESS));
                 }
-
 
                 Header header = new Header();
                 header.setCreated("NOW");
 
                 log.setHeader(header);
                 log.setEvents(events);
-
-
-
 
                 exchange.getIn().setBody(log);
             }

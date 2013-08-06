@@ -55,6 +55,7 @@ import org.opennms.netmgt.capsd.snmp.IfXTableEntry;
 import org.opennms.netmgt.capsd.snmp.IpAddrTable;
 import org.opennms.netmgt.capsd.snmp.SystemGroup;
 import org.opennms.netmgt.eventd.EventIpcManagerFactory;
+import org.opennms.netmgt.model.OnmsNode;
 import org.opennms.netmgt.model.capsd.DbIfServiceEntry;
 import org.opennms.netmgt.model.capsd.DbIpInterfaceEntry;
 import org.opennms.netmgt.model.capsd.DbNodeEntry;
@@ -528,12 +529,12 @@ public class SuspectEventProcessor implements Runnable {
         Date now = new Date();
         entryNode.setCreationTime(now);
         entryNode.setLastPoll(now);
-        entryNode.setNodeType(DbNodeEntry.NODE_TYPE_ACTIVE);
+        entryNode.setNodeType(OnmsNode.NodeType.ACTIVE);
         entryNode.setLabel(primaryIf.getHostName());
         if (entryNode.getLabel().equals(str(primaryIf))) {
-            entryNode.setLabelSource(DbNodeEntry.LABEL_SOURCE_ADDRESS);
+            entryNode.setLabelSource(OnmsNode.NodeLabelSource.ADDRESS);
         } else {
-            entryNode.setLabelSource(DbNodeEntry.LABEL_SOURCE_HOSTNAME);
+            entryNode.setLabelSource(OnmsNode.NodeLabelSource.HOSTNAME);
         }
 
         if (snmpc != null) {
@@ -558,9 +559,9 @@ public class SuspectEventProcessor implements Runnable {
                     // Hostname takes precedence over sysName so only replace
                     // label if
                     // hostname was not available.
-                    if (entryNode.getLabelSource() == DbNodeEntry.LABEL_SOURCE_ADDRESS) {
+                    if (entryNode.getLabelSource() == OnmsNode.NodeLabelSource.ADDRESS) {
                         entryNode.setLabel(str);
-                        entryNode.setLabelSource(DbNodeEntry.LABEL_SOURCE_SYSNAME);
+                        entryNode.setLabelSource(OnmsNode.NodeLabelSource.SYSNAME);
                     }
                 }
 
@@ -592,9 +593,9 @@ public class SuspectEventProcessor implements Runnable {
         if (smbc != null) {
             // Netbios Name and Domain
             // Note: only override if the label source is not HOSTNAME
-            if (smbc.getNbtName() != null && entryNode.getLabelSource() != DbNodeEntry.LABEL_SOURCE_HOSTNAME) {
+            if (smbc.getNbtName() != null && entryNode.getLabelSource() != OnmsNode.NodeLabelSource.HOSTNAME) {
                 entryNode.setLabel(smbc.getNbtName());
-                entryNode.setLabelSource(DbNodeEntry.LABEL_SOURCE_NETBIOS);
+                entryNode.setLabelSource(OnmsNode.NodeLabelSource.NETBIOS);
                 entryNode.setNetBIOSName(entryNode.getLabel());
                 if (smbc.getDomainName() != null) {
                     entryNode.setDomainName(smbc.getDomainName());
@@ -1680,7 +1681,9 @@ public class SuspectEventProcessor implements Runnable {
         EventBuilder bldr = createEventBuilder(EventConstants.NODE_ADDED_EVENT_UEI);
         bldr.setNodeid(nodeEntry.getNodeId());
         bldr.addParam(EventConstants.PARM_NODE_LABEL, nodeEntry.getLabel());
-        bldr.addParam(EventConstants.PARM_NODE_LABEL_SOURCE, nodeEntry.getLabelSource());
+        if (nodeEntry.getLabelSource() != null) {
+            bldr.addParam(EventConstants.PARM_NODE_LABEL_SOURCE, nodeEntry.getLabelSource().toString());
+        }
         bldr.addParam(EventConstants.PARM_METHOD, "icmp");
 
         sendEvent(bldr.getEvent());
@@ -1770,8 +1773,9 @@ public class SuspectEventProcessor implements Runnable {
         bldr.setService(svcName);
         bldr.addParam(EventConstants.PARM_IP_HOSTNAME, ipAddr.getHostName());
         bldr.addParam(EventConstants.PARM_NODE_LABEL, nodeEntry.getLabel());
-        bldr.addParam(EventConstants.PARM_NODE_LABEL_SOURCE, nodeEntry.getLabelSource());
-
+        if (nodeEntry.getLabelSource() != null) {
+            bldr.addParam(EventConstants.PARM_NODE_LABEL_SOURCE, nodeEntry.getLabelSource().toString());
+        }
         // Add qualifier (if available)
         if (qualifier != null && qualifier.length() > 0) {
             bldr.addParam(EventConstants.PARM_QUALIFIER, qualifier);
