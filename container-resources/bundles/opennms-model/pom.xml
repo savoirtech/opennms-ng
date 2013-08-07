@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0"
-         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+<project xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xmlns="http://maven.apache.org/POM/4.0.0"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <parent>
         <artifactId>bundles</artifactId>
@@ -32,10 +32,8 @@
             org.hibernate.transform;resolution:=optional,
             org.hibernate.type;resolution:=optional,
             org.hibernate.usertype;resolution:=optional,
-
             org.springframework.security.core;resolution:=optional,
             org.springframework.security.core.userdetails;resolution:=optional,
-
             *
         </opennms.osgi.import>
         <opennms.osgi.export.pkg>
@@ -60,33 +58,121 @@
             <version>${opennms.version}</version>
         </dependency>
 
+        <dependency>
+            <groupId>org.opennms</groupId>
+            <artifactId>opennms-model</artifactId>
+            <version>${opennms.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.apache.aries.jpa</groupId>
+            <artifactId>org.apache.aries.jpa.container</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>org.apache.openjpa</groupId>
+            <artifactId>openjpa</artifactId>
+        </dependency>
+
     </dependencies>
 
     <build>
         <plugins>
+
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-shade-plugin</artifactId>
-                <version>${maven.shade.plugin.version}</version>
+                <artifactId>maven-dependency-plugin</artifactId>
+
                 <executions>
                     <execution>
-                        <phase>package</phase>
+                        <id>src-dependencies</id>
+                        <phase>generate-sources</phase>
                         <goals>
-                            <goal>shade</goal>
+                            <!-- use copy-dependencies instead if you don't want to explode the sources -->
+                            <goal>unpack-dependencies</goal>
                         </goals>
                         <configuration>
-                            <artifactSet>
-                                <includes>
-                                    <include>${pkgGroupId}:${pkgArtifactId}</include>
-                                </includes>
-                            </artifactSet>
+                            <classifier>sources</classifier>
+                            <includeArtifactIds>opennms-model</includeArtifactIds>
 
-                            <promoteTransitiveDependencies>true</promoteTransitiveDependencies>
-                            <createDependencyReducedPom>true</createDependencyReducedPom>
+                            <failOnMissingClassifierArtifact>false</failOnMissingClassifierArtifact>
+                            <outputDirectory>${project.build.directory}/generated</outputDirectory>
                         </configuration>
                     </execution>
                 </executions>
             </plugin>
+
+            <!-- Replace a token -->
+
+            <plugin>
+                <artifactId>maven-antrun-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>process-sources</id>
+                        <phase>process-sources</phase>
+                        <configuration>
+                            <tasks>
+                                <replace token="@GeneratedValue(generator="
+                                         value="@GeneratedValue(strategy=javax.persistence.GenerationType.SEQUENCE, generator=" dir="target/generated">
+                                    <include name="**/*.java"/>
+                                </replace>
+                                <replace token="@GeneratedValue(generator = "
+                                                                         value="@GeneratedValue(strategy=javax.persistence.GenerationType.SEQUENCE, generator=" dir="target/generated">
+                                                                    <include name="**/*.java"/>
+                                                                </replace>
+                            </tasks>
+                        </configuration>
+                        <goals>
+                            <goal>run</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+
+
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>build-helper-maven-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <phase>generate-sources</phase>
+                        <goals><goal>add-source</goal></goals>
+                        <configuration>
+                            <sources>
+                                <source>target/generated</source>
+                            </sources>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+
+             <!--
+             <plugin>
+                 <groupId>org.apache.maven.plugins</groupId>
+                 <artifactId>maven-shade-plugin</artifactId>
+                 <version>${maven.shade.plugin.version}</version>
+                 <executions>
+                     <execution>
+                         <phase>package</phase>
+                         <goals>
+                             <goal>shade</goal>
+                         </goals>
+                         <configuration>
+                             <artifactSet>
+                                 <includes>
+                                     <include>${pkgGroupId}:${pkgArtifactId}</include>
+                                 </includes>
+                             </artifactSet>
+
+                             <promoteTransitiveDependencies>true</promoteTransitiveDependencies>
+                             <createDependencyReducedPom>true</createDependencyReducedPom>
+                         </configuration>
+                     </execution>
+                 </executions>
+             </plugin>
+
+             -->
+
         </plugins>
     </build>
 

@@ -1,4 +1,4 @@
-package com.xtrakter.xbus.persistence.dao.jpa;
+package org.opennms.ng.persistence.dao.jpa;
 
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;

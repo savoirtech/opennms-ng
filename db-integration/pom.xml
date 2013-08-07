@@ -19,7 +19,7 @@
     <modules>
         <module>datasource</module>
         <module>db</module>
-        <module>persistence</module>
+
     </modules>
 
 </project>

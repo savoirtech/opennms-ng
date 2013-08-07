@@ -26,41 +26,44 @@
         <pkgVersion>${opennms.version}</pkgVersion>
 
         <opennms.osgi.import.pkg>
-            !org.springframework*,
             !com.sun*,
-            !org.jboss*,
             com.fasterxml*;resolution:="optional",
-
             javax.security.jacc;resolution:="optional",
             javax.validation* ;resolution:="optional",
             org.apache.tools.ant;resolution:="optional",
             org.apache.tools.ant.taskdefs;resolution:="optional",
             org.apache.tools.ant.types;resolution:="optional",
 
-            !org.hibernate*,
-            !org.opennms.core.criteria,
-            !org.opennms.core.criteria.restrictions,
+            org.hibernate*;resolution:="optional",
+            org.apache.openjpa.enhance;version="[2.1.0,3)",
+            org.apache.openjpa.util;version="[2.1.0,3)",
+            javax.persistence,
+            javax.transaction,
+            org.hsqldb;resolution:=optional,
+            com.oracle;resolution:=optional,
+            org.postgresql; ;resolution:=optional,
             *
         </opennms.osgi.import.pkg>
         <opennms.osgi.export>
             !org.opennms.netmgt.dao.api,
             !org.opennms.netmgt.dao.support,
             org.opennms.netmgt.dao*;version="${opennms.version}",
+            org.opennms.ng.persistence.entities*,
+            org.opennms.ng.persistence.dao*,
+            org.opennms.ng.persistence.service*,
         </opennms.osgi.export>
 
         <opennms.osgi.private.pkg>
-            org.springframework*
-            org.hibernate*,
             org.opennms.core.criteria,
             org.opennms.core.criteria.restrictions,
 
         </opennms.osgi.private.pkg>
 
-        <opennms.osgi.embed>hibernate-core,hibernate-commons-annotations,hibernate-jpa-2.0-api,javassist</opennms.osgi.embed>
-
         <opennms.osgi.failok>true</opennms.osgi.failok>
         <!-- Trying to get around dynamic class.forname loading -->
         <opennms.osgi.dynamic>*</opennms.osgi.dynamic>
+
+        <opennms.osgi.jpa.context>/META-INF/persistence.xml</opennms.osgi.jpa.context>
 
     </properties>
 
@@ -76,6 +79,29 @@
                     <artifactId>jdbc-pool</artifactId>
                 </exclusion>
                 <exclusion>
+                    <groupId>org.opennms</groupId>
+                    <artifactId>opennms-model</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>org.snmp4j</groupId>
+                    <artifactId>snmp4j</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+
+        <dependency>
+            <groupId>org.opennms.bundles</groupId>
+            <artifactId>opennms-model</artifactId>
+            <exclusions>
+                <exclusion>
+                    <groupId>org.apache.tomcat</groupId>
+                    <artifactId>jdbc-pool</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>org.opennms</groupId>
+                    <artifactId>opennms-model</artifactId>
+                </exclusion>
+                <exclusion>
                     <groupId>org.snmp4j</groupId>
                     <artifactId>snmp4j</artifactId>
                 </exclusion>
@@ -84,45 +110,175 @@
 
         <dependency>
             <groupId>org.hibernate</groupId>
-            <artifactId>hibernate-core</artifactId>
-            <version>3.6.10.Final</version>
-        </dependency>
-
-
-        <dependency>
-            <groupId>org.hibernate</groupId>
             <artifactId>hibernate-commons-annotations</artifactId>
             <version>3.2.0.Final</version>
         </dependency>
 
         <dependency>
-            <groupId>org.hibernate.javax.persistence</groupId>
-            <artifactId>hibernate-jpa-2.0-api</artifactId>
-            <version>1.0.1.Final</version>
+            <groupId>org.apache.aries.jpa</groupId>
+            <artifactId>org.apache.aries.jpa.container</artifactId>
         </dependency>
 
         <dependency>
-            <groupId>javassist</groupId>
-            <artifactId>javassist</artifactId>
-            <version>3.12.1.GA</version>
+            <groupId>org.apache.openjpa</groupId>
+            <artifactId>openjpa</artifactId>
         </dependency>
 
-        <!-- CORE LIBRARIES
+        <!-- Testing under hsqldb -->
 
-        org.hibernate,
-        	org.hibernate.criterion,
-        	org.hibernate.metadata,
-        	org.hibernate.transform,
-        	org.hibernate.type,
-        	org.opennms.core.criteria;version="[1.13,2)",
-        	org.opennms.core.criteria.restrictions;version="[1.13,2)",
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-api</artifactId>
+        </dependency>
 
-        -->
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-log4j12</artifactId>
+        </dependency>
+
+        <!-- Test dependencies -->
+        <dependency>
+            <groupId>org.dbunit</groupId>
+            <artifactId>dbunit</artifactId>
+            <scope>test</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
+            <scope>test</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>org.apache.servicemix.bundles</groupId>
+            <artifactId>org.apache.servicemix.bundles.aspectj</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-context</artifactId>
+            <scope>test</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-orm</artifactId>
+            <scope>test</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-tx</artifactId>
+            <scope>test</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>commons-dbcp</groupId>
+            <artifactId>commons-dbcp</artifactId>
+            <scope>test</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>org.hsqldb</groupId>
+            <artifactId>hsqldb</artifactId>
+            <scope>test</scope>
+        </dependency>
 
     </dependencies>
 
     <build>
         <plugins>
+
+            <!-- Copy opennms-dao -->
+
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>openjpa-maven-plugin</artifactId>
+                <configuration>
+                    <includes>**/entities/*.class</includes>
+                    <excludes>**/domain/XML*.class</excludes>
+                    <addDefaultConstructor>true</addDefaultConstructor>
+                    <enforcePropertyRestrictions>true</enforcePropertyRestrictions>
+                </configuration>
+                <executions>
+                    <execution>
+                        <id>enhancer</id>
+                        <phase>process-classes</phase>
+                        <goals>
+                            <goal>enhance</goal>
+                        </goals>
+                    </execution>
+                </executions>
+                <dependencies>
+                    <dependency>
+                        <groupId>org.apache.openjpa</groupId>
+                        <artifactId>openjpa</artifactId>
+                        <version>${openjpa.version}</version>
+                    </dependency>
+                </dependencies>
+            </plugin>
+
+            <plugin>
+                <artifactId>maven-antrun-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <phase>generate-sources</phase>
+                        <configuration>
+                            <tasks>
+                                <!-- MYSQL Version -->
+                                <loadfile property="mysql_funcs" srcFile="${basedir}/src/db/mysql_funcs.sql"/>
+                                <filter token="funcs" value="${mysql_funcs}"/>
+                                <filter token="clob" value="longtext"/>
+                                <filter token="boolean" value="smallint"/>
+                                <filter token="double" value="double"/>
+                                <filter token="timestamp_constraint" value=" null default null"/>
+                                <copy file="${basedir}/src/db/db.sql" tofile="${basedir}/target/db/mysql/db.sql"
+                                      filtering="true"/>
+                                <!-- HSQLDB Version -->
+                                <loadfile property="hsqldb_funcs" srcFile="${basedir}/src/db/hsqldb_funcs.sql"/>
+                                <filter token="funcs" value="${hsqldb_funcs}"/>
+                                <filter token="clob" value="longvarchar"/>
+                                <filter token="boolean" value="smallint"/>
+                                <filter token="double" value="double"/>
+                                <filter token="timestamp_constraint" value=""/>
+                                <copy file="${basedir}/src/db/db.sql" tofile="${basedir}/target/db/hsqldb/db.sql"
+                                      filtering="true"/>
+                                <!-- Derby Version -->
+                                <loadfile property="derby_funcs" srcFile="${basedir}/src/db/derby_funcs.sql"/>
+                                <filter token="funcs" value="${derby_funcs}"/>
+                                <filter token="clob" value="long varchar"/>
+                                <filter token="boolean" value="smallint"/>
+                                <filter token="double" value="double"/>
+                                <filter token="timestamp_constraint" value=""/>
+                                <copy file="${basedir}/src/db/db.sql" tofile="${basedir}/target/db/derby/db.sql"
+                                      filtering="true"/>
+                                <!-- Oracle Version -->
+                                <loadfile property="oracle_funcs" srcFile="${basedir}/src/db/oracle_funcs.sql"/>
+                                <filter token="funcs" value="${oracle_funcs}"/>
+                                <filter token="clob" value="clob"/>
+                                <filter token="boolean" value="number(1)"/>
+                                <filter token="double" value="number(20,10)"/>
+                                <filter token="timestamp_constraint" value=""/>
+                                <copy file="${basedir}/src/db/db.sql" tofile="${basedir}/target/db/oracle/db.sql"
+                                      filtering="true"/>
+                                <!-- PostgreSQL Version -->
+                                <loadfile property="postgreSQL_funcs" srcFile="${basedir}/src/db/postgreSQL_funcs.sql"/>
+                                <filter token="funcs" value="${postgreSQL_funcs}"/>
+                                <filter token="clob" value="text"/>
+                                <filter token="boolean" value="smallint"/>
+                                <filter token="double" value="numeric(20,10)"/>
+                                <filter token="timestamp_constraint" value=""/>
+                                <copy file="${basedir}/src/db/db.sql" tofile="${basedir}/target/db/postgreSQL/db.sql"
+                                      filtering="true"/>
+                            </tasks>
+                        </configuration>
+                        <goals>
+                            <goal>run</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-shade-plugin</artifactId>
@@ -137,11 +293,6 @@
                             <artifactSet>
                                 <includes>
                                     <include>org.opennms:opennms-dao</include>
-                                    <include>org.hibernate:hibernate-core</include>
-                                    <include>org.hibernate:hibernate-commons-annotations</include>
-                                    <include>org.opennms.dependencies:hibernate-dependencies</include>
-                                    <include>org.hibernate.javax.persistence:hibernate-jpa-2.0-api</include>
-
                                 </includes>
 
                                 <excludes>
@@ -156,6 +307,7 @@
                     </execution>
                 </executions>
             </plugin>
+
         </plugins>
     </build>
 
