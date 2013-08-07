@@ -181,13 +181,13 @@
             <url>http://maven.opennms.org/content/groups/opennms.org-snapshot</url>
         </repository>
 
-        <!--repository>
+        <repository>
             <snapshots><enabled>false</enabled><updatePolicy>${updatePolicy}</updatePolicy></snapshots>
             <releases><enabled>true</enabled><updatePolicy>${updatePolicy}</updatePolicy></releases>
             <id>opennms-repo</id>
             <name>OpenNMS Repository</name>
             <url>http://maven.opennms.org/content/groups/opennms.org-release</url>
-        </repository-->
+        </repository>
 
     </repositories>
 
@@ -455,6 +455,11 @@
                 <groupId>org.opennms.bundles</groupId>
                 <artifactId>opennms-dao-api</artifactId>
                 <version>${opennms.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.opennms.bundles</groupId>
+                <artifactId>opennms-jicmp-api</artifactId>
+                <version>${jicmp.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.opennms.bundles</groupId>
