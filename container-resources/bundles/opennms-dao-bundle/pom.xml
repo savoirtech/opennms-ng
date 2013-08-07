@@ -196,6 +196,7 @@
                 <artifactId>openjpa-maven-plugin</artifactId>
                 <configuration>
                     <includes>**/entities/*.class</includes>
+                    <includes>**/model/*.class</includes>
                     <excludes>**/domain/XML*.class</excludes>
                     <addDefaultConstructor>true</addDefaultConstructor>
                     <enforcePropertyRestrictions>true</enforcePropertyRestrictions>

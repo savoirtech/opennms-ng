@@ -7,14 +7,7 @@
         <provider>org.apache.openjpa.persistence.PersistenceProviderImpl</provider>
         <jta-data-source>blueprint:comp/jta</jta-data-source>
         <non-jta-data-source>blueprint:comp/nonJTA</non-jta-data-source>
-        <class>org.opennms.ng.persistence.entities.OnmsIpInterface</class>
-        <class>org.opennms.ng.persistence.entities.OnmsNode</class>
 
-        <!-- Inherited stuff -->
-
-              <class>org.opennms.netmgt.model.OnmsIpInterface</class>
-
-              <class>org.opennms.netmgt.model.OnmsNode</class>
         <exclude-unlisted-classes>true</exclude-unlisted-classes>
         <validation-mode>NONE</validation-mode>
 
@@ -34,14 +27,7 @@
         <provider>org.apache.openjpa.persistence.PersistenceProviderImpl</provider>
         <jta-data-source>osgi:service/javax.sql.DataSource/(transactional=true)</jta-data-source>
         <non-jta-data-source>osgi:service/javax.sql.DataSource/(transactional=false)</non-jta-data-source>
-        <class>org.opennms.ng.persistence.entities.OnmsIpInterface</class>
-        <class>org.opennms.ng.persistence.entities.OnmsNode</class>
 
-        <!-- Inherited stuff -->
-
-        <class>org.opennms.netmgt.model.OnmsIpInterface</class>
-
-        <class>org.opennms.netmgt.model.OnmsNode</class>
         <exclude-unlisted-classes>true</exclude-unlisted-classes>
         <validation-mode>NONE</validation-mode>
 

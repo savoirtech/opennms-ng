@@ -113,14 +113,20 @@
                         <configuration>
                             <tasks>
                                 <replace token="@GeneratedValue(generator="
-                                         value="@GeneratedValue(strategy=javax.persistence.GenerationType.SEQUENCE, generator=" dir="target/generated">
+                                         value="@GeneratedValue(strategy=javax.persistence.GenerationType.SEQUENCE, generator="
+                                         dir="target/generated">
                                     <include name="**/*.java"/>
+                                    <exclude name="**/OnmsAlarm.java"/>
                                 </replace>
                                 <replace token="@GeneratedValue(generator = "
-                                                                         value="@GeneratedValue(strategy=javax.persistence.GenerationType.SEQUENCE, generator=" dir="target/generated">
-                                                                    <include name="**/*.java"/>
-                                                                </replace>
+                                         value="@GeneratedValue(strategy=javax.persistence.GenerationType.SEQUENCE, generator="
+                                         dir="target/generated">
+                                    <include name="**/*.java"/>
+                                    <exclude name="**/OnmsAlarm.java"/>
+                                </replace>
+
                             </tasks>
+
                         </configuration>
                         <goals>
                             <goal>run</goal>
@@ -129,14 +135,15 @@
                 </executions>
             </plugin>
 
-
             <plugin>
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>build-helper-maven-plugin</artifactId>
                 <executions>
                     <execution>
                         <phase>generate-sources</phase>
-                        <goals><goal>add-source</goal></goals>
+                        <goals>
+                            <goal>add-source</goal>
+                        </goals>
                         <configuration>
                             <sources>
                                 <source>target/generated</source>
@@ -146,32 +153,59 @@
                 </executions>
             </plugin>
 
-             <!--
-             <plugin>
-                 <groupId>org.apache.maven.plugins</groupId>
-                 <artifactId>maven-shade-plugin</artifactId>
-                 <version>${maven.shade.plugin.version}</version>
-                 <executions>
-                     <execution>
-                         <phase>package</phase>
-                         <goals>
-                             <goal>shade</goal>
-                         </goals>
-                         <configuration>
-                             <artifactSet>
-                                 <includes>
-                                     <include>${pkgGroupId}:${pkgArtifactId}</include>
-                                 </includes>
-                             </artifactSet>
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>openjpa-maven-plugin</artifactId>
+                <configuration>
+                    <includes>**/model/*.class</includes>
+                    <excludes>**/domain/XML*.class</excludes>
+                    <addDefaultConstructor>true</addDefaultConstructor>
+                    <enforcePropertyRestrictions>true</enforcePropertyRestrictions>
+                </configuration>
+                <executions>
+                    <execution>
+                        <id>enhancer</id>
+                        <phase>process-classes</phase>
+                        <goals>
+                            <goal>enhance</goal>
+                        </goals>
+                    </execution>
+                </executions>
+                <dependencies>
+                    <dependency>
+                        <groupId>org.apache.openjpa</groupId>
+                        <artifactId>openjpa</artifactId>
+                        <version>${openjpa.version}</version>
+                    </dependency>
+                </dependencies>
+            </plugin>
 
-                             <promoteTransitiveDependencies>true</promoteTransitiveDependencies>
-                             <createDependencyReducedPom>true</createDependencyReducedPom>
-                         </configuration>
-                     </execution>
-                 </executions>
-             </plugin>
+            <!--
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-shade-plugin</artifactId>
+                <version>${maven.shade.plugin.version}</version>
+                <executions>
+                    <execution>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>shade</goal>
+                        </goals>
+                        <configuration>
+                            <artifactSet>
+                                <includes>
+                                    <include>${pkgGroupId}:${pkgArtifactId}</include>
+                                </includes>
+                            </artifactSet>
 
-             -->
+                            <promoteTransitiveDependencies>true</promoteTransitiveDependencies>
+                            <createDependencyReducedPom>true</createDependencyReducedPom>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+
+            -->
 
         </plugins>
     </build>
