@@ -12,12 +12,12 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.util.Assert;
 
-public class OnmsIpInterfaceDaoJPA extends GenericJpaDao<OnmsIpInterface, Integer> implements OnmsIpInterfaceDao {
+public class OnmsIpInterfaceJpaDao extends GenericJpaDao<OnmsIpInterface, Integer> implements OnmsIpInterfaceDao {
 
-    private static final Logger LOG = LoggerFactory.getLogger(OnmsIpInterfaceDaoJPA.class);
+    private static final Logger LOG = LoggerFactory.getLogger(OnmsIpInterfaceJpaDao.class);
     String m_findByServiceTypeQuery = null;
 
-    public OnmsIpInterfaceDaoJPA() {
+    public OnmsIpInterfaceJpaDao() {
         super(OnmsIpInterface.class);
         m_findByServiceTypeQuery = System.getProperty("org.opennms.dao.ipinterface.findByServiceType",
             "select distinct ipInterface from OnmsIpInterface as ipInterface join ipInterface.monitoredServices as monSvc where monSvc.serviceType"

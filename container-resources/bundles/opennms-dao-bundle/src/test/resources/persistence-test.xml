@@ -87,7 +87,7 @@
 
     <!-- DAOs -->
 
-    <bean id="onmsIpInterfaceDaoJPA" class="org.opennms.ng.persistence.dao.jpa.OnmsIpInterfaceDaoJPA"/>
+    <bean id="onmsIpInterfaceDaoJPA" class="org.opennms.ng.persistence.dao.jpa.OnmsIpInterfaceJpaDao"/>
 
     <!-- SVC Layer -->
 

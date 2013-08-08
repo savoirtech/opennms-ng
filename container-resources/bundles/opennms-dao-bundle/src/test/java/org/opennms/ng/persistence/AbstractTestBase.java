@@ -28,15 +28,11 @@ import org.springframework.transaction.support.DefaultTransactionDefinition;
 
 public class AbstractTestBase {
 
-    Logger log = LoggerFactory.getLogger(getClass());
-
     private static String APP_CONTEXT_DEV[] = {"persistence-test.xml"};
-
     private static boolean configured = false;
-
-    protected TransactionStatus status = null;
-
     private ApplicationContext appContext;
+    protected TransactionStatus status = null;
+    Logger log = LoggerFactory.getLogger(getClass());
 
     private IDatabaseConnection getConnection() throws Exception {
         DataSource ds = (DataSource) getBean("dataSource");
@@ -60,7 +56,6 @@ public class AbstractTestBase {
         final IDataSet data = getDataSet();
         try {
             DatabaseOperation.CLEAN_INSERT.execute(conn, data);
-
             //Commit the table inserts so other connections can retrieve it
             conn.getConnection().commit();
         } finally {
@@ -100,6 +95,7 @@ public class AbstractTestBase {
             try {
                 stmt.close();
             } catch (Exception e) {
+                e.printStackTrace();
             }
             try {
                 conn.close();
@@ -153,8 +149,7 @@ public class AbstractTestBase {
         String tmp = System.getProperty("basedir");
         if (tmp != null) {
             dir = new File(tmp);
-        }
-        else {
+        } else {
             String path = getClass().getProtectionDomain().getCodeSource().getLocation().getFile();
 
             dir = new File(path).getParentFile().getParentFile();

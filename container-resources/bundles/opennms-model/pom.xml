@@ -116,13 +116,11 @@
                                          value="@GeneratedValue(strategy=javax.persistence.GenerationType.SEQUENCE, generator="
                                          dir="target/generated">
                                     <include name="**/*.java"/>
-                                    <exclude name="**/OnmsAlarm.java"/>
                                 </replace>
                                 <replace token="@GeneratedValue(generator = "
                                          value="@GeneratedValue(strategy=javax.persistence.GenerationType.SEQUENCE, generator="
                                          dir="target/generated">
                                     <include name="**/*.java"/>
-                                    <exclude name="**/OnmsAlarm.java"/>
                                 </replace>
 
                             </tasks>
