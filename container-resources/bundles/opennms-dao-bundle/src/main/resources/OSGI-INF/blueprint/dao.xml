@@ -25,51 +25,9 @@
 
     <bean id="timeKeeper" class="org.opennms.core.utils.DefaultTimeKeeper"/>
 
-    <bean id="sessionFactory" class="org.springframework.orm.hibernate3.annotation.AnnotationSessionFactoryBean">
-        <property name="dataSource" ref="jta"/>
-        <property name="packagesToScan">
-            <list>
-                <value>org.opennms.netmgt.dao.hibernate</value>
-                <value>org.opennms.netmgt.model</value>
-            </list>
-        </property>
-        <!--  property name="schemaUpdate" value="true">
-          </property -->
-        <property name="annotatedPackages">
-            <list>
-                <value>org.opennms.netmgt.dao.hibernate</value>
-                <value>org.opennms.netmgt.model</value>
-            </list>
-        </property>
-        <property name="hibernateProperties">
-            <value>
-                hibernate.dialect=org.hibernate.dialect.PostgreSQLDialect
-                hibernate.cache.use_second_level_cache=false
-                hibernate.cache=false
-                hibernate.cache.use_query_cache=false
-                hibernate.jdbc.batch_size=0
-                <!-- hibernate.format_sql=true -->
-            </value>
-        </property>
-    </bean>
 
-    <bean id="transactionManager" class="org.springframework.orm.hibernate3.HibernateTransactionManager">
-        <property name="sessionFactory" ref="sessionFactory"/>
-        <property name="nestedTransactionAllowed" value="true"/>
-    </bean>
 
-    <bean id="transactionTemplate" class="org.springframework.transaction.support.TransactionTemplate">
-        <property name="transactionManager" ref="transactionManager"/>
-    </bean>
-
-    <service interface="org.springframework.transaction.support.TransactionOperations" ref="transactionTemplate"/>
-
-    <bean id="filterManager" class="org.opennms.netmgt.dao.hibernate.HibernateFilterManager">
-        <property name="sessionFactory" ref="sessionFactory"/>
-    </bean>
-
-    <service interface="org.opennms.netmgt.model.FilterManager" ref="filterManager"/>
-
+    <!--
     <bean id="acknowledgmentDao" class="org.opennms.netmgt.dao.hibernate.AcknowledgmentDaoHibernate">
         <property name="sessionFactory" ref="sessionFactory"/>
     </bean>
@@ -221,7 +179,7 @@
     <bean id="groupDao" class="org.opennms.netmgt.dao.hibernate.GroupDaoHibernate" >
       <property name="sessionFactory" ref="sessionFactory" />
     </bean>
-    -->
+
 
     <bean id="applicationDao" class="org.opennms.netmgt.dao.hibernate.ApplicationDaoHibernate">
         <property name="sessionFactory" ref="sessionFactory"/>
@@ -328,6 +286,8 @@
     <bean id="dataCollectionConfigDirectoryLocation" class="java.lang.String">
         <argument value="${opennms.home}/etc/datacollection"/>
     </bean>
+
+    -->
 
     <!-- Default: reload datacollection config every 10 minutes -->
     <bean id="dataCollectionConfigReloadInterval" class="java.lang.Long">

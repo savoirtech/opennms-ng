@@ -51,6 +51,7 @@
             org.opennms.ng.persistence.entities*,
             org.opennms.ng.persistence.dao*,
             org.opennms.ng.persistence.service*,
+            org.opennms.ng.persistence.notpurty
         </opennms.osgi.export>
 
         <opennms.osgi.private.pkg>
