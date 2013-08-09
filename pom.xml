@@ -48,6 +48,8 @@
         <aries.blueprint.jpa.container.version>1.0.0</aries.blueprint.jpa.container.version>
         <aspectj.version>1.7.1_1</aspectj.version>
 
+        <ant.version>1.9.2.1</ant.version>
+
         <bsf.version>2.4.0</bsf.version>
         <c3p0.version>0.9.1.2</c3p0.version>
 
@@ -84,6 +86,7 @@
         <postgres.bundle.version>9.1.0.901</postgres.bundle.version>
         <quartz.version>1.6.6_2</quartz.version>
 
+        <serp.version>1.14.1.1</serp.version>
         <slf4j.version>1.7.2</slf4j.version>
         <spring.version>3.0.7.RELEASE</spring.version>
 
@@ -146,7 +149,8 @@
             *
         </opennms.osgi.import-->
 
-        <opennms.osgi.jpa.context/>
+        <opennms.osgi.jpa.context></opennms.osgi.jpa.context>
+
         <updatePolicy>daily</updatePolicy>
     </properties>
 
@@ -182,8 +186,14 @@
         </repository>
 
         <repository>
-            <snapshots><enabled>false</enabled><updatePolicy>${updatePolicy}</updatePolicy></snapshots>
-            <releases><enabled>true</enabled><updatePolicy>${updatePolicy}</updatePolicy></releases>
+            <snapshots>
+                <enabled>false</enabled>
+                <updatePolicy>${updatePolicy}</updatePolicy>
+            </snapshots>
+            <releases>
+                <enabled>true</enabled>
+                <updatePolicy>${updatePolicy}</updatePolicy>
+            </releases>
             <id>opennms-repo</id>
             <name>OpenNMS Repository</name>
             <url>http://maven.opennms.org/content/groups/opennms.org-release</url>

@@ -239,7 +239,10 @@
         <bundle>mvn:org.opennms.ng/hsqldb-test-server/${project.version}</bundle>
     </feature>
 
-    <feature name="persistence" version="${project.version}">
+    <feature name="opennms-dao-bundle" version="${project.version}">
+
+        <bundle dependency='true'>mvn:org.apache.servicemix.bundles/org.apache.servicemix.bundles.ant/${ant.version}</bundle>
+                <bundle dependency='true'>mvn:org.apache.servicemix.bundles/org.apache.servicemix.bundles.serp/${serp.version}</bundle>
         <bundle>mvn:org.apache.openjpa/openjpa/${openjpa.version}</bundle>
         <feature version="${project.version}">datasource</feature>
         <feature>transaction</feature>
@@ -247,6 +250,9 @@
         <bundle dependency='true'>mvn:commons-collections/commons-collections/${commons-collections.version}</bundle>
         <feature version="${aries.blueprint.version}">jpa</feature>
         <bundle>mvn:org.opennms.ng/persistence/${project.version}</bundle>
+        <feature>collectd-config</feature>
+        <bundle>mvn:org.opennms.bundles/opennms-dao/${opennms.version}</bundle>
+
     </feature>
 
 </features>

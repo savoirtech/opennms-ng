@@ -47,24 +47,20 @@
         <opennms.osgi.export>
             !org.opennms.netmgt.dao.api,
             !org.opennms.netmgt.dao.support,
-            org.opennms.netmgt.dao*;version="${opennms.version}",
-            org.opennms.ng.persistence.entities*,
-            org.opennms.ng.persistence.dao*,
-            org.opennms.ng.persistence.service*,
-            org.opennms.ng.persistence.notpurty
+            org.opennms.ng.persistence.*,
+
         </opennms.osgi.export>
 
         <opennms.osgi.private.pkg>
             org.opennms.core.criteria,
             org.opennms.core.criteria.restrictions,
-
         </opennms.osgi.private.pkg>
 
         <opennms.osgi.failok>true</opennms.osgi.failok>
         <!-- Trying to get around dynamic class.forname loading -->
         <opennms.osgi.dynamic>*</opennms.osgi.dynamic>
 
-        <opennms.osgi.jpa.context>/META-INF/persistence.xml</opennms.osgi.jpa.context>
+        <opennms.osgi.jpa.context>META-INF/persistence.xml</opennms.osgi.jpa.context>
 
     </properties>
 
@@ -117,6 +113,7 @@
             <groupId>org.hibernate</groupId>
             <artifactId>hibernate-commons-annotations</artifactId>
             <version>3.2.0.Final</version>
+            <scope>compile</scope>
         </dependency>
 
         <dependency>
