@@ -71,6 +71,25 @@
     <dependencies>
 
         <dependency>
+            <groupId>org.opennms.bundles</groupId>
+            <artifactId>opennms-model</artifactId>
+            <exclusions>
+                <exclusion>
+                    <groupId>org.apache.tomcat</groupId>
+                    <artifactId>jdbc-pool</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>org.snmp4j</groupId>
+                    <artifactId>snmp4j</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>xerces</groupId>
+                    <artifactId>xercesImpl</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+
+        <dependency>
             <groupId>org.opennms</groupId>
             <artifactId>opennms-dao</artifactId>
             <version>${opennms.version}</version>
@@ -87,24 +106,9 @@
                     <groupId>org.snmp4j</groupId>
                     <artifactId>snmp4j</artifactId>
                 </exclusion>
-            </exclusions>
-        </dependency>
-
-        <dependency>
-            <groupId>org.opennms.bundles</groupId>
-            <artifactId>opennms-model</artifactId>
-            <exclusions>
                 <exclusion>
-                    <groupId>org.apache.tomcat</groupId>
-                    <artifactId>jdbc-pool</artifactId>
-                </exclusion>
-                <exclusion>
-                    <groupId>org.opennms</groupId>
-                    <artifactId>opennms-model</artifactId>
-                </exclusion>
-                <exclusion>
-                    <groupId>org.snmp4j</groupId>
-                    <artifactId>snmp4j</artifactId>
+                    <groupId>xerces</groupId>
+                    <artifactId>xercesImpl</artifactId>
                 </exclusion>
             </exclusions>
         </dependency>
@@ -198,7 +202,6 @@
 
                 <configuration>
                     <includes>**/entities/*.class</includes>
-                    <includes>**/model/*.class</includes>
                     <excludes>**/domain/XML*.class</excludes>
                     <addDefaultConstructor>true</addDefaultConstructor>
                     <enforcePropertyRestrictions>true</enforcePropertyRestrictions>
@@ -222,8 +225,6 @@
                     </dependency>
                 </dependencies>
             </plugin>
-
-
 
             <plugin>
                 <artifactId>maven-antrun-plugin</artifactId>

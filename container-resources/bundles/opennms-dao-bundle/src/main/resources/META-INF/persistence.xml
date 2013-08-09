@@ -9,14 +9,13 @@
         <non-jta-data-source>blueprint:comp/nonJTA</non-jta-data-source>
         <class>org.opennms.ng.persistence.entities.OnmsIpInterface</class>
         <class>org.opennms.ng.persistence.entities.OnmsNode</class>
-
         <exclude-unlisted-classes>true</exclude-unlisted-classes>
-
-
         <validation-mode>NONE</validation-mode>
-
         <properties>
 
+            <property name="openjpa.RuntimeUnenhancedClasses" value="unsupported"/>
+
+            <property name="openjpa.jdbc.SchemaFactory" value="native(ForeignKeys=true)"/>
             <property name="openjpa.Multithreaded" value="true"/>
             <property name="openjpa.TransactionMode" value="managed"/>
             <property name="openjpa.ConnectionFactoryMode" value="managed"/>
