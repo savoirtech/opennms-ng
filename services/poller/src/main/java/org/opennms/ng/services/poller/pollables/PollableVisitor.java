@@ -28,6 +28,8 @@
 
 package org.opennms.ng.services.poller.pollables;
 
+
+
 /**
  * Represents a PollableVisitor
  *
@@ -39,42 +41,42 @@ public interface PollableVisitor {
     /**
      * <p>visitService</p>
      *
-     * @param service a {@link PollableService} object.
+     * @param service a {@link org.opennms.netmgt.poller.pollables.PollableService} object.
      */
     void visitService(PollableService service);
 
     /**
      * <p>visitInterface</p>
      *
-     * @param interface1 a {@link PollableInterface} object.
+     * @param interface1 a {@link org.opennms.netmgt.poller.pollables.PollableInterface} object.
      */
     void visitInterface(PollableInterface interface1);
 
     /**
      * <p>visitNode</p>
      *
-     * @param node a {@link PollableNode} object.
+     * @param node a {@link org.opennms.netmgt.poller.pollables.PollableNode} object.
      */
     void visitNode(PollableNode node);
 
     /**
      * <p>visitNetwork</p>
      *
-     * @param network a {@link PollableNetwork} object.
+     * @param network a {@link org.opennms.netmgt.poller.pollables.PollableNetwork} object.
      */
     void visitNetwork(PollableNetwork network);
 
     /**
      * <p>visitContainer</p>
      *
-     * @param container a {@link PollableContainer} object.
+     * @param container a {@link org.opennms.netmgt.poller.pollables.PollableContainer} object.
      */
     void visitContainer(PollableContainer container);
 
     /**
      * <p>visitElement</p>
      *
-     * @param element a {@link PollableElement} object.
+     * @param element a {@link org.opennms.netmgt.poller.pollables.PollableElement} object.
      */
     void visitElement(PollableElement element);
 

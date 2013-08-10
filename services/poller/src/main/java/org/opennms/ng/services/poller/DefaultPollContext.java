@@ -28,25 +28,31 @@
 
 package org.opennms.ng.services.poller;
 
+import java.net.InetAddress;
+import java.sql.SQLException;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+
 import org.opennms.core.utils.InetAddressUtils;
 import org.opennms.netmgt.EventConstants;
-import org.opennms.netmgt.config.OpennmsServerConfigFactory;
-import org.opennms.netmgt.config.PollerConfig;
+import org.opennms.netmgt.capsd.plugins.IcmpPlugin;
 import org.opennms.netmgt.model.events.EventBuilder;
 import org.opennms.netmgt.model.events.EventIpcManager;
 import org.opennms.netmgt.model.events.EventListener;
-import org.opennms.ng.services.poller.monitors.IcmpPlugin;
+import org.opennms.netmgt.poller.QueryManager;
+import org.opennms.netmgt.xml.event.Event;
+import org.opennms.ng.services.opennmsserverconfig.OpennmsServerConfigFactory;
 import org.opennms.ng.services.poller.pollables.PendingPollEvent;
 import org.opennms.ng.services.poller.pollables.PollContext;
 import org.opennms.ng.services.poller.pollables.PollEvent;
 import org.opennms.ng.services.poller.pollables.PollableService;
-import org.opennms.netmgt.xml.event.Event;
+import org.opennms.ng.services.pollerconfig.PollerConfig;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.net.InetAddress;
-import java.sql.SQLException;
-import java.util.*;
 
 /**
  * Represents a DefaultPollContext
@@ -56,7 +62,7 @@ import java.util.*;
  */
 public class DefaultPollContext implements PollContext, EventListener {
     
-    private static final Logger LOG = LoggerFactory.getLogger(org.opennms.ng.services.poller.DefaultPollContext.class);
+    private static final Logger LOG = LoggerFactory.getLogger(DefaultPollContext.class);
     
     private volatile PollerConfig m_pollerConfig;
     private volatile QueryManager m_queryManager;
@@ -142,7 +148,7 @@ public class DefaultPollContext implements PollContext, EventListener {
     /**
      * <p>getQueryManager</p>
      *
-     * @return a {@link QueryManager} object.
+     * @return a {@link org.opennms.netmgt.poller.QueryManager} object.
      */
     public QueryManager getQueryManager() {
         return m_queryManager;
@@ -151,14 +157,14 @@ public class DefaultPollContext implements PollContext, EventListener {
     /**
      * <p>setQueryManager</p>
      *
-     * @param queryManager a {@link QueryManager} object.
+     * @param queryManager a {@link org.opennms.netmgt.poller.QueryManager} object.
      */
     public void setQueryManager(QueryManager queryManager) {
         m_queryManager = queryManager;
     }
 
     /* (non-Javadoc)
-     * @see org.opennms.ng.services.poller.pollables.PollContext#getCriticalServiceName()
+     * @see org.opennms.netmgt.poller.pollables.PollContext#getCriticalServiceName()
      */
     /**
      * <p>getCriticalServiceName</p>
@@ -171,7 +177,7 @@ public class DefaultPollContext implements PollContext, EventListener {
     }
 
     /* (non-Javadoc)
-     * @see org.opennms.ng.services.poller.pollables.PollContext#isNodeProcessingEnabled()
+     * @see org.opennms.netmgt.poller.pollables.PollContext#isNodeProcessingEnabled()
      */
     /**
      * <p>isNodeProcessingEnabled</p>
@@ -184,7 +190,7 @@ public class DefaultPollContext implements PollContext, EventListener {
     }
 
     /* (non-Javadoc)
-     * @see org.opennms.ng.services.poller.pollables.PollContext#isPollingAllIfCritServiceUndefined()
+     * @see org.opennms.netmgt.poller.pollables.PollContext#isPollingAllIfCritServiceUndefined()
      */
     /**
      * <p>isPollingAllIfCritServiceUndefined</p>
@@ -197,7 +203,7 @@ public class DefaultPollContext implements PollContext, EventListener {
     }
 
     /* (non-Javadoc)
-     * @see org.opennms.ng.services.poller.pollables.PollContext#sendEvent(org.opennms.netmgt.xml.event.Event)
+     * @see org.opennms.netmgt.poller.pollables.PollContext#sendEvent(org.opennms.netmgt.xml.event.Event)
      */
     /** {@inheritDoc} */
     @Override
@@ -216,12 +222,12 @@ public class DefaultPollContext implements PollContext, EventListener {
     }
 
     /* (non-Javadoc)
-     * @see org.opennms.ng.services.poller.pollables.PollContext#createEvent(java.lang.String, int, java.net.InetAddress, java.lang.String, java.util.Date)
+     * @see org.opennms.netmgt.poller.pollables.PollContext#createEvent(java.lang.String, int, java.net.InetAddress, java.lang.String, java.util.Date)
      */
     /** {@inheritDoc} */
     @Override
     public Event createEvent(String uei, int nodeId, InetAddress address, String svcName, Date date, String reason) {
-        LOG.debug("createEvent: uei = " + uei + " nodeid = " + nodeId);
+        LOG.debug("createEvent: uei = {} nodeid = {}", uei, nodeId);
         
         EventBuilder bldr = new EventBuilder(uei, this.getName(), date);
         bldr.setNodeid(nodeId);
@@ -276,20 +282,21 @@ public class DefaultPollContext implements PollContext, EventListener {
     /** {@inheritDoc} */
     @Override
     public void openOutage(final PollableService svc, final PollEvent svcLostEvent) {
-        LOG.debug("openOutage: Opening outage for: "+svc+" with event:"+svcLostEvent);
+        LOG.debug("openOutage: Opening outage for: {} with event:{}", svc, svcLostEvent);
         final int nodeId = svc.getNodeId();
         final String ipAddr = svc.getIpAddr();
         final String svcName = svc.getSvcName();
         final Runnable r = new Runnable() {
             @Override
             public void run() {
-                LOG.debug("run: Opening outage with query manager: "+svc+" with event:"+svcLostEvent);
+                LOG.debug("run: Opening outage with query manager: {} with event:{}", svc, svcLostEvent);
 
                 final int eventId = svcLostEvent.getEventId();
                 if (eventId > 0) {
-                    getQueryManager().openOutage(getPollerConfig().getNextOutageIdSql(), nodeId, ipAddr, svcName, eventId, EventConstants.formatToString(svcLostEvent.getDate()));
+                    getQueryManager().openOutage(getPollerConfig().getNextOutageIdSql(), nodeId, ipAddr, svcName, eventId, EventConstants
+                        .formatToString(svcLostEvent.getDate()));
                 } else {
-                    LOG.warn("run: Failed to determine an eventId for service outage for: " + svc + " with event: " + svcLostEvent);
+                    LOG.warn("run: Failed to determine an eventId for service outage for: {} with event: {}", svc, svcLostEvent);
                 }
             }
 
@@ -304,7 +311,7 @@ public class DefaultPollContext implements PollContext, EventListener {
     }
 
     /* (non-Javadoc)
-     * @see org.opennms.ng.services.poller.pollables.PollContext#resolveOutage(org.opennms.ng.services.poller.pollables.PollableService, org.opennms.netmgt.xml.event.Event)
+     * @see org.opennms.netmgt.poller.pollables.PollContext#resolveOutage(org.opennms.netmgt.poller.pollables.PollableService, org.opennms.netmgt.xml.event.Event)
      */
     /** {@inheritDoc} */
     @Override
@@ -319,7 +326,7 @@ public class DefaultPollContext implements PollContext, EventListener {
                 if (eventId > 0) {
                     getQueryManager().resolveOutage(nodeId, ipAddr, svcName, eventId, EventConstants.formatToString(svcRegainEvent.getDate()));
                 } else {
-                    LOG.warn("run: Failed to determine an eventId for service regained for: " + svc + " with event: " + svcRegainEvent);
+                    LOG.warn("run: Failed to determine an eventId for service regained for: {} with event: {}", svc, svcRegainEvent);
                 }
             }
         };
@@ -338,7 +345,7 @@ public class DefaultPollContext implements PollContext, EventListener {
     }
 
     /* (non-Javadoc)
-     * @see org.opennms.ng.services.poller.pollables.PollContext#isServiceUnresponsiveEnabled()
+     * @see org.opennms.netmgt.poller.pollables.PollContext#isServiceUnresponsiveEnabled()
      */
     /**
      * <p>isServiceUnresponsiveEnabled</p>
@@ -357,7 +364,7 @@ public class DefaultPollContext implements PollContext, EventListener {
     @Override
     public void onEvent(final Event e) {
         synchronized (m_pendingPollEvents) {
-            LOG.debug("onEvent: Received event: "+e+" uei: "+e.getUei()+", dbid: "+e.getDbid());
+            LOG.debug("onEvent: Received event: {} uei: {}, dbid: {}", e, e.getUei(), e.getDbid());
             for (final Iterator<PendingPollEvent> it = m_pendingPollEvents .iterator(); it.hasNext();) {
                 final PendingPollEvent pollEvent = it.next();
                 LOG.debug("onEvent: comparing events to poll event: {}", pollEvent);
@@ -413,7 +420,7 @@ public class DefaultPollContext implements PollContext, EventListener {
             nodeLabel = getQueryManager().getNodeLabel(nodeId);
         } catch (SQLException sqlE) {
             // Log a warning
-            LOG.warn("Failed to retrieve node label for nodeid " + nodeId, sqlE);
+            LOG.warn("Failed to retrieve node label for nodeid {}", nodeId, sqlE);
         }
     
         if (nodeLabel == null) {

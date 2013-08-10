@@ -31,6 +31,7 @@ package org.opennms.ng.services.poller.pollables;
 import java.util.Date;
 
 
+
 /**
  * Represents a DbPollEvent
  *
@@ -38,11 +39,11 @@ import java.util.Date;
  * @version $Id: $
  */
 public class DbPollEvent extends PollEvent {
-    
+
     int m_eventId;
     String m_uei;
     Date m_date;
-    
+
     /**
      * <p>Constructor for DbPollEvent.</p>
      *
@@ -87,7 +88,7 @@ public class DbPollEvent extends PollEvent {
     /**
      * <p>equals</p>
      *
-     * @param e a {@link PollEvent} object.
+     * @param e a {@link org.opennms.netmgt.poller.pollables.PollEvent} object.
      * @return a boolean.
      */
     public boolean equals(PollEvent e) {

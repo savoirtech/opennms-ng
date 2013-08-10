@@ -31,6 +31,7 @@ package org.opennms.ng.services.poller.pollables;
 import java.util.Date;
 
 
+
 /**
  * <p>Abstract PollEvent class.</p>
  *
@@ -39,12 +40,12 @@ import java.util.Date;
  */
 abstract public class PollEvent {
     
-    Scope m_scope;
-    
+   Scope m_scope;
+
     /**
      * <p>Constructor for PollEvent.</p>
      *
-     * @param scope a {@link Scope} object.
+     * @param scope a {@linkScope} object.
      */
     protected PollEvent(Scope scope) {
         m_scope = scope;
@@ -53,7 +54,7 @@ abstract public class PollEvent {
     /**
      * <p>getScope</p>
      *
-     * @return a {@link Scope} object.
+     * @return a {@linkScope} object.
      */
     public Scope getScope() {
         return m_scope;
@@ -103,27 +104,27 @@ abstract public class PollEvent {
     /**
      * <p>hasLargerScopeThan</p>
      *
-     * @param e a {@link org.opennms.ng.services.poller.pollables.PollEvent} object.
+     * @param e a {@linkPollEvent} object.
      * @return a boolean.
      */
-    public boolean hasLargerScopeThan(org.opennms.ng.services.poller.pollables.PollEvent e) {
+    public boolean hasLargerScopeThan(PollEvent e) {
         return Scope.isLargerThan(this.getScope(), e.getScope());
     }
 
     /**
      * <p>hasSmallerScopeThan</p>
      *
-     * @param e a {@link org.opennms.ng.services.poller.pollables.PollEvent} object.
+     * @param e a {@linkPollEvent} object.
      * @return a boolean.
      */
-    public boolean hasSmallerScopeThan(org.opennms.ng.services.poller.pollables.PollEvent e) {
+    public boolean hasSmallerScopeThan(PollEvent e) {
         return Scope.isSmallerThan(this.getScope(), e.getScope());
     }
 
     /**
      * <p>hasScopeLargerThan</p>
      *
-     * @param scope a {@link Scope} object.
+     * @param scope a {@linkScope} object.
      * @return a boolean.
      */
     public boolean hasScopeLargerThan(Scope scope) {
@@ -133,7 +134,7 @@ abstract public class PollEvent {
     /**
      * <p>hasScopeSmallerThan</p>
      *
-     * @param scope a {@link Scope} object.
+     * @param scope a {@linkScope} object.
      * @return a boolean.
      */
     public boolean hasScopeSmallerThan(Scope scope) {
@@ -143,21 +144,21 @@ abstract public class PollEvent {
     /**
      * <p>hasSameScope</p>
      *
-     * @param e a {@link org.opennms.ng.services.poller.pollables.PollEvent} object.
+     * @param e a {@linkPollEvent} object.
      * @return a boolean.
      */
-    public boolean hasSameScope(org.opennms.ng.services.poller.pollables.PollEvent e) {
+    public boolean hasSameScope(PollEvent e) {
         return this.getScope() == e.getScope();
     }
     
     /**
      * <p>withLargestScope</p>
      *
-     * @param a a {@link org.opennms.ng.services.poller.pollables.PollEvent} object.
-     * @param b a {@link org.opennms.ng.services.poller.pollables.PollEvent} object.
-     * @return a {@link org.opennms.ng.services.poller.pollables.PollEvent} object.
+     * @param a a {@linkPollEvent} object.
+     * @param b a {@linkPollEvent} object.
+     * @return a {@linkPollEvent} object.
      */
-    public static org.opennms.ng.services.poller.pollables.PollEvent withLargestScope(org.opennms.ng.services.poller.pollables.PollEvent a, org.opennms.ng.services.poller.pollables.PollEvent b) {
+    public static PollEvent withLargestScope(PollEvent a,PollEvent b) {
         if (a == null) return b;
         if (b == null) return a;
         if (b.hasLargerScopeThan(a)) {

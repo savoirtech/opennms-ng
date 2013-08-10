@@ -599,6 +599,12 @@
 
             <dependency>
                 <groupId>org.opennms.ng</groupId>
+                <artifactId>poll-outages-config</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>org.opennms.ng</groupId>
                 <artifactId>scheduler</artifactId>
                 <version>${project.version}</version>
             </dependency>
@@ -873,6 +879,14 @@
                 <groupId>postgresql</groupId>
                 <artifactId>postgresql</artifactId>
                 <version>${postgres.version}</version>
+            </dependency>
+
+            <!-- Legacy -->
+
+            <dependency>
+                <groupId>commons-logging</groupId>
+                <artifactId>commons-logging-api</artifactId>
+                <version>1.1</version>
             </dependency>
         </dependencies>
     </dependencyManagement>

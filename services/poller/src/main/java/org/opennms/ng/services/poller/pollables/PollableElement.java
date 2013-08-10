@@ -28,14 +28,14 @@
 
 package org.opennms.ng.services.poller.pollables;
 
+import java.util.Date;
+import java.util.concurrent.Callable;
+import java.util.concurrent.Executors;
+
 import org.opennms.netmgt.model.PollStatus;
 import org.opennms.netmgt.xml.event.Event;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.util.Date;
-import java.util.concurrent.Callable;
-import java.util.concurrent.Executors;
 
 /**
  * Represents a PollableElement
@@ -44,7 +44,7 @@ import java.util.concurrent.Executors;
  * @version $Id: $
  */
 abstract public class PollableElement {
-    private static final Logger LOG = LoggerFactory.getLogger(org.opennms.ng.services.poller.pollables.PollableElement.class);
+    private static final Logger LOG = LoggerFactory.getLogger(PollableElement.class);
     private final Scope m_scope;
 
     private volatile PollableContainer m_parent;
@@ -172,10 +172,10 @@ abstract public class PollableElement {
     /**
      * <p>doPoll</p>
      *
-     * @param elem a {@link org.opennms.ng.services.poller.pollables.PollableElement} object.
+     * @param elem a {@link PollableElement} object.
      * @return a {@link org.opennms.netmgt.model.PollStatus} object.
      */
-    public PollStatus doPoll(org.opennms.ng.services.poller.pollables.PollableElement elem) {
+    public PollStatus doPoll(PollableElement elem) {
         if (getParent() == null) {
             resetStatusChanged();
             return poll(elem);
@@ -187,9 +187,9 @@ abstract public class PollableElement {
     /**
      * <p>getLockRoot</p>
      *
-     * @return a {@link org.opennms.ng.services.poller.pollables.PollableElement} object.
+     * @return a {@link PollableElement} object.
      */
-    public org.opennms.ng.services.poller.pollables.PollableElement getLockRoot() {
+    public PollableElement getLockRoot() {
         PollableContainer parent = getParent();
         return (parent == null ? this : parent.getLockRoot());
     }
@@ -271,7 +271,7 @@ abstract public class PollableElement {
         }
     }
 
-
+    
 
     /**
      * <p>poll</p>
@@ -283,22 +283,22 @@ abstract public class PollableElement {
     /**
      * <p>poll</p>
      *
-     * @param elem a {@link org.opennms.ng.services.poller.pollables.PollableElement} object.
+     * @param elem a {@link PollableElement} object.
      * @return a {@link org.opennms.netmgt.model.PollStatus} object.
      */
-    protected PollStatus poll(org.opennms.ng.services.poller.pollables.PollableElement elem) {
+    protected PollStatus poll(PollableElement elem) {
         if (elem != this)
             throw new IllegalArgumentException("Invalid parameter to poll on "+this+": "+elem);
-
+        
         return poll();
     }
 
     /**
      * <p>selectPollElement</p>
      *
-     * @return a {@link org.opennms.ng.services.poller.pollables.PollableElement} object.
+     * @return a {@link PollableElement} object.
      */
-    public org.opennms.ng.services.poller.pollables.PollableElement selectPollElement() {
+    public PollableElement selectPollElement() {
         return this;
     }
 
@@ -335,7 +335,7 @@ abstract public class PollableElement {
     protected void resolveOutage(PollEvent resolution) {
         setCause(null);
     }
-
+    
     /**
      * <p>hasOpenOutage</p>
      *
@@ -344,7 +344,7 @@ abstract public class PollableElement {
     public boolean hasOpenOutage() {
         return m_cause != null;
     }
-
+    
     /**
      * <p>setCause</p>
      *
@@ -353,7 +353,7 @@ abstract public class PollableElement {
     public void setCause(PollEvent cause) {
         m_cause = cause;
     }
-
+    
     /**
      * <p>getCause</p>
      *
@@ -428,7 +428,7 @@ abstract public class PollableElement {
         if (resolvedCause.equals(getCause()))
             resolveOutage(resolution);
     }
-
+    
     /**
      * <p>isDeleted</p>
      *
@@ -446,7 +446,7 @@ abstract public class PollableElement {
             public void run() {
                 m_deleted = true;
                 if (m_parent != null) {
-                    getParent().deleteMember(org.opennms.ng.services.poller.pollables.PollableElement.this);
+                    getParent().deleteMember(PollableElement.this);
                     getParent().recalculateStatus();
                 }
             }

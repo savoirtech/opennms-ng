@@ -10,85 +10,59 @@
     <modelVersion>4.0.0</modelVersion>
 
     <artifactId>poller</artifactId>
+
     <packaging>bundle</packaging>
+
+    <name>OPENNMS :: Daemons :: Poller</name>
+    <description>OPENNMS Daemons :: Poller</description>
 
     <properties>
         <opennms.osgi.import.pkg>
             org.hibernate*;resolution:=optional,
             org.springframework.security.core*;resolution:=optional,
             org.opennms.netmgt.snmp.snmp4j,
+            org.postgresql*;resolution:=optional,
             *
         </opennms.osgi.import.pkg>
 
-        <opennms.osgi.export>
-            org.opennms.ng.services.poller*
-        </opennms.osgi.export>
+        <opennms.osgi.export.pkg>
+            org.opennms.ng.services.poller,
+            org.opennms.ng.services.poller.pollables,
+        </opennms.osgi.export.pkg>
 
-        <!-- Trying to get around dynamic class.forname loading -->
+        <!-- Trying to get around dynamic class.forname loading
+        -->
+
         <opennms.osgi.dynamic>*</opennms.osgi.dynamic>
 
     </properties>
 
-    <name>OPENNMS :: Daemons :: Poller</name>
-    <description>OPENNMS Daemons :: Poller</description>
-
     <dependencies>
+
         <dependency>
-            <groupId>org.apache.camel</groupId>
-            <artifactId>camel-jms</artifactId>
+            <groupId>org.opennms.ng</groupId>
+            <artifactId>capsd-config</artifactId>
         </dependency>
 
         <dependency>
             <groupId>org.opennms.ng</groupId>
-            <artifactId>event-config</artifactId>
+            <artifactId>collectd-config</artifactId>
         </dependency>
+
         <dependency>
             <groupId>org.opennms.ng</groupId>
-            <artifactId>passive</artifactId>
+            <artifactId>poller-config</artifactId>
         </dependency>
+
         <dependency>
             <groupId>org.opennms.ng</groupId>
-            <artifactId>scheduler</artifactId>
+            <artifactId>poll-outages-config</artifactId>
         </dependency>
-        <dependency>
-            <groupId>org.opennms</groupId>
-            <artifactId>opennms-dao</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.opennms.features.poller</groupId>
-            <artifactId>org.opennms.features.poller.api</artifactId>
-        </dependency>
+
         <dependency>
             <groupId>org.opennms.bundles</groupId>
-            <artifactId>opennms-util</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.opennms.bundles</groupId>
-            <artifactId>bsf</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.httpcomponents</groupId>
-            <artifactId>httpclient-osgi</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.opennms.bundles</groupId>
-            <artifactId>opennms-javamail-api</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.opennms.bundles</groupId>
-            <artifactId>opennms-protocols</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.opennms</groupId>
-            <artifactId>opennms-icmp-api</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.servicemix.bundles</groupId>
-            <artifactId>org.apache.servicemix.bundles.quartz</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.slf4j</groupId>
-            <artifactId>slf4j-api</artifactId>
+            <artifactId>opennms-services-bundle</artifactId>
         </dependency>
     </dependencies>
+
 </project>

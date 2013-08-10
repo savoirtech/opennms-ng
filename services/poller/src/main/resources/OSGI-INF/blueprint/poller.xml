@@ -1,0 +1,58 @@
+<blueprint xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+           xmlns:cm="http://aries.apache.org/blueprint/xmlns/blueprint-cm/v1.1.0"
+           xmlns="http://www.osgi.org/xmlns/blueprint/v1.0.0"
+           xsi:schemaLocation="http://www.osgi.org/xmlns/blueprint/v1.0.0 http://www.osgi.org/xmlns/blueprint/v1.0.0/blueprint.xsd">
+
+    <cm:property-placeholder persistent-id="org.opennms.ng.poller" id="pollerConfigOsgi" update-strategy="reload">
+        <cm:default-properties>
+
+        </cm:default-properties>
+    </cm:property-placeholder>
+
+    <reference id="opennmsServerConfig" interface="org.opennms.ng.services.opennmsserverconfig.OpennmsServerConfig" availability="mandatory"/>
+
+    <reference id="jta" interface="javax.sql.DataSource"
+               filter="(transactional=true)" availability="mandatory"/>
+
+    <reference id="nonJTA" interface="javax.sql.DataSource"
+               filter="(transactional=false)" availability="mandatory"/>
+
+    <reference id="pollerConfig" interface="org.opennms.ng.services.pollerconfig.PollerConfig" availability="mandatory"/>
+
+    <reference id="eventIpcManager" interface="org.opennms.netmgt.model.events.EventIpcManager" availability="mandatory"/>
+
+    <reference id="pollOutagesConfig" interface="org.opennms.ng.services.polloutagesconfig.PollOutagesConfig" availability="mandatory"/>
+
+    <bean id="serverName" factory-ref="opennmsServerConfig" factory-method="getServerName"/>
+
+    <bean id="pollerQueryManager" class="org.opennms.netmgt.poller.DefaultQueryManager">
+        <property name="dataSource" ref="nonJTA"/>
+    </bean>
+
+    <bean id="pollContext" class="org.opennms.ng.services.poller.DefaultPollContext">
+        <property name="eventManager" ref="eventIpcManager"/>
+        <property name="localHostName" ref="serverName"/>
+        <property name="name" value="OpenNMS.Poller.DefaultPollContext"/>
+        <property name="pollerConfig" ref="pollerConfig"/>
+        <property name="queryManager" ref="pollerQueryManager"/>
+    </bean>
+
+    <bean id="pollableNetwork" class="org.opennms.ng.services.poller.pollables.PollableNetwork">
+        <argument ref="pollContext"/>
+    </bean>
+
+    <bean id="jdbcTemplate" class="org.springframework.jdbc.core.JdbcTemplate">
+        <argument ref="jta"/>
+    </bean>
+
+    <bean id="daemon" class="org.opennms.ng.services.poller.Poller" init-method="onInit" destroy-method="onStop">
+        <property name="dataSource" ref="jta"/>
+        <property name="jdbcTemplate" ref="jdbcTemplate"/>
+        <property name="eventManager" ref="eventIpcManager"/>
+        <property name="network" ref="pollableNetwork"/>
+        <property name="queryManager" ref="pollerQueryManager"/>
+        <property name="pollerConfig" ref="pollerConfig"/>
+        <property name="pollOutagesConfig" ref="pollOutagesConfig"/>
+    </bean>
+
+</blueprint>

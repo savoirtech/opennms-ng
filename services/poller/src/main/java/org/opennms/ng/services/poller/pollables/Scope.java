@@ -46,9 +46,9 @@ public enum Scope {
      * <p>fromUei</p>
      *
      * @param uei a {@link String} object.
-     * @return a {@link org.opennms.ng.services.poller.pollables.Scope} object.
+     * @return a {@link Scope} object.
      */
-    public static org.opennms.ng.services.poller.pollables.Scope fromUei(String uei) {
+    public static Scope fromUei(String uei) {
         if (EventConstants.NODE_DOWN_EVENT_UEI.equals(uei)) {
             return NODE;
         } else if (EventConstants.INTERFACE_DOWN_EVENT_UEI.equals(uei)) {
@@ -62,10 +62,10 @@ public enum Scope {
     /**
      * <p>isLargerThan</p>
      *
-     * @param s a {@link org.opennms.ng.services.poller.pollables.Scope} object.
+     * @param s a {@link Scope} object.
      * @return a boolean.
      */
-    public boolean isLargerThan(org.opennms.ng.services.poller.pollables.Scope s) {
+    public boolean isLargerThan(Scope s) {
         if (s == null) return true;
         return this.ordinal() > s.ordinal();
     }
@@ -73,10 +73,10 @@ public enum Scope {
     /**
      * <p>isSmallerThan</p>
      *
-     * @param s a {@link org.opennms.ng.services.poller.pollables.Scope} object.
+     * @param s a {@link Scope} object.
      * @return a boolean.
      */
-    public boolean isSmallerThan(org.opennms.ng.services.poller.pollables.Scope s) {
+    public boolean isSmallerThan(Scope s) {
         if (s == null) return false;
         return this.ordinal() < s.ordinal();
     }
@@ -84,11 +84,11 @@ public enum Scope {
     /**
      * <p>isLargerThan</p>
      *
-     * @param a a {@link org.opennms.ng.services.poller.pollables.Scope} object.
-     * @param b a {@link org.opennms.ng.services.poller.pollables.Scope} object.
+     * @param a a {@link Scope} object.
+     * @param b a {@link Scope} object.
      * @return a boolean.
      */
-    public static boolean isLargerThan(org.opennms.ng.services.poller.pollables.Scope a, org.opennms.ng.services.poller.pollables.Scope b) {
+    public static boolean isLargerThan(Scope a, Scope b) {
         if (a == null && b == null) {
             return false;
         } else if (a == null && b != null) {
@@ -103,11 +103,11 @@ public enum Scope {
     /**
      * <p>isSmallerThan</p>
      *
-     * @param a a {@link org.opennms.ng.services.poller.pollables.Scope} object.
-     * @param b a {@link org.opennms.ng.services.poller.pollables.Scope} object.
+     * @param a a {@link Scope} object.
+     * @param b a {@link Scope} object.
      * @return a boolean.
      */
-    public static boolean isSmallerThan(org.opennms.ng.services.poller.pollables.Scope a, org.opennms.ng.services.poller.pollables.Scope b) {
+    public static boolean isSmallerThan(Scope a, Scope b) {
         return a != b && !isLargerThan(a, b);
     }
     

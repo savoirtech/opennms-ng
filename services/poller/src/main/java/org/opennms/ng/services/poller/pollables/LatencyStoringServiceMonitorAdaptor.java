@@ -28,9 +28,19 @@
 
 package org.opennms.ng.services.poller.pollables;
 
+import java.io.File;
+import java.net.InetAddress;
+import java.text.NumberFormat;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Iterator;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
+
 import org.opennms.core.utils.InetAddressUtils;
 import org.opennms.core.utils.ParameterMap;
-import org.opennms.netmgt.config.PollerConfig;
 import org.opennms.netmgt.config.poller.Package;
 import org.opennms.netmgt.model.PollStatus;
 import org.opennms.netmgt.model.RrdRepository;
@@ -42,13 +52,9 @@ import org.opennms.netmgt.rrd.RrdUtils;
 import org.opennms.netmgt.threshd.LatencyThresholdingSet;
 import org.opennms.netmgt.threshd.ThresholdingEventProxy;
 import org.opennms.netmgt.xml.event.Event;
+import org.opennms.ng.services.pollerconfig.PollerConfig;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.io.File;
-import java.net.InetAddress;
-import java.text.NumberFormat;
-import java.util.*;
 
 /**
  * <p>LatencyStoringServiceMonitorAdaptor class.</p>
@@ -59,7 +65,7 @@ import java.util.*;
 public class LatencyStoringServiceMonitorAdaptor implements ServiceMonitor {
 
     
-    private static final Logger LOG = LoggerFactory.getLogger(org.opennms.ng.services.poller.pollables.LatencyStoringServiceMonitorAdaptor.class);
+    private static final Logger LOG = LoggerFactory.getLogger(LatencyStoringServiceMonitorAdaptor.class);
     
     /** Constant <code>DEFAULT_BASENAME="response-time"</code> */
     public static final String DEFAULT_BASENAME = "response-time";
@@ -160,7 +166,7 @@ public class LatencyStoringServiceMonitorAdaptor implements ServiceMonitor {
                 }
             }
             if (m_thresholdingSet.isNodeInOutage()) {
-                LOG.info("applyThresholds: the threshold processing will be skipped because the service " + service + " is on a scheduled outage.");
+                LOG.info("applyThresholds: the threshold processing will be skipped because the service {} is on a scheduled outage.", service);
             } else if (m_thresholdingSet.hasThresholds(attributes)) {
                 List<Event> events = m_thresholdingSet.applyThresholds(dsName, attributes);
                 if (events.size() > 0) {
@@ -170,7 +176,7 @@ public class LatencyStoringServiceMonitorAdaptor implements ServiceMonitor {
                 }
             }
 	} catch(Throwable e) {
-	    LOG.error("Failed to threshold on " + service + " for " + dsName + " because of an exception", e);
+	    LOG.error("Failed to threshold on {} for {} because of an exception", service, dsName, e);
 	}
     }
 

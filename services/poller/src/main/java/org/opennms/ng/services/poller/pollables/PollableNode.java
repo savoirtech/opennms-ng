@@ -28,14 +28,14 @@
 
 package org.opennms.ng.services.poller.pollables;
 
+import java.net.InetAddress;
+import java.util.Date;
+
 import org.opennms.netmgt.EventConstants;
 import org.opennms.netmgt.model.PollStatus;
 import org.opennms.netmgt.xml.event.Event;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.net.InetAddress;
-import java.util.Date;
 
 /**
  * Represents a PollableNode
@@ -44,53 +44,53 @@ import java.util.Date;
  * @version $Id: $
  */
 public class PollableNode extends PollableContainer {
-    private static final Logger LOG = LoggerFactory.getLogger(org.opennms.ng.services.poller.pollables.PollableNode.class);
+    private static final Logger LOG = LoggerFactory.getLogger(PollableNode.class);
 
     /**
-     * Represents a Lock 
+     * Represents a Lock
      *
      * @author brozow
      */
     public class Lock {
         private Thread m_owner = null;
         private int m_obtainCount = 0;
-        
+
         public synchronized void obtain() {
-            
+
             if (m_owner != Thread.currentThread()) {
-                LOG.debug("Trying to obtain lock for {}", org.opennms.ng.services.poller.pollables.PollableNode.this);
+                LOG.debug("Trying to obtain lock for {}", PollableNode.this);
                 while (m_owner != null) {
-                    try { wait();} catch (InterruptedException e) { throw new ThreadInterrupted("Lock for "+ org.opennms.ng.services.poller.pollables.PollableNode.this+" is unavailable", e);}
+                    try { wait();} catch (InterruptedException e) { throw new ThreadInterrupted("Lock for "+ PollableNode.this+" is unavailable", e);}
                 }
                 m_owner = Thread.currentThread();
-                LOG.debug("Obtained lock for {}", org.opennms.ng.services.poller.pollables.PollableNode.this);
+                LOG.debug("Obtained lock for {}", PollableNode.this);
             }
             m_obtainCount++;
         }
-        
+
         public synchronized void obtain(long timeout) {
-            
+
             if (m_owner != Thread.currentThread()) {
-                LOG.debug("Trying to obtain lock for {}", org.opennms.ng.services.poller.pollables.PollableNode.this);
+                LOG.debug("Trying to obtain lock for {}", PollableNode.this);
                 long now = System.currentTimeMillis();
                 long endTime = (timeout == 0 ? Long.MAX_VALUE : now+timeout);
                 while (m_owner != null) {
-                    try { wait(endTime-now);} catch (InterruptedException e) { throw new ThreadInterrupted("Lock for "+ org.opennms.ng.services.poller.pollables.PollableNode.this+" is unavailable", e);}
+                    try { wait(endTime-now);} catch (InterruptedException e) { throw new ThreadInterrupted("Lock for "+ PollableNode.this+" is unavailable", e);}
                     now = System.currentTimeMillis();
                     if (now >= endTime)
-                        throw new LockUnavailable("Unable to obtain lock for "+ org.opennms.ng.services.poller.pollables.PollableNode.this+" before timeout");
+                        throw new LockUnavailable("Unable to obtain lock for "+ PollableNode.this+" before timeout");
                 }
                 m_owner = Thread.currentThread();
-                LOG.debug("Obtained lock for {}", org.opennms.ng.services.poller.pollables.PollableNode.this);
+                LOG.debug("Obtained lock for {}", PollableNode.this);
             }
             m_obtainCount++;
         }
-        
+
         public synchronized void release() {
             if (m_owner == Thread.currentThread()) {
                 m_obtainCount--;
                 if (m_obtainCount == 0) {
-                    LOG.debug("Releasing lock for {}", org.opennms.ng.services.poller.pollables.PollableNode.this);
+                    LOG.debug("Releasing lock for {}", PollableNode.this);
                     m_owner = null;
                     notifyAll();
                 }
@@ -105,7 +105,7 @@ public class PollableNode extends PollableContainer {
         }
 
     }
-    
+
     private final int m_nodeId;
     private String m_nodeLabel;
     private final Lock m_lock = new Lock();
@@ -161,7 +161,7 @@ public class PollableNode extends PollableContainer {
         Runnable r = new Runnable() {
             @Override
             public void run() {
-                PollableInterface iface =  new PollableInterface(org.opennms.ng.services.poller.pollables.PollableNode.this, addr);
+                PollableInterface iface =  new PollableInterface(PollableNode.this, addr);
                 addMember(iface);
                 retVal[0] = iface;
             }

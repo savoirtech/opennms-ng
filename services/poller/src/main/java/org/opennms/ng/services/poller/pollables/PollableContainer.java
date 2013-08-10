@@ -28,10 +28,14 @@
 
 package org.opennms.ng.services.poller.pollables;
 
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Map;
+
 import org.opennms.netmgt.model.PollStatus;
-
-import java.util.*;
-
 
 /**
  * Represents a PollableContainer
@@ -46,10 +50,10 @@ abstract public class PollableContainer extends PollableElement {
     /**
      * <p>Constructor for PollableContainer.</p>
      *
-     * @param parent a {@link org.opennms.ng.services.poller.pollables.PollableContainer} object.
+     * @param parent a {@link PollableContainer} object.
      * @param scope a {@link Scope} object.
      */
-    public PollableContainer(org.opennms.ng.services.poller.pollables.PollableContainer parent, Scope scope) {
+    public PollableContainer(PollableContainer parent, Scope scope) {
         super(parent, scope);
     }
 
@@ -134,7 +138,7 @@ abstract public class PollableContainer extends PollableElement {
                     PollableElement member = it.next();
                     member.delete();
                 }
-                org.opennms.ng.services.poller.pollables.PollableContainer.super.delete();
+                PollableContainer.super.delete();
             }
         };
         withTreeLock(r);
@@ -165,13 +169,13 @@ abstract public class PollableContainer extends PollableElement {
             PollableElement element = it.next();
             element.visit(v);
         }
-
+        
     }
-
+    
     protected interface Iter {
         public void forEachElement(PollableElement element);
     }
-
+    
     abstract protected class SimpleIter<T> implements Iter {
         private T result;
         public SimpleIter(T initial) { result = initial; }
@@ -179,7 +183,7 @@ abstract public class PollableContainer extends PollableElement {
         public T getResult() { return result; }
         public void setResult(T newResult) { result = newResult; }
     }
-
+    
     abstract protected class Accumulator<T> extends SimpleIter<T> {
         public Accumulator(T initial) { super(initial); }
         public Accumulator() { super(null); }
@@ -189,34 +193,34 @@ abstract public class PollableContainer extends PollableElement {
         }
         abstract T processNextMember(PollableElement member, T currentValue);
     }
-
-
-
+    
+    
+    
     /**
      * <p>forEachMember</p>
      *
-     * @param iter a {@link org.opennms.ng.services.poller.pollables.PollableContainer.Iter} object.
+     * @param iter a {@link PollableContainer.Iter} object.
      */
     protected void forEachMember(Iter iter) {
         forEachMember(false, iter);
     }
-
+    
     /**
      * <p>deriveValueFromMembers</p>
      *
-     * @param iter a {@link org.opennms.ng.services.poller.pollables.PollableContainer.SimpleIter} object.
+     * @param iter a {@link PollableContainer.SimpleIter} object.
      * @param <T> a T object.
      * @return a T object.
      */
     protected <T> T deriveValueFromMembers(SimpleIter<T> iter) {
         return deriveValueFromMembers(false, iter);
     }
-
+    
     /**
      * <p>deriveValueFromMembers</p>
      *
      * @param withTreeLock a boolean.
-     * @param iter a {@link org.opennms.ng.services.poller.pollables.PollableContainer.SimpleIter} object.
+     * @param iter a {@link PollableContainer.SimpleIter} object.
      * @param <T> a T object.
      * @return a T object.
      */
@@ -224,12 +228,12 @@ abstract public class PollableContainer extends PollableElement {
         forEachMember(withTreeLock, iter);
         return iter.getResult();
     }
-
+    
     /**
      * <p>forEachMember</p>
      *
      * @param withTreeLock a boolean.
-     * @param iter a {@link org.opennms.ng.services.poller.pollables.PollableContainer.Iter} object.
+     * @param iter a {@link PollableContainer.Iter} object.
      */
     protected void forEachMember(boolean withTreeLock, final Iter iter) {
         Runnable r = new Runnable() {
@@ -241,14 +245,14 @@ abstract public class PollableContainer extends PollableElement {
                 }
             }
         };
-
+        
         if (withTreeLock) {
             withTreeLock(r);
         } else {
             r.run();
         }
     }
-
+    
     /**
      * <p>recalculateStatus</p>
      */
@@ -271,7 +275,7 @@ abstract public class PollableContainer extends PollableElement {
         };
         withTreeLock(r);
     }
-
+    
     /**
      * <p>resetStatusChanged</p>
      */
@@ -280,7 +284,7 @@ abstract public class PollableContainer extends PollableElement {
         Runnable r = new Runnable() {
             @Override
             public void run() {
-                org.opennms.ng.services.poller.pollables.PollableContainer.super.resetStatusChanged();
+                PollableContainer.super.resetStatusChanged();
                 Iter iter = new Iter() {
                     @Override
                     public void forEachElement(PollableElement elem) {
@@ -292,7 +296,7 @@ abstract public class PollableContainer extends PollableElement {
         };
         withTreeLock(r);
     }
-
+    
     PollableElement findMemberWithDescendent(PollableElement elem) {
         PollableElement member = elem;
         while (member != null && member.getParent() != this) {
@@ -340,7 +344,7 @@ abstract public class PollableContainer extends PollableElement {
         forEachMember(iter);
         return iter.getResult();
     }
-
+    
     /**
      * <p>getMemberStatus</p>
      *
@@ -353,12 +357,12 @@ abstract public class PollableContainer extends PollableElement {
                 if (elem.getStatus().isUp())
                     setResult(PollStatus.up());
             }
-
+            
         };
         forEachMember(iter);
         return iter.getResult();
     }
-
+    
     /**
      * <p>poll</p>
      *
@@ -393,7 +397,7 @@ abstract public class PollableContainer extends PollableElement {
             @Override
             public void run() {
                 if (isStatusChanged()) {
-                    org.opennms.ng.services.poller.pollables.PollableContainer.super.processStatusChange(date);
+                    PollableContainer.super.processStatusChange(date);
                 } else if (getStatus().isUp()) {
                     processMemberStatusChanges(date);
                 }

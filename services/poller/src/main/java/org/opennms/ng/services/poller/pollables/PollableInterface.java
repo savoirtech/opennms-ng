@@ -28,14 +28,14 @@
 
 package org.opennms.ng.services.poller.pollables;
 
+import java.net.InetAddress;
+import java.util.Date;
+import java.util.concurrent.Callable;
+
 import org.opennms.core.utils.InetAddressUtils;
 import org.opennms.netmgt.EventConstants;
 import org.opennms.netmgt.model.PollStatus;
 import org.opennms.netmgt.xml.event.Event;
-
-import java.net.InetAddress;
-import java.util.Date;
-import java.util.concurrent.Callable;
 
 /**
  * Represents a PollableInterface
@@ -66,7 +66,7 @@ public class PollableInterface extends PollableContainer {
     public PollableNode getNode() {
         return (PollableNode)getParent();
     }
-
+    
     private void setNode(PollableNode newNode) {
         setParent(newNode);
     }
@@ -79,7 +79,7 @@ public class PollableInterface extends PollableContainer {
     public PollableNetwork getNetwork() {
         return getNode().getNetwork();
     }
-
+    
     /**
      * <p>getContext</p>
      *
@@ -137,7 +137,7 @@ public class PollableInterface extends PollableContainer {
             @Override
             public PollableService call() {
 
-                PollableService svc = new PollableService(org.opennms.ng.services.poller.pollables.PollableInterface.this, svcName);
+                PollableService svc = new PollableService(PollableInterface.this, svcName);
                 addMember(svc);
                 return svc;
 
@@ -279,8 +279,8 @@ public class PollableInterface extends PollableContainer {
                 String oldIp = getIpAddr();
                 int newNodeId = newNode.getNodeId();
                 
-                oldNode.removeMember(org.opennms.ng.services.poller.pollables.PollableInterface.this);
-                newNode.addMember(org.opennms.ng.services.poller.pollables.PollableInterface.this);
+                oldNode.removeMember(PollableInterface.this);
+                newNode.addMember(PollableInterface.this);
                 setNode(newNode);
 
                 getContext().reparentOutages(oldIp, oldNodeId, newNodeId);

@@ -28,10 +28,10 @@
 
 package org.opennms.ng.services.poller.pollables;
 
-import org.opennms.netmgt.xml.event.Event;
-
 import java.net.InetAddress;
 import java.util.Date;
+
+import org.opennms.netmgt.xml.event.Event;
 
 /**
  * Represents a PollContext
@@ -86,16 +86,16 @@ public interface PollContext {
     /**
      * <p>openOutage</p>
      *
-     * @param pSvc a {@link PollableService} object.
-     * @param svcLostEvent a {@link PollEvent} object.
+     * @param pSvc a {@link org.opennms.netmgt.poller.pollables.PollableService} object.
+     * @param svcLostEvent a {@link org.opennms.netmgt.poller.pollables.PollEvent} object.
      */
     public void openOutage(PollableService pSvc, PollEvent svcLostEvent);
 
     /**
      * <p>resolveOutage</p>
      *
-     * @param pSvc a {@link PollableService} object.
-     * @param svcRegainEvent a {@link PollEvent} object.
+     * @param pSvc a {@link org.opennms.netmgt.poller.pollables.PollableService} object.
+     * @param svcRegainEvent a {@link org.opennms.netmgt.poller.pollables.PollEvent} object.
      */
     public void resolveOutage(PollableService pSvc, PollEvent svcRegainEvent);
     /**

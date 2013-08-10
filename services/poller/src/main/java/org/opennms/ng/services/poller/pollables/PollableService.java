@@ -28,20 +28,20 @@
 
 package org.opennms.ng.services.poller.pollables;
 
+import java.net.InetAddress;
+import java.util.Date;
+
 import org.opennms.netmgt.EventConstants;
 import org.opennms.netmgt.model.PollStatus;
 import org.opennms.netmgt.poller.InetNetworkInterface;
 import org.opennms.netmgt.poller.MonitoredService;
 import org.opennms.netmgt.poller.NetworkInterface;
+import org.opennms.netmgt.scheduler.PostponeNecessary;
+import org.opennms.netmgt.scheduler.ReadyRunnable;
+import org.opennms.netmgt.scheduler.Schedule;
 import org.opennms.netmgt.xml.event.Event;
-import org.opennms.ng.services.scheduler.PostponeNecessary;
-import org.opennms.ng.services.scheduler.ReadyRunnable;
-import org.opennms.ng.services.scheduler.Schedule;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.net.InetAddress;
-import java.util.Date;
 
 /**
  * Represents a PollableService
@@ -50,11 +50,11 @@ import java.util.Date;
  * @version $Id: $
  */
 public class PollableService extends PollableElement implements ReadyRunnable, MonitoredService {
-    
+
     private static final Logger LOG = LoggerFactory.getLogger(PollableService.class);
 
     private final class PollRunner implements Runnable {
-    	
+
     	private volatile PollStatus m_pollStatus;
             @Override
 		public void run() {
@@ -78,7 +78,7 @@ public class PollableService extends PollableElement implements ReadyRunnable, M
      * <p>Constructor for PollableService.</p>
      *
      * @param svcName a {@link String} object.
-     * @param iface a {@link PollableInterface} object.
+     * @param iface a {@link org.opennms.netmgt.poller.pollables.PollableInterface} object.
      */
     public PollableService(PollableInterface iface, String svcName) {
         super(iface, Scope.SERVICE);
@@ -89,7 +89,7 @@ public class PollableService extends PollableElement implements ReadyRunnable, M
     /**
      * <p>getInterface</p>
      *
-     * @return a {@link PollableInterface} object.
+     * @return a {@link org.opennms.netmgt.poller.pollables.PollableInterface} object.
      */
     public PollableInterface getInterface() {
         return (PollableInterface)getParent();
@@ -98,7 +98,7 @@ public class PollableService extends PollableElement implements ReadyRunnable, M
     /**
      * <p>getNode</p>
      *
-     * @return a {@link PollableNode} object.
+     * @return a {@link org.opennms.netmgt.poller.pollables.PollableNode} object.
      */
     public PollableNode getNode() {
         return getInterface().getNode();
@@ -107,7 +107,7 @@ public class PollableService extends PollableElement implements ReadyRunnable, M
     /**
      * <p>getNetwork</p>
      *
-     * @return a {@link PollableNetwork} object.
+     * @return a {@link org.opennms.netmgt.poller.pollables.PollableNetwork} object.
      */
     public PollableNetwork getNetwork() {
         return getInterface().getNetwork();
@@ -116,7 +116,7 @@ public class PollableService extends PollableElement implements ReadyRunnable, M
     /**
      * <p>getContext</p>
      *
-     * @return a {@link PollContext} object.
+     * @return a {@link org.opennms.netmgt.poller.pollables.PollContext} object.
      */
     @Override
     public PollContext getContext() {
@@ -173,7 +173,7 @@ public class PollableService extends PollableElement implements ReadyRunnable, M
     /**
      * <p>setPollConfig</p>
      *
-     * @param pollConfig a {@link PollableServiceConfig} object.
+     * @param pollConfig a {@link org.opennms.netmgt.poller.pollables.PollableServiceConfig} object.
      */
     public void setPollConfig(PollableServiceConfig pollConfig) {
         m_pollConfig = pollConfig;
@@ -196,6 +196,7 @@ public class PollableService extends PollableElement implements ReadyRunnable, M
     /**
      * <p>getNetInterface</p>
      *
+     * @throws UnknownHostException if any.
      * @return a {@link org.opennms.netmgt.poller.NetworkInterface} object.
      */
     @Override
@@ -413,7 +414,7 @@ public class PollableService extends PollableElement implements ReadyRunnable, M
             processStatusChange(new Date());
             status = getStatus();
         }
-        LOG.debug("Finish Scheduled Poll of service "+this+", started at "+new Date(startDate));
+        LOG.debug("Finish Scheduled Poll of service {}, started at {}", this, new Date(startDate));
         return status;
 	}
 
@@ -425,7 +426,7 @@ public class PollableService extends PollableElement implements ReadyRunnable, M
         Runnable r = new Runnable() {
             @Override
             public void run() {
-                org.opennms.ng.services.poller.pollables.PollableService.super.delete();
+                PollableService.super.delete();
                 m_schedule.unschedule();
             }
         };

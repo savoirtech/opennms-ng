@@ -26,7 +26,6 @@
         <module>trapd</module>
         <module>collectd</module>
         <module>threshd</module>
-
     </modules>
 
 </project>

@@ -28,6 +28,7 @@
 
 package org.opennms.ng.services.poller.pollables;
 
+
 /**
  * Represents a PollableVisitorAdaptor
  *

@@ -28,21 +28,21 @@
 
 package org.opennms.ng.services.poller.pollables;
 
-import org.opennms.netmgt.config.PollOutagesConfig;
-import org.opennms.netmgt.config.PollerConfig;
+import java.util.Map;
+import java.util.concurrent.ConcurrentSkipListMap;
+
 import org.opennms.netmgt.config.poller.Downtime;
 import org.opennms.netmgt.config.poller.Package;
 import org.opennms.netmgt.config.poller.Parameter;
 import org.opennms.netmgt.config.poller.Service;
 import org.opennms.netmgt.model.PollStatus;
 import org.opennms.netmgt.poller.ServiceMonitor;
-import org.opennms.ng.services.scheduler.ScheduleInterval;
-import org.opennms.ng.services.scheduler.Timer;
+import org.opennms.netmgt.scheduler.ScheduleInterval;
+import org.opennms.netmgt.scheduler.Timer;
+import org.opennms.ng.services.pollerconfig.PollerConfig;
+import org.opennms.ng.services.polloutagesconfig.PollOutagesConfig;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.util.Map;
-import java.util.concurrent.ConcurrentSkipListMap;
 
 /**
  * Represents a PollableServiceConfig
@@ -51,7 +51,7 @@ import java.util.concurrent.ConcurrentSkipListMap;
  * @version $Id: $
  */
 public class PollableServiceConfig implements PollConfig, ScheduleInterval {
-    private static final Logger LOG = LoggerFactory.getLogger(org.opennms.ng.services.poller.pollables.PollableServiceConfig.class);
+    private static final Logger LOG = LoggerFactory.getLogger(PollableServiceConfig.class);
 
     private PollerConfig m_pollerConfig;
     private PollOutagesConfig m_pollOutagesConfig;
@@ -78,7 +78,7 @@ public class PollableServiceConfig implements PollConfig, ScheduleInterval {
         m_pkg = pkg;
         m_timer = timer;
         m_configService = findService(pkg);
-        
+
         ServiceMonitor monitor = getServiceMonitor();
         monitor.initialize(m_service);
     }
@@ -95,7 +95,7 @@ public class PollableServiceConfig implements PollConfig, ScheduleInterval {
         }
 
         throw new RuntimeException("Service name not part of package!");
-        
+
     }
 
     /**
@@ -116,8 +116,8 @@ public class PollableServiceConfig implements PollConfig, ScheduleInterval {
             LOG.debug("Finish polling {} using pkg {} result = {}", result, m_service, packageName);
             return result;
         } catch (Throwable e) {
-            LOG.error("Unexpected exception while polling {}. Marking service as DOWN", e, m_service);
-            return PollStatus.down("Unexpected exception while polling "+m_service+". "+e);
+            LOG.error("Unexpected exception while polling {}. Marking service as DOWN", m_service, e);
+            return PollStatus.down("Unexpected exception while polling " + m_service + ". " + e);
         }
     }
 

@@ -20,7 +20,6 @@
         <pkgGroupId>xa-pool</pkgGroupId>
         <pkgArtifactId>xa-pool</pkgArtifactId>
         <pkgVersion>1.6</pkgVersion>
-
         <opennms.osgi.import.pkg>
             !org.enhydra*,
             org.apache.commons.logging;version="[1.1,2)",
@@ -44,11 +43,27 @@
     <dependencies>
 
         <dependency>
+                   <groupId>org.apache.felix</groupId>
+                   <artifactId>org.apache.felix.framework</artifactId>
+               </dependency>
+
+
+        <dependency>
             <groupId>xa-pool</groupId>
             <artifactId>xa-pool</artifactId>
             <version>1.6</version>
             <scope>system</scope>
             <systemPath>${basedir}/lib/xa-pool.jar</systemPath>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.geronimo.specs</groupId>
+            <artifactId>geronimo-jta_1.1_spec</artifactId>
+
+        </dependency>
+        <dependency>
+            <groupId>commons-logging</groupId>
+            <artifactId>commons-logging-api</artifactId>
+
         </dependency>
 
     </dependencies>

@@ -24,6 +24,7 @@
         <module>passive-config</module>
         <module>snmp-config</module>
         <module>poller-config</module>
+        <module>poll-outages-config</module>
         <module>storage-config</module>
     </modules>
 
