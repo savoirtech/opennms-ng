@@ -447,6 +447,12 @@
 
             <dependency>
                 <groupId>org.opennms.bundles</groupId>
+                <artifactId>opennms-services-common</artifactId>
+                <version>${opennms.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>org.opennms.bundles</groupId>
                 <artifactId>opennms-services-bundle</artifactId>
                 <version>${opennms.version}</version>
             </dependency>
@@ -565,12 +571,6 @@
                 <groupId>org.opennms.ng</groupId>
                 <artifactId>passive-config</artifactId>
                 <version>${project.version}</version>
-            </dependency>
-
-            <dependency>
-                <groupId>org.opennms.ng</groupId>
-                <artifactId>opennms-services-common</artifactId>
-                <version>${opennms.version}</version>
             </dependency>
 
             <dependency>
