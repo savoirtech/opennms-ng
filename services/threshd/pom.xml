@@ -49,7 +49,7 @@
         </dependency>
 
         <dependency>
-            <groupId>org.opennms.ng</groupId>
+            <groupId>org.opennms.bundles</groupId>
             <artifactId>opennms-services-common</artifactId>
         </dependency>
 
