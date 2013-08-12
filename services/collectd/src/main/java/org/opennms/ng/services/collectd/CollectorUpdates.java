@@ -39,22 +39,22 @@ import org.opennms.netmgt.model.OnmsIpInterface;
  * SnmpCollector object the updates represented by the class are to be applied
  * to the SnmpCollector AFTER being popped from the interval queues for
  * scheduling but BEFORE the next collection takes place.
- * 
+ *
  * This is necessary because it isn't possible to make modifications to the
  * SnmpCollector objects at the time that a particular event is received by the
  * BroadcastEventProcessor class...the interface may in fact be in the process
  * of being collected. So we make "note" of the updates using this class and
  * wait for the collector object to be popped from the interval queues before
  * the updates are actually applied.
- * 
+ *
  * The only "updates" currently handled by this class are new/modified
  * attributes, a flag indicating that the service has been marked for deletion,
  * a flag indicating the service has been marked for reparenting, a flag
  * indicating the service has been marked for reinitialization, and finally a
  * flag indicating that the SNMP service on the interface has a new status.
- * 
+ *
  */
-final class CollectorUpdates {
+public final class CollectorUpdates {
     /**
      * Indicates if there are any updates to be processed
      */
@@ -90,7 +90,7 @@ final class CollectorUpdates {
      * New nodeId for reparenting
      */
     private String m_reparentNewNodeId;
-    
+
     private OnmsIpInterface m_newIface = null;
 
     /**
@@ -136,7 +136,7 @@ final class CollectorUpdates {
     /**
      * Set the deletion flag.
      */
-    void markForDeletion() {
+    public void markForDeletion() {
         m_deletionFlag = true;
         m_hasUpdates = true;
     }
@@ -144,16 +144,16 @@ final class CollectorUpdates {
     /**
      * Set the reinit flag.
      */
-    void markForReinitialization(OnmsIpInterface iface) {
+    public void markForReinitialization(OnmsIpInterface iface) {
         m_reinitFlag = iface;
         m_hasUpdates = true;
     }
 
     /**
      * Set the reparent flag.
-     * @param iface 
+     * @param iface
      */
-    void markForReparenting(String oldNodeId, String newNodeId, OnmsIpInterface iface) {
+    public void markForReparenting(String oldNodeId, String newNodeId, OnmsIpInterface iface) {
         m_reparentFlag = true;
         m_reparentOldNodeId = oldNodeId;
         m_reparentNewNodeId = newNodeId;
@@ -168,9 +168,9 @@ final class CollectorUpdates {
     String getReparentNewNodeId() {
         return m_reparentNewNodeId;
     }
-    
+
     OnmsIpInterface getUpdatedInterface() {
-    	return m_newIface;
+        return m_newIface;
     }
 
     /**

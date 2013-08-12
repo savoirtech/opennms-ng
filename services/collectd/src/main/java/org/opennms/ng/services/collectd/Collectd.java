@@ -28,32 +28,19 @@
 
 package org.opennms.ng.services.collectd;
 
-import java.net.InetAddress;
-import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.ListIterator;
-import java.util.Map;
-import java.util.Set;
-
 import org.apache.commons.lang.StringUtils;
 import org.opennms.core.logging.Logging;
 import org.opennms.core.utils.ConfigFileConstants;
 import org.opennms.netmgt.EventConstants;
 import org.opennms.netmgt.capsd.EventUtils;
 import org.opennms.netmgt.capsd.InsufficientInformationException;
-import org.opennms.netmgt.config.CollectdConfigFactory;
-import org.opennms.netmgt.config.CollectdPackage;
-import org.opennms.netmgt.config.SnmpEventInfo;
-import org.opennms.netmgt.config.SnmpPeerFactory;
-import org.opennms.netmgt.config.ThreshdConfigFactory;
-import org.opennms.netmgt.config.ThresholdingConfigFactory;
+import org.opennms.netmgt.collectd.CollectionInitializationException;
+import org.opennms.netmgt.collectd.CollectionSpecification;
+import org.opennms.netmgt.collectd.DefaultCollectdInstrumentation;
+import org.opennms.netmgt.collectd.ServiceCollector;
+import org.opennms.netmgt.config.*;
 import org.opennms.netmgt.config.collectd.Collector;
+import org.opennms.netmgt.daemon.AbstractServiceDaemon;
 import org.opennms.netmgt.dao.api.CollectorConfigDao;
 import org.opennms.netmgt.dao.api.IpInterfaceDao;
 import org.opennms.netmgt.dao.api.NodeDao;
@@ -67,9 +54,6 @@ import org.opennms.netmgt.model.events.EventListener;
 import org.opennms.netmgt.xml.event.Event;
 import org.opennms.netmgt.xml.event.Parm;
 import org.opennms.netmgt.xml.event.Value;
-import org.opennms.ng.services.scheduler.LegacyScheduler;
-import org.opennms.ng.services.scheduler.ReadyRunnable;
-import org.opennms.ng.services.scheduler.Scheduler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.transaction.TransactionStatus;
@@ -78,6 +62,9 @@ import org.springframework.transaction.support.TransactionTemplate;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 
+import java.net.InetAddress;
+import java.sql.SQLException;
+import java.util.*;
 
 import static org.opennms.core.utils.InetAddressUtils.str;
 
@@ -87,58 +74,23 @@ import static org.opennms.core.utils.InetAddressUtils.str;
  * @author ranger
  * @version $Id: $
  */
-public class Collectd implements EventListener {
-
-    //extends AbstractServiceDaemon implements EventListener {
+public class Collectd extends AbstractServiceDaemon implements
+        EventListener {
 
     private static final Logger LOG = LoggerFactory.getLogger(Collectd.class);
-    private static CollectdInstrumentation s_instrumentation = null;
-    /**
-     * Log4j category
-     */
-    private final static String LOG4J_CATEGORY = "collectd";
-    /**
-     * Instantiated service collectors specified in config file
-     */
-    private final Map<String, ServiceCollector> m_collectors = new HashMap<String, ServiceCollector>(4);
-    /**
-     * List of all CollectableService objects.
-     */
-    private final List<CollectableService> m_collectableServices;
-    /**
-     * Reference to the collection scheduler
-     */
-    private volatile Scheduler m_scheduler;
-    /**
-     * Indicates if scheduling of existing interfaces has been completed
-     */
-    private volatile CollectorConfigDao m_collectorConfigDao;
-    private volatile IpInterfaceDao m_ifaceDao;
-    private final SchedulingCompletedFlag m_schedulingCompletedFlag = new SchedulingCompletedFlag();
-    private volatile EventIpcManager m_eventIpcManager;
-    private volatile TransactionTemplate m_transTemplate;
-    private volatile NodeDao m_nodeDao;
 
-    /**
-     * Constructor.
-     */
-    public Collectd() {
-        //   super(LOG4J_CATEGORY);
-
-        m_collectableServices = Collections.synchronizedList(new LinkedList<CollectableService>());
-    }
+    private static org.opennms.netmgt.collectd.CollectdInstrumentation s_instrumentation = null;
 
     /**
      * <p>instrumentation</p>
      *
-     * @return a {@link CollectdInstrumentation} object.
+     * @return a {@link org.opennms.netmgt.collectd.CollectdInstrumentation} object.
      */
-    public static CollectdInstrumentation instrumentation() {
+    public static org.opennms.netmgt.collectd.CollectdInstrumentation instrumentation() {
         if (s_instrumentation == null) {
-            String className = System.getProperty("org.opennms.collectd.instrumentationClass", DefaultCollectdInstrumentation.class.getName());
+            String className = System.getProperty("org.opennms.collectd.instrumentationClass", org.opennms.netmgt.collectd.DefaultCollectdInstrumentation.class.getName());
             try {
-                s_instrumentation = (CollectdInstrumentation) ClassUtils.forName(className, Thread.currentThread().getContextClassLoader())
-                                                                        .newInstance();
+                s_instrumentation = (org.opennms.netmgt.collectd.CollectdInstrumentation) ClassUtils.forName(className, Thread.currentThread().getContextClassLoader()).newInstance();
             } catch (Throwable e) {
                 s_instrumentation = new DefaultCollectdInstrumentation();
             }
@@ -147,19 +99,75 @@ public class Collectd implements EventListener {
         return s_instrumentation;
     }
 
-    public static String getLoggingCategory() {
-        return LOG4J_CATEGORY;
+    /**
+     * Log4j category
+     */
+    final static String LOG4J_CATEGORY = "collectd";
+
+    /**
+     * Instantiated service collectors specified in config file
+     */
+    private final Map<String, org.opennms.netmgt.collectd.ServiceCollector> m_collectors = new HashMap<String, org.opennms.netmgt.collectd.ServiceCollector>(4);
+
+    /**
+     * List of all CollectableService objects.
+     */
+    private final List<CollectableService> m_collectableServices;
+
+    /**
+     * Reference to the collection scheduler
+     */
+    private volatile org.opennms.netmgt.scheduler.Scheduler m_scheduler;
+
+    /**
+     * Indicates if scheduling of existing interfaces has been completed
+     */
+    private volatile CollectorConfigDao m_collectorConfigDao;
+
+    private volatile IpInterfaceDao m_ifaceDao;
+
+    static class SchedulingCompletedFlag {
+        volatile boolean m_schedulingCompleted = false;
+
+        public synchronized void setSchedulingCompleted(
+                boolean schedulingCompleted) {
+            m_schedulingCompleted = schedulingCompleted;
+        }
+
+        public synchronized boolean isSchedulingCompleted() {
+            return m_schedulingCompleted;
+        }
+
+    }
+
+    private final SchedulingCompletedFlag m_schedulingCompletedFlag = new SchedulingCompletedFlag();
+
+    private volatile EventIpcManager m_eventIpcManager;
+
+    private volatile TransactionTemplate m_transTemplate;
+
+    private volatile NodeDao m_nodeDao;
+
+    /**
+     * Constructor.
+     */
+    public Collectd() {
+        super(LOG4J_CATEGORY);
+
+        m_collectableServices = Collections.synchronizedList(new LinkedList<CollectableService>());
     }
 
     /**
      * <p>onInit</p>
      */
+    @Override
     protected void onInit() {
         Assert.notNull(m_collectorConfigDao, "collectorConfigDao must not be null");
         Assert.notNull(m_eventIpcManager, "eventIpcManager must not be null");
         Assert.notNull(m_transTemplate, "transTemplate must not be null");
         Assert.notNull(m_ifaceDao, "ifaceDao must not be null");
         Assert.notNull(m_nodeDao, "nodeDao must not be null");
+
 
         LOG.debug("init: Initializing collection daemon");
 
@@ -221,15 +229,6 @@ public class Collectd implements EventListener {
     }
 
     /**
-     * <p>getEventIpcManager</p>
-     *
-     * @return a {@link org.opennms.netmgt.model.events.EventIpcManager} object.
-     */
-    public EventIpcManager getEventIpcManager() {
-        return m_eventIpcManager;
-    }
-
-    /**
      * <p>setEventIpcManager</p>
      *
      * @param eventIpcManager a {@link org.opennms.netmgt.model.events.EventIpcManager} object.
@@ -238,10 +237,19 @@ public class Collectd implements EventListener {
         m_eventIpcManager = eventIpcManager;
     }
 
-    private ReadyRunnable ifScheduler() {
+    /**
+     * <p>getEventIpcManager</p>
+     *
+     * @return a {@link org.opennms.netmgt.model.events.EventIpcManager} object.
+     */
+    public EventIpcManager getEventIpcManager() {
+        return m_eventIpcManager;
+    }
+
+    private org.opennms.netmgt.scheduler.ReadyRunnable ifScheduler() {
         // Schedule existing interfaces for data collection
 
-        ReadyRunnable interfaceScheduler = new ReadyRunnable() {
+        org.opennms.netmgt.scheduler.ReadyRunnable interfaceScheduler = new org.opennms.netmgt.scheduler.ReadyRunnable() {
 
             @Override
             public boolean isReady() {
@@ -261,6 +269,7 @@ public class Collectd implements EventListener {
                             setSchedulingCompleted(true);
                         }
                     }
+
                 });
             }
         };
@@ -268,21 +277,23 @@ public class Collectd implements EventListener {
     }
 
     private void createScheduler() {
-
-        // Create a scheduler
-        try {
-            LOG.debug("init: Creating collectd scheduler");
-
-            setScheduler(new LegacyScheduler("Collectd", getCollectorConfigDao().getSchedulerThreads()));
-        } catch (RuntimeException e) {
-            LOG.error("init: Failed to create collectd scheduler", e);
-            throw e;
-        }
+        Logging.withPrefix("collectd", new Runnable() {
+            @Override
+            public void run() {
+                // Create a scheduler
+                try {
+                    LOG.debug("init: Creating collectd scheduler");
+                    setScheduler(new org.opennms.netmgt.scheduler.LegacyScheduler("Collectd", getCollectorConfigDao().getSchedulerThreads()));
+                } catch (final RuntimeException e) {
+                    LOG.error("init: Failed to create collectd scheduler", e);
+                    throw e;
+                }
+            }
+        });
     }
 
-    /**
-     * {@inheritDoc}
-     */
+    /** {@inheritDoc} */
+    @Override
     protected void onStart() {
         // start the scheduler
         try {
@@ -295,9 +306,8 @@ public class Collectd implements EventListener {
         }
     }
 
-    /**
-     * {@inheritDoc}
-     */
+    /** {@inheritDoc} */
+    @Override
     protected void onStop() {
         getScheduler().stop();
         deinstallMessageSelectors();
@@ -305,16 +315,14 @@ public class Collectd implements EventListener {
         setScheduler(null);
     }
 
-    /**
-     * {@inheritDoc}
-     */
+    /** {@inheritDoc} */
+    @Override
     protected void onPause() {
         getScheduler().pause();
     }
 
-    /**
-     * {@inheritDoc}
-     */
+    /** {@inheritDoc} */
+    @Override
     protected void onResume() {
         getScheduler().resume();
     }
@@ -322,7 +330,8 @@ public class Collectd implements EventListener {
     /**
      * Schedule existing interfaces for data collection.
      *
-     * @throws java.sql.SQLException if database errors encountered.
+     * @throws SQLException
+     *             if database errors encountered.
      */
     private void scheduleExistingInterfaces() throws SQLException {
 
@@ -335,11 +344,13 @@ public class Collectd implements EventListener {
                 public void doInTransactionWithoutResult(TransactionStatus status) {
 
                     // Loop through collectors and schedule for each one present
-                    for (String name : getCollectorNames()) {
+                    for(String name : getCollectorNames()) {
                         scheduleInterfacesWithService(name);
                     }
                 }
+
             });
+
         } finally {
             instrumentation().endScheduleExistingInterfaces();
         }
@@ -369,19 +380,25 @@ public class Collectd implements EventListener {
         } finally {
             instrumentation().endFindInterfacesWithService(svcName, count);
         }
+
     }
 
     /**
      * This method is responsible for scheduling the specified
      * node/address/svcname tuple for data collection.
      *
-     * @param nodeId    Node id
-     * @param ipAddress IP address
-     * @param svcName   Service name
-     * @param existing  True if called by scheduleExistingInterfaces(), false
-     *                  otheriwse
+     * @param nodeId
+     *            Node id
+     * @param ipAddress
+     *            IP address
+     * @param svcName
+     *            Service name
+     * @param existing
+     *            True if called by scheduleExistingInterfaces(), false
+     *            otheriwse
      */
-    private void scheduleInterface(int nodeId, String ipAddress, String svcName, boolean existing) {
+    private void scheduleInterface(int nodeId, String ipAddress,
+                                   String svcName, boolean existing) {
 
         OnmsIpInterface iface = getIpInterface(nodeId, ipAddress);
         if (iface == null) {
@@ -395,7 +412,8 @@ public class Collectd implements EventListener {
             return;
         }
 
-        scheduleInterface(iface, svc.getServiceType().getName(), existing);
+        scheduleInterface(iface, svc.getServiceType().getName(),
+                existing);
     }
 
     private void scheduleNode(final int nodeId, final boolean existing) {
@@ -409,6 +427,7 @@ public class Collectd implements EventListener {
             public void visitMonitoredService(OnmsMonitoredService monSvc) {
                 scheduleInterface(monSvc.getIpInterface(), monSvc.getServiceName(), existing);
             }
+
         });
     }
 
@@ -429,12 +448,12 @@ public class Collectd implements EventListener {
         instrumentation().beginScheduleInterface(iface.getNode().getId(), ipAddress, svcName);
         try {
 
-            Collection<CollectionSpecification> matchingSpecs = getSpecificationsForInterface(iface, svcName);
+            Collection<org.opennms.netmgt.collectd.CollectionSpecification> matchingSpecs = getSpecificationsForInterface(iface, svcName);
             StringBuffer sb;
 
             LOG.debug("scheduleInterface: found {} matching specs for interface: {}", matchingSpecs.size(), iface);
 
-            for (CollectionSpecification spec : matchingSpecs) {
+            for (org.opennms.netmgt.collectd.CollectionSpecification spec : matchingSpecs) {
 
                 if (existing == false) {
                 /*
@@ -463,8 +482,9 @@ public class Collectd implements EventListener {
                  * interface, service and package pairing
                  */
 
-                    cSvc = new CollectableService(iface, m_ifaceDao, spec, getScheduler(), m_schedulingCompletedFlag,
-                        m_transTemplate.getTransactionManager());
+                    cSvc = new CollectableService(iface, m_ifaceDao, spec, getScheduler(),
+                            m_schedulingCompletedFlag,
+                            m_transTemplate.getTransactionManager());
 
                     // Add new collectable service to the collectable service list.
                     m_collectableServices.add(cSvc);
@@ -494,6 +514,7 @@ public class Collectd implements EventListener {
                     LOG.error("scheduleInterface: Uncaught exception, failed to schedule interface {}/{}.", iface, svcName, t);
                 }
             } // end while more specifications exist
+
         } finally {
             instrumentation().endScheduleInterface(iface.getNode().getId(), ipAddress, svcName);
         }
@@ -502,12 +523,12 @@ public class Collectd implements EventListener {
     /**
      * <p>getSpecificationsForInterface</p>
      *
-     * @param iface   a {@link org.opennms.netmgt.model.OnmsIpInterface} object.
-     * @param svcName a {@link String} object.
+     * @param iface a {@link org.opennms.netmgt.model.OnmsIpInterface} object.
+     * @param svcName a {@link java.lang.String} object.
      * @return a {@link java.util.Collection} object.
      */
-    public Collection<CollectionSpecification> getSpecificationsForInterface(OnmsIpInterface iface, String svcName) {
-        Collection<CollectionSpecification> matchingPkgs = new LinkedList<CollectionSpecification>();
+    public Collection<org.opennms.netmgt.collectd.CollectionSpecification> getSpecificationsForInterface(OnmsIpInterface iface, String svcName) {
+        Collection<org.opennms.netmgt.collectd.CollectionSpecification> matchingPkgs = new LinkedList<org.opennms.netmgt.collectd.CollectionSpecification>();
 
 
         /*
@@ -515,30 +536,26 @@ public class Collectd implements EventListener {
          * For each match, create new SnmpCollector object and
          * schedule it for collection
          */
-        for (CollectdPackage wpkg : getCollectorConfigDao().getPackages()) {
+        for(CollectdPackage wpkg : getCollectorConfigDao().getPackages()) {
             /*
              * Make certain the the current service is in the package
              * and enabled!
              */
             if (!wpkg.serviceInPackageAndEnabled(svcName)) {
-                LOG.debug(
-                    "getSpecificationsForInterface: address/service: {}/{} not scheduled, service is not enabled or does not exist in package: {}",
-                    iface, svcName, wpkg.getName());
+                LOG.debug("getSpecificationsForInterface: address/service: {}/{} not scheduled, service is not enabled or does not exist in package: {}", iface, svcName, wpkg.getName());
                 continue;
             }
 
             // Is the interface in the package?
             final String ipAddress = str(iface.getIpAddress());
             if (!wpkg.interfaceInPackage(ipAddress)) {
-                LOG.debug("getSpecificationsForInterface: address/service: {}/{} not scheduled, interface does not belong to package: {}", iface,
-                    svcName, wpkg.getName());
+                LOG.debug("getSpecificationsForInterface: address/service: {}/{} not scheduled, interface does not belong to package: {}", iface, svcName, wpkg.getName());
                 continue;
             }
 
-            LOG.debug("getSpecificationsForInterface: address/service: {}/{} scheduled, interface does belong to package: {}", iface, svcName,
-                wpkg.getName());
+            LOG.debug("getSpecificationsForInterface: address/service: {}/{} scheduled, interface does belong to package: {}", iface, svcName, wpkg.getName());
 
-            matchingPkgs.add(new CollectionSpecification(wpkg, svcName, getServiceCollector(svcName)));
+            matchingPkgs.add(new org.opennms.netmgt.collectd.CollectionSpecification(wpkg, svcName, getServiceCollector(svcName)));
         }
         return matchingPkgs;
     }
@@ -547,9 +564,10 @@ public class Collectd implements EventListener {
      * Returns true if specified address/pkg pair is already represented in
      * the collectable services list. False otherwise.
      *
-     * @param iface   TODO
-     * @param spec    TODO
-     * @param svcName TODO
+     * @param iface
+     *            TODO
+     * @param spec
+     *            TODO
      */
     private boolean alreadyScheduled(OnmsIpInterface iface, CollectionSpecification spec) {
         String ipAddress = str(iface.getIpAddress());
@@ -574,7 +592,9 @@ public class Collectd implements EventListener {
         synchronized (m_collectableServices) {
             for (CollectableService cSvc : m_collectableServices) {
                 InetAddress addr = (InetAddress) cSvc.getAddress();
-                if (str(addr).equals(ipAddress) && cSvc.getPackageName().equals(pkgName) && cSvc.getServiceName().equals(svcName)) {
+                if (str(addr).equals(ipAddress)
+                        && cSvc.getPackageName().equals(pkgName)
+                        && cSvc.getServiceName().equals(svcName)) {
                     isScheduled = true;
                     break;
                 }
@@ -592,7 +612,8 @@ public class Collectd implements EventListener {
     }
 
     /**
-     * @param schedulingCompleted The schedulingCompleted to set.
+     * @param schedulingCompleted
+     *            The schedulingCompleted to set.
      */
     private void setSchedulingCompleted(boolean schedulingCompleted) {
         m_schedulingCompletedFlag.setSchedulingCompleted(schedulingCompleted);
@@ -608,14 +629,9 @@ public class Collectd implements EventListener {
         return m_collectableServices;
     }
 
-    @Override
-    public String getName() {
-        return "Collectd";
-    }
-
     /**
      * {@inheritDoc}
-     * <p/>
+     *
      * This method is invoked by the JMS topic session when a new event is
      * available for processing. Currently only text based messages are
      * processed by this callback. Each message is examined for its Universal
@@ -635,9 +651,12 @@ public class Collectd implements EventListener {
                     public void doInTransactionWithoutResult(TransactionStatus status) {
                         onEventInTransaction(event);
                     }
+
                 });
             }
+
         });
+
     }
 
     private void onEventInTransaction(Event event) {
@@ -648,50 +667,28 @@ public class Collectd implements EventListener {
         try {
             if (event.getUei().equals(EventConstants.SCHEDOUTAGES_CHANGED_EVENT_UEI)) {
                 handleScheduledOutagesChanged(event);
-            } else {
-                if (event.getUei().equals(EventConstants.CONFIGURE_SNMP_EVENT_UEI)) {
-                    handleConfigureSNMP(event);
-                } else {
-                    if (event.getUei().equals(EventConstants.NODE_GAINED_SERVICE_EVENT_UEI)) {
-                        handleNodeGainedService(event);
-                    } else {
-                        if (event.getUei().equals(EventConstants.PRIMARY_SNMP_INTERFACE_CHANGED_EVENT_UEI)) {
-                            handlePrimarySnmpInterfaceChanged(event);
-                        } else {
-                            if (event.getUei().equals(EventConstants.REINITIALIZE_PRIMARY_SNMP_INTERFACE_EVENT_UEI)) {
-                                handleReinitializePrimarySnmpInterface(event);
-                            } else {
-                                if (event.getUei().equals(EventConstants.INTERFACE_REPARENTED_EVENT_UEI)) {
-                                    handleInterfaceReparented(event);
-                                } else {
-                                    if (event.getUei().equals(EventConstants.NODE_DELETED_EVENT_UEI)) {
-                                        handleNodeDeleted(event);
-                                    } else {
-                                        if (event.getUei().equals(EventConstants.DUP_NODE_DELETED_EVENT_UEI)) {
-                                            handleDupNodeDeleted(event);
-                                        } else {
-                                            if (event.getUei().equals(EventConstants.INTERFACE_DELETED_EVENT_UEI)) {
-                                                handleInterfaceDeleted(event);
-                                            } else {
-                                                if (event.getUei().equals(EventConstants.SERVICE_DELETED_EVENT_UEI)) {
-                                                    handleServiceDeleted(event);
-                                                } else {
-                                                    if (event.getUei().equals(EventConstants.RELOAD_DAEMON_CONFIG_UEI)) {
-                                                        handleReloadDaemonConfig(event);
-                                                    } else {
-                                                        if (event.getUei().equals(EventConstants.NODE_CATEGORY_MEMBERSHIP_CHANGED_EVENT_UEI)) {
-                                                            handleNodeCategoryMembershipChanged(event);
-                                                        }
-                                                    }
-                                                }
-                                            }
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
+            } else if (event.getUei().equals(EventConstants.CONFIGURE_SNMP_EVENT_UEI)) {
+                handleConfigureSNMP(event);
+            } else if (event.getUei().equals(EventConstants.NODE_GAINED_SERVICE_EVENT_UEI)) {
+                handleNodeGainedService(event);
+            } else if (event.getUei().equals(EventConstants.PRIMARY_SNMP_INTERFACE_CHANGED_EVENT_UEI)) {
+                handlePrimarySnmpInterfaceChanged(event);
+            } else if (event.getUei().equals(EventConstants.REINITIALIZE_PRIMARY_SNMP_INTERFACE_EVENT_UEI)) {
+                handleReinitializePrimarySnmpInterface(event);
+            } else if (event.getUei().equals(EventConstants.INTERFACE_REPARENTED_EVENT_UEI)) {
+                handleInterfaceReparented(event);
+            } else if (event.getUei().equals(EventConstants.NODE_DELETED_EVENT_UEI)) {
+                handleNodeDeleted(event);
+            } else if (event.getUei().equals(EventConstants.DUP_NODE_DELETED_EVENT_UEI)) {
+                handleDupNodeDeleted(event);
+            } else if (event.getUei().equals(EventConstants.INTERFACE_DELETED_EVENT_UEI)) {
+                handleInterfaceDeleted(event);
+            } else if (event.getUei().equals(EventConstants.SERVICE_DELETED_EVENT_UEI)) {
+                handleServiceDeleted(event);
+            } else if (event.getUei().equals(EventConstants.RELOAD_DAEMON_CONFIG_UEI)) {
+                handleReloadDaemonConfig(event);
+            } else if (event.getUei().equals(EventConstants.NODE_CATEGORY_MEMBERSHIP_CHANGED_EVENT_UEI)) {
+                handleNodeCategoryMembershipChanged(event);
             }
         } catch (InsufficientInformationException e) {
             handleInsufficientInfo(e);
@@ -707,7 +704,8 @@ public class Collectd implements EventListener {
         LOG.info(e.getMessage());
     }
 
-    private void handleDupNodeDeleted(Event event) throws InsufficientInformationException {
+    private void handleDupNodeDeleted(Event event)
+            throws InsufficientInformationException {
         handleNodeDeleted(event);
     }
 
@@ -735,7 +733,8 @@ public class Collectd implements EventListener {
     /**
      * This method is responsible for handling configureSNMP events.
      *
-     * @param event The event to process.
+     * @param event
+     *            The event to process.
      */
     private void handleConfigureSNMP(final Event event) {
         LOG.debug("configureSNMPHandler: processing configure SNMP event...", event);
@@ -753,22 +752,25 @@ public class Collectd implements EventListener {
             SnmpPeerFactory.getInstance().define(info);
             SnmpPeerFactory.saveCurrent();
             LOG.debug("configureSNMPHandler: process complete. {}", info);
+
         } catch (Throwable e) {
-            LOG.error("configureSNMPHandler: ", e);
+            LOG.error("configureSNMPHandler: ",e);
         }
     }
 
     /**
      * This method is responsible for handling interfaceDeleted events.
      *
-     * @param event The event to process.
-     * @throws org.opennms.netmgt.capsd.InsufficientInformationException
+     * @param event
+     *            The event to process.
+     * @throws InsufficientInformationException
      */
-    private void handleInterfaceDeleted(Event event) throws InsufficientInformationException {
+    private void handleInterfaceDeleted(Event event)
+            throws InsufficientInformationException {
         EventUtils.checkNodeId(event);
 
         String ipAddr = event.getInterface();
-        if (EventUtils.isNonIpInterface(ipAddr)) {
+        if(EventUtils.isNonIpInterface(ipAddr) ) {
             LOG.debug("handleInterfaceDeleted: the deleted interface was a non-ip interface. Nothing to do here.");
             return;
         }
@@ -786,9 +788,8 @@ public class Collectd implements EventListener {
                 // Only interested in entries with matching nodeId and IP
                 // address
                 InetAddress addr = (InetAddress) cSvc.getAddress();
-                if (!(cSvc.getNodeId() == nodeId && addr.getHostName().equals(ipAddr))) {
+                if (!(cSvc.getNodeId() == nodeId && addr.getHostName().equals(ipAddr)))
                     continue;
-                }
 
                 synchronized (cSvc) {
                     // Retrieve the CollectorUpdates object associated with
@@ -799,10 +800,7 @@ public class Collectd implements EventListener {
                     // time it is selected for execution by the scheduler
                     // the collection will be skipped and the service will not
                     // be rescheduled.
-                    LOG.debug(
-                        "Marking CollectableService for deletion because an interface was deleted:  Service nodeid={}, "
-                            + "deleted node:{}service address:{}deleted interface:{}",
-                        cSvc.getNodeId(), nodeId, addr.getHostName(), ipAddr);
+                    LOG.debug("Marking CollectableService for deletion because an interface was deleted:  Service nodeid={}, deleted node:{}service address:{}deleted interface:{}", cSvc.getNodeId(), nodeId, addr.getHostName(), ipAddr);
 
                     updates.markForDeletion();
                 }
@@ -827,19 +825,20 @@ public class Collectd implements EventListener {
      * under the new nodeId and the nodeId of the collectable service is
      * updated to reflect the interface's new parent nodeId.
      *
-     * @param event The event to process.
-     * @throws org.opennms.netmgt.capsd.InsufficientInformationException
+     * @param event
+     *            The event to process.
+     * @throws InsufficientInformationException
      */
-    private void handleInterfaceReparented(Event event) throws InsufficientInformationException {
+    private void handleInterfaceReparented(Event event)
+            throws InsufficientInformationException {
         EventUtils.checkNodeId(event);
         EventUtils.checkInterface(event);
 
         LOG.debug("interfaceReparentedHandler:  processing interfaceReparented event for {}", event.getInterface());
 
         // Verify that the event has an interface associated with it
-        if (event.getInterface() == null) {
+        if (event.getInterface() == null)
             return;
-        }
 
         // Extract the old and new nodeId's from the event parms
         String oldNodeIdStr = null;
@@ -851,11 +850,10 @@ public class Collectd implements EventListener {
         for (Parm parm : event.getParmCollection()) {
             parmName = parm.getParmName();
             parmValue = parm.getValue();
-            if (parmValue == null) {
+            if (parmValue == null)
                 continue;
-            } else {
+            else
                 parmContent = parmValue.getContent();
-            }
 
             // old nodeid
             if (parmName.equals(EventConstants.PARM_OLD_NODEID)) {
@@ -863,10 +861,8 @@ public class Collectd implements EventListener {
             }
 
             // new nodeid
-            else {
-                if (parmName.equals(EventConstants.PARM_NEW_NODEID)) {
-                    newNodeIdStr = parmContent;
-                }
+            else if (parmName.equals(EventConstants.PARM_NEW_NODEID)) {
+                newNodeIdStr = parmContent;
             }
         }
 
@@ -923,10 +919,12 @@ public class Collectd implements EventListener {
     /**
      * This method is responsible for handling nodeDeleted events.
      *
-     * @param event The event to process.
-     * @throws org.opennms.netmgt.capsd.InsufficientInformationException
+     * @param event
+     *            The event to process.
+     * @throws InsufficientInformationException
      */
-    private void handleNodeDeleted(Event event) throws InsufficientInformationException {
+    private void handleNodeDeleted(Event event)
+            throws InsufficientInformationException {
         EventUtils.checkNodeId(event);
         EventUtils.checkInterface(event);
 
@@ -940,8 +938,9 @@ public class Collectd implements EventListener {
     /**
      * This method is responsible for handling nodeDeleted events.
      *
-     * @param event The event to process.
-     * @throws org.opennms.netmgt.capsd.InsufficientInformationException
+     * @param event
+     *            The event to process.
+     * @throws InsufficientInformationException
      */
     private void handleNodeCategoryMembershipChanged(Event event) throws InsufficientInformationException {
         EventUtils.checkNodeId(event);
@@ -953,6 +952,7 @@ public class Collectd implements EventListener {
         LOG.debug("nodeCategoryMembershipChanged: unscheduling nodeid {} completed.", nodeId);
 
         scheduleNode(nodeId.intValue(), true);
+
     }
 
     private void unscheduleNodeAndMarkForDeletion(Long nodeId) {
@@ -965,9 +965,8 @@ public class Collectd implements EventListener {
                 cSvc = liter.next();
 
                 // Only interested in entries with matching nodeId
-                if (!(cSvc.getNodeId() == nodeId)) {
+                if (!(cSvc.getNodeId() == nodeId))
                     continue;
-                }
 
                 synchronized (cSvc) {
                     // Retrieve the CollectorUpdates object associated
@@ -978,8 +977,7 @@ public class Collectd implements EventListener {
                     // time it is selected for execution by the scheduler
                     // the collection will be skipped and the service will not
                     // be rescheduled.
-                    LOG.debug("Marking CollectableService for deletion because a node was deleted:  Service nodeid={}, deleted node:{}",
-                        cSvc.getNodeId(), nodeId);
+                    LOG.debug("Marking CollectableService for deletion because a node was deleted:  Service nodeid={}, deleted node:{}", cSvc.getNodeId(), nodeId);
                     updates.markForDeletion();
                 }
 
@@ -996,10 +994,12 @@ public class Collectd implements EventListener {
      * for collection. If any errors occur scheduling the interface no error
      * is returned.
      *
-     * @param event The event to process.
-     * @throws org.opennms.netmgt.capsd.InsufficientInformationException
+     * @param event
+     *            The event to process.
+     * @throws InsufficientInformationException
      */
-    private void handleNodeGainedService(Event event) throws InsufficientInformationException {
+    private void handleNodeGainedService(Event event)
+            throws InsufficientInformationException {
         EventUtils.checkNodeId(event);
         EventUtils.checkInterface(event);
         EventUtils.checkService(event);
@@ -1042,7 +1042,7 @@ public class Collectd implements EventListener {
                 // Updating thresholding visitors to use the new configuration
                 LOG.debug("handleReloadDaemonConfig: Reloading thresholding configuration in collectd");
                 synchronized (m_collectableServices) {
-                    for (CollectableService service : m_collectableServices) {
+                    for(CollectableService service: m_collectableServices) {
                         service.reinitializeThresholding();
                     }
                 }
@@ -1057,7 +1057,8 @@ public class Collectd implements EventListener {
                 ebldr.addParam(EventConstants.PARM_DAEMON_NAME, daemonName);
                 ebldr.addParam(EventConstants.PARM_CONFIG_FILE_NAME, targetFile);
                 ebldr.addParam(EventConstants.PARM_REASON, e.getMessage());
-            } finally {
+            }
+            finally {
                 if (ebldr != null) {
                     getEventIpcManager().sendNow(ebldr.getEvent());
                 }
@@ -1071,7 +1072,8 @@ public class Collectd implements EventListener {
 
         getCollectorConfigDao().rebuildPackageIpListMap();
 
-        scheduleInterface(event.getNodeid().intValue(), event.getInterface(), event.getService(), false);
+        scheduleInterface(event.getNodeid().intValue(), event.getInterface(),
+                event.getService(), false);
     }
 
     /**
@@ -1085,10 +1087,12 @@ public class Collectd implements EventListener {
      * new CollectableService objects are created, initialized and scheduled
      * for collection.
      *
-     * @param event The event to process.
-     * @throws org.opennms.netmgt.capsd.InsufficientInformationException
+     * @param event
+     *            The event to process.
+     * @throws InsufficientInformationException
      */
-    private void handlePrimarySnmpInterfaceChanged(Event event) throws InsufficientInformationException {
+    private void handlePrimarySnmpInterfaceChanged(Event event)
+            throws InsufficientInformationException {
         EventUtils.checkNodeId(event);
         EventUtils.checkInterface(event);
 
@@ -1096,9 +1100,8 @@ public class Collectd implements EventListener {
 
         // Currently only support SNMP data collection.
         //
-        if (!event.getService().equals("SNMP")) {
+        if (!event.getService().equals("SNMP"))
             return;
-        }
 
         // Extract the old and new primary SNMP interface addresses from the
         // event parms.
@@ -1111,11 +1114,10 @@ public class Collectd implements EventListener {
         for (Parm parm : event.getParmCollection()) {
             parmName = parm.getParmName();
             parmValue = parm.getValue();
-            if (parmValue == null) {
+            if (parmValue == null)
                 continue;
-            } else {
+            else
                 parmContent = parmValue.getContent();
-            }
 
             // old primary SNMP interface (optional parameter)
             if (parmName.equals(EventConstants.PARM_OLD_PRIMARY_SNMP_ADDRESS)) {
@@ -1186,10 +1188,12 @@ public class Collectd implements EventListener {
      * collection. If any errors occur scheduling the service no error is
      * returned.
      *
-     * @param event The event to process.
-     * @throws org.opennms.netmgt.capsd.InsufficientInformationException
+     * @param event
+     *            The event to process.
+     * @throws InsufficientInformationException
      */
-    private void handleReinitializePrimarySnmpInterface(Event event) throws InsufficientInformationException {
+    private void handleReinitializePrimarySnmpInterface(Event event)
+            throws InsufficientInformationException {
         EventUtils.checkNodeId(event);
         EventUtils.checkInterface(event);
 
@@ -1235,13 +1239,18 @@ public class Collectd implements EventListener {
     /**
      * This method is responsible for handling serviceDeleted events.
      *
-     * @param event The event to process.
-     * @throws org.opennms.netmgt.capsd.InsufficientInformationException
+     * @param event
+     *            The event to process.
+     * @throws InsufficientInformationException
+     *
      */
-    private void handleServiceDeleted(Event event) throws InsufficientInformationException {
+    private void handleServiceDeleted(Event event)
+            throws InsufficientInformationException {
         EventUtils.checkNodeId(event);
         EventUtils.checkInterface(event);
         EventUtils.checkService(event);
+
+
 
         //INCORRECT; we now support all *sorts* of data collection.  This is *way* out of date
         // Currently only support SNMP data collection.
@@ -1268,10 +1277,9 @@ public class Collectd implements EventListener {
 
                 //WATCH the brackets; there used to be an extra close bracket after the ipAddr comparison which borked this whole expression
                 if (!(cSvc.getNodeId() == nodeId &&
-                    addr.getHostName().equals(ipAddr) &&
-                    cSvc.getServiceName().equals(svcName))) {
+                        addr.getHostName().equals(ipAddr) &&
+                        cSvc.getServiceName().equals(svcName)))
                     continue;
-                }
 
                 synchronized (cSvc) {
                     // Retrieve the CollectorUpdates object associated with
@@ -1282,10 +1290,7 @@ public class Collectd implements EventListener {
                     // time it is selected for execution by the scheduler
                     // the collection will be skipped and the service will not
                     // be rescheduled.
-                    LOG.debug(
-                        "Marking CollectableService for deletion because a service was deleted:  Service nodeid={}, deleted node:{}, "
-                            + "service address:{}, deleted interface:{}, service servicename:{}, deleted service name:{}, event source {}",
-                        cSvc.getNodeId(), nodeId, addr.getHostName(), ipAddr, cSvc.getServiceName(), svcName, event.getSource());
+                    LOG.debug("Marking CollectableService for deletion because a service was deleted:  Service nodeid={}, deleted node:{}, service address:{}, deleted interface:{}, service servicename:{}, deleted service name:{}, event source {}", cSvc.getNodeId(), nodeId, addr.getHostName(), ipAddr, cSvc.getServiceName(), svcName, event.getSource());
                     updates.markForDeletion();
                 }
 
@@ -1298,24 +1303,20 @@ public class Collectd implements EventListener {
         LOG.debug("serviceDeletedHandler: processing of serviceDeleted event for {}/{}/{} completed.", nodeId, ipAddr, svcName);
     }
 
-    private Scheduler getScheduler() {
-        if (m_scheduler == null) {
-            createScheduler();
-        }
-        return m_scheduler;
-    }
-
     /**
      * <p>setScheduler</p>
      *
      * @param scheduler a {@link org.opennms.netmgt.scheduler.Scheduler} object.
      */
-    public void setScheduler(Scheduler scheduler) {
+    public void setScheduler(org.opennms.netmgt.scheduler.Scheduler scheduler) {
         m_scheduler = scheduler;
     }
 
-    private CollectorConfigDao getCollectorConfigDao() {
-        return m_collectorConfigDao;
+    private org.opennms.netmgt.scheduler.Scheduler getScheduler() {
+        if (m_scheduler == null) {
+            createScheduler();
+        }
+        return m_scheduler;
     }
 
     /**
@@ -1327,8 +1328,8 @@ public class Collectd implements EventListener {
         m_collectorConfigDao = collectorConfigDao;
     }
 
-    private IpInterfaceDao getIpInterfaceDao() {
-        return m_ifaceDao;
+    private CollectorConfigDao getCollectorConfigDao() {
+        return m_collectorConfigDao;
     }
 
     /**
@@ -1338,6 +1339,10 @@ public class Collectd implements EventListener {
      */
     public void setIpInterfaceDao(IpInterfaceDao ifSvcDao) {
         m_ifaceDao = ifSvcDao;
+    }
+
+    private IpInterfaceDao getIpInterfaceDao() {
+        return m_ifaceDao;
     }
 
     /**
@@ -1358,23 +1363,24 @@ public class Collectd implements EventListener {
         m_nodeDao = nodeDao;
     }
 
+
     /**
      * <p>setServiceCollector</p>
      *
-     * @param svcName   a {@link String} object.
-     * @param collector a {@link ServiceCollector} object.
+     * @param svcName a {@link java.lang.String} object.
+     * @param collector a {@link org.opennms.netmgt.collectd.ServiceCollector} object.
      */
-    public void setServiceCollector(String svcName, ServiceCollector collector) {
+    public void setServiceCollector(String svcName, org.opennms.netmgt.collectd.ServiceCollector collector) {
         m_collectors.put(svcName, collector);
     }
 
     /**
      * <p>getServiceCollector</p>
      *
-     * @param svcName a {@link String} object.
-     * @return a {@link ServiceCollector} object.
+     * @param svcName a {@link java.lang.String} object.
+     * @return a {@link org.opennms.netmgt.collectd.ServiceCollector} object.
      */
-    public ServiceCollector getServiceCollector(String svcName) {
+    public org.opennms.netmgt.collectd.ServiceCollector getServiceCollector(String svcName) {
         return m_collectors.get(svcName);
     }
 
@@ -1401,7 +1407,7 @@ public class Collectd implements EventListener {
             try {
                 LOG.debug("instantiateCollectors: Loading collector {}, classname {}", svcName, collector.getClassName());
                 Class<?> cc = Class.forName(collector.getClassName());
-                ServiceCollector sc = (ServiceCollector) cc.newInstance();
+                org.opennms.netmgt.collectd.ServiceCollector sc = (ServiceCollector) cc.newInstance();
 
                 sc.initialize(Collections.<String, String>emptyMap());
 
@@ -1412,15 +1418,7 @@ public class Collectd implements EventListener {
         }
     }
 
-    static class SchedulingCompletedFlag {
-        volatile boolean m_schedulingCompleted = false;
-
-        public synchronized boolean isSchedulingCompleted() {
-            return m_schedulingCompleted;
-        }
-
-        public synchronized void setSchedulingCompleted(boolean schedulingCompleted) {
-            m_schedulingCompleted = schedulingCompleted;
-        }
+    public static String getLoggingCategory() {
+        return LOG4J_CATEGORY;
     }
 }

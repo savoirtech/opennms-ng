@@ -31,19 +31,24 @@ package org.opennms.ng.services.collectd;
 import java.io.File;
 import java.util.Map;
 
+import org.opennms.core.logging.Logging;
 import org.opennms.core.utils.InetAddressUtils;
 import org.opennms.netmgt.EventConstants;
+import org.opennms.netmgt.collectd.*;
+import org.opennms.netmgt.collectd.Collectd;
+import org.opennms.ng.services.collectd.Collectd.SchedulingCompletedFlag;
 import org.opennms.netmgt.config.DataCollectionConfigFactory;
 import org.opennms.netmgt.config.collector.CollectionSet;
 import org.opennms.netmgt.config.collector.ServiceParameters;
 import org.opennms.netmgt.dao.api.CollectorConfigDao;
 import org.opennms.netmgt.dao.api.IpInterfaceDao;
+import org.opennms.netmgt.eventd.EventIpcManagerFactory;
 import org.opennms.netmgt.model.OnmsIpInterface;
 import org.opennms.netmgt.model.RrdRepository;
 import org.opennms.netmgt.model.events.EventBuilder;
+import org.opennms.netmgt.scheduler.ReadyRunnable;
+import org.opennms.netmgt.scheduler.Scheduler;
 import org.opennms.netmgt.threshd.ThresholdingVisitor;
-import org.opennms.ng.services.scheduler.ReadyRunnable;
-import org.opennms.ng.services.scheduler.Scheduler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.transaction.PlatformTransactionManager;
@@ -52,15 +57,15 @@ import org.springframework.transaction.PlatformTransactionManager;
  * <P>
  * The CollectableService class ...
  * </P>
- * 
+ *
  * @author <A HREF="mailto:mike@opennms.org">Mike Davidson </A>
  * @author <A HREF="http://www.opennms.org/">OpenNMS </A>
- * 
+ *
  */
 final class CollectableService implements ReadyRunnable {
-    
+
     private static final Logger LOG = LoggerFactory.getLogger(CollectableService.class);
-    
+
     /**
      * Interface's parent node identifier
      */
@@ -87,21 +92,21 @@ final class CollectableService implements ReadyRunnable {
     private final CollectorUpdates m_updates;
 
     /**
-     * The thresholdvisitor for this collectable service; called 
+     * The thresholdvisitor for this collectable service; called
      */
     private final ThresholdingVisitor m_thresholdVisitor;
     /**
-     * 
+     *
      */
     private static final boolean ABORT_COLLECTION = true;
 
-	private final CollectionSpecification m_spec;
+    private final CollectionSpecification m_spec;
 
-	private final Collectd.SchedulingCompletedFlag m_schedulingCompletedFlag;
+    private final SchedulingCompletedFlag m_schedulingCompletedFlag;
 
-	private volatile CollectionAgent m_agent;
+    private volatile CollectionAgent m_agent;
 
-	private final PlatformTransactionManager m_transMgr;
+    private final PlatformTransactionManager m_transMgr;
 
     private final IpInterfaceDao m_ifaceDao;
 
@@ -116,10 +121,10 @@ final class CollectableService implements ReadyRunnable {
      *            The package containing parms for this collectable service.
      * @param ifaceDao a {@link org.opennms.netmgt.dao.api.IpInterfaceDao} object.
      * @param scheduler a {@link org.opennms.netmgt.scheduler.Scheduler} object.
-     * @param schedulingCompletedFlag a {@link Collectd.SchedulingCompletedFlag} object.
+     * @param schedulingCompletedFlag a {@link org.opennms.netmgt.collectd.Collectd.SchedulingCompletedFlag} object.
      * @param transMgr a {@link org.springframework.transaction.PlatformTransactionManager} object.
      */
-    protected CollectableService(OnmsIpInterface iface, IpInterfaceDao ifaceDao, CollectionSpecification spec, Scheduler scheduler, Collectd.SchedulingCompletedFlag schedulingCompletedFlag, PlatformTransactionManager transMgr) throws CollectionInitializationException {
+    protected CollectableService(OnmsIpInterface iface, IpInterfaceDao ifaceDao, CollectionSpecification spec, Scheduler scheduler, SchedulingCompletedFlag schedulingCompletedFlag, PlatformTransactionManager transMgr) throws CollectionInitializationException {
         m_agent = DefaultCollectionAgent.create(iface.getId(), ifaceDao, transMgr);
         m_spec = spec;
         m_scheduler = scheduler;
@@ -140,26 +145,26 @@ final class CollectableService implements ReadyRunnable {
         m_params=new ServiceParameters(roProps);
         m_repository=m_spec.getRrdRepository(m_params.getCollectionName());
 
-        m_thresholdVisitor = ThresholdingVisitor.create(m_nodeId, getHostAddress(), m_spec.getServiceName(), m_repository, roProps);
+        m_thresholdVisitor = ThresholdingVisitor.create(m_nodeId, getHostAddress(), m_spec.getServiceName(), m_repository,  roProps);
 
     }
 
     /**
      * <p>getAddress</p>
      *
-     * @return a {@link Object} object.
+     * @return a {@link java.lang.Object} object.
      */
     public Object getAddress() {
-    	return m_agent.getAddress();
+        return m_agent.getAddress();
     }
 
     /**
      * <p>getSpecification</p>
      *
-     * @return a {@link CollectionSpecification} object.
+     * @return a {@link org.opennms.netmgt.collectd.CollectionSpecification} object.
      */
     public CollectionSpecification getSpecification() {
-    	return m_spec;
+        return m_spec;
     }
 
     /**
@@ -174,7 +179,7 @@ final class CollectableService implements ReadyRunnable {
     /**
      * Returns the service name
      *
-     * @return a {@link String} object.
+     * @return a {@link java.lang.String} object.
      */
     public String getServiceName() {
         return m_spec.getServiceName();
@@ -183,7 +188,7 @@ final class CollectableService implements ReadyRunnable {
     /**
      * Returns the package name
      *
-     * @return a {@link String} object.
+     * @return a {@link java.lang.String} object.
      */
     public String getPackageName() {
         return m_spec.getPackageName();
@@ -198,17 +203,17 @@ final class CollectableService implements ReadyRunnable {
         return m_updates;
     }
 
-	/**
-	 * Uses the existing package name to try and re-obtain the package from the collectd config factory.
-	 * Should be called when the collect config has been reloaded.
-	 *
-	 * @param collectorConfigDao a {@link org.opennms.netmgt.dao.api.CollectorConfigDao} object.
-	 */
-	public void refreshPackage(CollectorConfigDao collectorConfigDao) {
-		m_spec.refresh(collectorConfigDao);
-		if (m_thresholdVisitor != null)
-		    m_thresholdVisitor.reloadScheduledOutages();
-	}
+    /**
+     * Uses the existing package name to try and re-obtain the package from the collectd config factory.
+     * Should be called when the collect config has been reloaded.
+     *
+     * @param collectorConfigDao a {@link org.opennms.netmgt.dao.api.CollectorConfigDao} object.
+     */
+    public void refreshPackage(CollectorConfigDao collectorConfigDao) {
+        m_spec.refresh(collectorConfigDao);
+        if (m_thresholdVisitor != null)
+            m_thresholdVisitor.reloadScheduledOutages();
+    }
 
     /** {@inheritDoc} */
     @Override
@@ -241,8 +246,8 @@ final class CollectableService implements ReadyRunnable {
         return ready;
     }
 
-	private boolean isSchedulingComplete() {
-		return m_schedulingCompletedFlag.isSchedulingCompleted();
+    private boolean isSchedulingComplete() {
+        return m_schedulingCompletedFlag.isSchedulingCompleted();
     }
 
     /**
@@ -263,8 +268,7 @@ final class CollectableService implements ReadyRunnable {
 
         // Send the event
         try {
-            //TODO - SEND EVENT
-            //EventIpcManagerFactory.getIpcManager().sendNow(builder.getEvent());
+            EventIpcManagerFactory.getIpcManager().sendNow(builder.getEvent());
 
             LOG.debug("sendEvent: Sent event {} for {}/{}/{}", uei, m_nodeId, getHostAddress(), getServiceName());
         } catch (Throwable e) {
@@ -285,6 +289,17 @@ final class CollectableService implements ReadyRunnable {
      */
     @Override
     public void run() {
+        Logging.withPrefix(org.opennms.ng.services.collectd.Collectd.LOG4J_CATEGORY, new Runnable() {
+
+            @Override
+            public void run() {
+                doRun();
+            }
+
+        });
+    }
+
+    private void doRun() {
         // Process any outstanding updates.
         if (processUpdates() == ABORT_COLLECTION) {
             LOG.debug("run: Aborting because processUpdates returned ABORT_COLLECTION (probably marked for deletion) for {}", this);
@@ -302,12 +317,14 @@ final class CollectableService implements ReadyRunnable {
             try {
                 doCollection();
                 updateStatus(ServiceCollector.COLLECTION_SUCCEEDED, null);
+            } catch (CollectionTimedOut e) {
+                LOG.info(e.getMessage());
+                updateStatus(ServiceCollector.COLLECTION_FAILED, e);
+            } catch (CollectionWarning e) {
+                LOG.warn(e.getMessage(), e);
+                updateStatus(ServiceCollector.COLLECTION_FAILED, e);
             } catch (CollectionException e) {
-                if (e instanceof CollectionWarning) {
-                    LOG.warn(e.getMessage(), e);
-                } else {
-                    LOG.error(e.getMessage(), e);
-                }
+                LOG.error(e.getMessage(), e);
                 updateStatus(ServiceCollector.COLLECTION_FAILED, e);
             } catch (Throwable e) {
                 LOG.error(e.getMessage(), e);
@@ -315,7 +332,7 @@ final class CollectableService implements ReadyRunnable {
             }
         }
 
-    	// Reschedule the service
+        // Reschedule the service
         m_scheduler.schedule(m_spec.getInterval(), getReadyRunnable());
     }
 
@@ -332,16 +349,16 @@ final class CollectableService implements ReadyRunnable {
 
             // Send the appropriate event
             switch (status) {
-            case ServiceCollector.COLLECTION_SUCCEEDED:
-                sendEvent(EventConstants.DATA_COLLECTION_SUCCEEDED_EVENT_UEI, null);
-                break;
+                case ServiceCollector.COLLECTION_SUCCEEDED:
+                    sendEvent(EventConstants.DATA_COLLECTION_SUCCEEDED_EVENT_UEI, null);
+                    break;
 
-            case ServiceCollector.COLLECTION_FAILED:
-                sendEvent(EventConstants.DATA_COLLECTION_FAILED_EVENT_UEI, reason);
-                break;
+                case ServiceCollector.COLLECTION_FAILED:
+                    sendEvent(EventConstants.DATA_COLLECTION_FAILED_EVENT_UEI, reason);
+                    break;
 
-            default:
-                break;
+                default:
+                    break;
             }
         }
 
@@ -349,59 +366,59 @@ final class CollectableService implements ReadyRunnable {
         m_status = status;
     }
 
-        private BasePersister createPersister(ServiceParameters params, RrdRepository repository) {
-            if (Boolean.getBoolean("org.opennms.rrd.storeByGroup")) {
-                return new GroupPersister(params, repository);
-            } else {
-                return new OneToOnePersister(params, repository);
-            }
+    private BasePersister createPersister(ServiceParameters params, RrdRepository repository) {
+        if (Boolean.getBoolean("org.opennms.rrd.storeByGroup")) {
+            return new GroupPersister(params, repository);
+        } else {
+            return new OneToOnePersister(params, repository);
         }
+    }
 
-        /**
-         * Perform data collection.
-         */
-	private void doCollection() throws CollectionException {
-		LOG.info("run: starting new collection for {}/{}/{}", getHostAddress(), m_spec.getServiceName(), m_spec.getPackageName());
-		CollectionSet result = null;
-		try {
-		    result = m_spec.collect(m_agent);
-		    if (result != null) {
-                        Collectd.instrumentation().beginPersistingServiceData(m_nodeId, getHostAddress(), m_spec.getServiceName());
-                        try {
-                            BasePersister persister = createPersister(m_params, m_repository);
-                            persister.setIgnorePersist(result.ignorePersist());
-                            result.visit(persister);
-                        } finally {
-                            Collectd.instrumentation().endPersistingServiceData(m_nodeId, getHostAddress(), m_spec.getServiceName());
-                        }
+    /**
+     * Perform data collection.
+     */
+    private void doCollection() throws CollectionException {
+        LOG.info("run: starting new collection for {}/{}/{}", getHostAddress(), m_spec.getServiceName(), m_spec.getPackageName());
+        CollectionSet result = null;
+        try {
+            result = m_spec.collect(m_agent);
+            if (result != null) {
+                org.opennms.netmgt.collectd.Collectd.instrumentation().beginPersistingServiceData(m_nodeId, getHostAddress(), m_spec.getServiceName());
+                try {
+                    BasePersister persister = createPersister(m_params, m_repository);
+                    persister.setIgnorePersist(result.ignorePersist());
+                    result.visit(persister);
+                } finally {
+                    Collectd.instrumentation().endPersistingServiceData(m_nodeId, getHostAddress(), m_spec.getServiceName());
+                }
 
                         /*
                          * Do the thresholding; this could be made more generic (listeners being passed the collectionset), but frankly, why bother?
                          * The first person who actually needs to configure that sort of thing on the fly can code it up.
                          */
-                        if (m_thresholdVisitor != null) {
-                            if (m_thresholdVisitor.isNodeInOutage()) {
-                                LOG.info("run: the threshold processing will be skipped because the node {} is on a scheduled outage.", m_nodeId);
-                            } else if (m_thresholdVisitor.hasThresholds()) {
-                                result.visit(m_thresholdVisitor);
-                            }
-                        }
-
-                        if (result.getStatus() != ServiceCollector.COLLECTION_SUCCEEDED) {
-                            throw new CollectionFailed(result.getStatus());
-                        }
+                if (m_thresholdVisitor != null) {
+                    if (m_thresholdVisitor.isNodeInOutage()) {
+                        LOG.info("run: the threshold processing will be skipped because the node {} is on a scheduled outage.", m_nodeId);
+                    } else if (m_thresholdVisitor.hasThresholds()) {
+                        result.visit(m_thresholdVisitor);
                     }
-                } catch (CollectionException e) {
-                    LOG.warn("run: failed collection for {}/{}/{}", getHostAddress(), m_spec.getServiceName(), m_spec.getPackageName());
-                    throw e;
-		} catch (Throwable t) {
-                    LOG.warn("run: failed collection for {}/{}/{}", getHostAddress(), m_spec.getServiceName(), m_spec.getPackageName());
-                    throw new CollectionException("An undeclared throwable was caught during data collection for interface " + getHostAddress() +"/"+ m_spec.getServiceName(), t);
-		}
-		LOG.info("run: finished collection for {}/{}/{}", getHostAddress(), m_spec.getServiceName(), m_spec.getPackageName());
-	}
+                }
 
-	/**
+                if (result.getStatus() != ServiceCollector.COLLECTION_SUCCEEDED) {
+                    throw new CollectionFailed(result.getStatus());
+                }
+            }
+        } catch (CollectionException e) {
+            LOG.warn("run: failed collection for {}/{}/{}", getHostAddress(), m_spec.getServiceName(), m_spec.getPackageName());
+            throw e;
+        } catch (Throwable t) {
+            LOG.warn("run: failed collection for {}/{}/{}", getHostAddress(), m_spec.getServiceName(), m_spec.getPackageName());
+            throw new CollectionException("An undeclared throwable was caught during data collection for interface " + getHostAddress() +"/"+ m_spec.getServiceName(), t);
+        }
+        LOG.info("run: finished collection for {}/{}/{}", getHostAddress(), m_spec.getServiceName(), m_spec.getPackageName());
+    }
+
+    /**
      * Process any outstanding updates.
      *
      * @return true if update indicates that collection should be aborted (for
@@ -427,7 +444,7 @@ final class CollectableService implements ReadyRunnable {
             }
 
             OnmsIpInterface newIface = m_updates.isReinitializationNeeded();
-			// Update: reinitialization flag
+            // Update: reinitialization flag
             //
             if (newIface != null) {
                 // Reinitialization flag is set, call initialize() to
@@ -553,10 +570,11 @@ final class CollectableService implements ReadyRunnable {
 
         return !ABORT_COLLECTION;
     }
-    
+
     private void reinitialize(OnmsIpInterface newIface) throws CollectionInitializationException {
         m_spec.release(m_agent);
-        m_agent = DefaultCollectionAgent.create(newIface.getId(), m_ifaceDao, m_transMgr);
+        m_agent = DefaultCollectionAgent.create(newIface.getId(), m_ifaceDao,
+                m_transMgr);
         m_spec.initialize(m_agent);
     }
 
@@ -569,14 +587,14 @@ final class CollectableService implements ReadyRunnable {
             m_thresholdVisitor.reload();
         }
     }
-    
+
     /**
      * <p>getReadyRunnable</p>
      *
      * @return a {@link org.opennms.netmgt.scheduler.ReadyRunnable} object.
      */
     public ReadyRunnable getReadyRunnable() {
-	return this;
+        return this;
     }
 
 }
