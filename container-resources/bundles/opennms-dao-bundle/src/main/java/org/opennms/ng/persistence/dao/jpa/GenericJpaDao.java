@@ -159,5 +159,31 @@ public abstract class GenericJpaDao<T, PK extends Serializable> extends Abstract
         }
         return Integer.valueOf(query.getSingleResult().toString());
     }
+
+    /**
+     * <p>findObjects</p>
+     *
+     * @param clazz  a {@link java.lang.Class} object.
+     * @param query  a {@link java.lang.String} object.
+     * @param values a {@link java.lang.Object} object.
+     * @param <S>    a S object.
+     * @return a {@link java.util.List} object.
+     */
+    @SuppressWarnings("unchecked")
+    public <S> List<S> findObjects(final Class<S> clazz, final String query, final Object... values) {
+        final List<S> notifs = find(query, values);
+        return notifs;
+    }
+
+    public T get(final PK id) throws DataAccessException {
+        return type.cast(em.find(type, id));
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public void initialize(final Object obj) {
+        em.refresh(obj);
+    }
 }
 

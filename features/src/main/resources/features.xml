@@ -200,9 +200,14 @@
         <bundle>mvn:org.opennms.ng/poller-config/${project.version}</bundle>
     </feature>
 
+    <feature name="poll-outages-config" version="${project.version}">
+        <feature>poller-config</feature>
+    </feature>
+
     <feature name="poller" version="${project.version}">
         <feature>event-config</feature>
         <feature>poller-config</feature>
+        <feature>poll-outages-config</feature>
         <bundle>mvn:org.opennms.bundles/opennms-javamail-api/${opennms.version}</bundle>
         <bundle>mvn:org.apache.httpcomponents/httpcore-osgi/${httpcore.version}</bundle>
         <bundle>mvn:org.apache.httpcomponents/httpclient-osgi/${httpclient.version}</bundle>
@@ -240,7 +245,6 @@
     </feature>
 
     <feature name="opennms-dao-bundle" version="${project.version}">
-
         <bundle dependency='true'>mvn:org.apache.servicemix.bundles/org.apache.servicemix.bundles.ant/${ant.version}</bundle>
         <bundle dependency='true'>mvn:org.apache.servicemix.bundles/org.apache.servicemix.bundles.serp/${serp.version}</bundle>
         <bundle>mvn:org.apache.openjpa/openjpa/${openjpa.version}</bundle>
@@ -252,7 +256,6 @@
         <bundle>mvn:org.opennms.ng/persistence/${project.version}</bundle>
         <feature>collectd-config</feature>
         <bundle>mvn:org.opennms.bundles/opennms-dao/${opennms.version}</bundle>
-
     </feature>
 
 </features>

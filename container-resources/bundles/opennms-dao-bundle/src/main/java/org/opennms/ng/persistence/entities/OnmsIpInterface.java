@@ -22,7 +22,7 @@ public class OnmsIpInterface extends org.opennms.netmgt.model.OnmsIpInterface {
     @SequenceGenerator(name = "opennmsSequence", sequenceName = "opennmsNxtId")
     @GeneratedValue(generator = "opennmsSequence", strategy = GenerationType.SEQUENCE)
     public Integer getId() {
-        return super.getId();    //TODO
+        return super.getId();
     }
 
 
