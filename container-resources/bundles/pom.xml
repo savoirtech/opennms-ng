@@ -19,6 +19,7 @@
         <module>enhydra-xa</module>
         <module>bsf</module>
         <module>c3p0</module>
+        <module>dbcp</module>
         <module>jldap</module>
         <module>postgresql</module>
         <module>dnsjava</module>
@@ -29,6 +30,7 @@
         <module>opennms-protocols</module>
         <module>opennms-util</module>
         <module>opennms-config-model</module>
+        <module>opennms-config</module>
         <module>opennms-core-snmp-api</module>
         <module>opennms-dao-api</module>
         <module>opennms-dao-bundle</module>

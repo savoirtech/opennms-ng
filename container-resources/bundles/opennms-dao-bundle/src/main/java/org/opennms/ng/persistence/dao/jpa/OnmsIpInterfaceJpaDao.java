@@ -5,9 +5,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.opennms.netmgt.model.OnmsNode;
 import org.opennms.ng.persistence.dao.OnmsIpInterfaceDao;
 import org.opennms.ng.persistence.entities.OnmsIpInterface;
+import org.opennms.ng.persistence.entities.OnmsNode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.util.Assert;

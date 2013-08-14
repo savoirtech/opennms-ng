@@ -3,11 +3,9 @@
            xmlns="http://www.osgi.org/xmlns/blueprint/v1.0.0"
            xsi:schemaLocation="http://www.osgi.org/xmlns/blueprint/v1.0.0 http://www.osgi.org/xmlns/blueprint/v1.0.0/blueprint.xsd">
 
-    <cm:property-placeholder persistent-id="org.opennms.ng.capsd" id="org.opennms.ng.capsd" update-strategy="reload">
+    <cm:property-placeholder persistent-id="org.opennms.ng.collectd" id="org.opennms.ng.collectd" update-strategy="reload">
         <cm:default-properties>
-            <cm:property name="opennms.trapd.snmpTrapAddress" value="127.0.0.1"/>
-            <cm:property name="opennms.trapd.snmpTrapPort" value="10062"/>
-            <cm:property name="opennms.trapd.newSuspectOnTrap" value="false"/>
+
         </cm:default-properties>
     </cm:property-placeholder>
 
@@ -27,6 +25,10 @@
 
     <reference id="eventIpcManager" interface="org.opennms.netmgt.model.events.EventIpcManager" availability="mandatory"/>
 
+    <reference id="ipInterfaceDao" interface="org.opennms.ng.persistence.dao.OnmsIpInterfaceDao"/>
+
+    <reference id="nodeDao" interface="org.opennms.ng.persistence.dao.OnmsNodeDao"/>
+
     <!--
     <bean id="xmlRpcEnabled" factory-ref="capsdConfig" factory-method="isXmlRpcEnabled"/>
         -->
@@ -44,20 +46,29 @@
 
     </bean>
 
-
-
     <bean id="jdbcTemplate" class="org.springframework.jdbc.core.JdbcTemplate">
         <argument ref="nonJTA"/>
     </bean>
 
-    <bean id="collectorConfigDao" class="org.opennms.ng.services.collectd.CollectorConfigDaoImpl"/>
+    <bean id="collectorConfigDao" class="org.opennms.ng.services.collectd.CollectorConfigDaoImpl">
+        <property name="collectdConfig" ref="collectdConfig"/>
+    </bean>
 
-    <bean id="daemon" class="org.opennms.ng.services.collectd.Collectd">
+    <bean id="daemon" class="org.opennms.ng.services.collectd.Collectd" init-method="onInit" destroy-method="onStop">
         <property name="collectorConfigDao" ref="collectorConfigDao"/>
         <property name="ipInterfaceDao" ref="ipInterfaceDao"/>
         <property name="nodeDao" ref="nodeDao"/>
         <property name="eventIpcManager" ref="eventIpcManager"/>
         <property name="transactionTemplate" ref="transactionTemplate"/>
+
+    </bean>
+
+    <!-- Re-using spring template tx - the TX Manager is provided by Aries TX. -->
+
+    <reference id="txManager" interface="org.springframework.transaction.PlatformTransactionManager" availability="mandatory"/>
+
+    <bean id="transactionTemplate" class="org.springframework.transaction.support.TransactionTemplate">
+        <property name="transactionManager" ref="txManager"/>
     </bean>
 
 </blueprint>

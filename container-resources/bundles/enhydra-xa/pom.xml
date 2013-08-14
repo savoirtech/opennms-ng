@@ -1,18 +1,18 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0"
-         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+<project xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xmlns="http://maven.apache.org/POM/4.0.0"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <parent>
-           <artifactId>bundles</artifactId>
-           <groupId>org.opennms.ng</groupId>
-           <version>1.0-SNAPSHOT</version>
-       </parent>
+        <artifactId>bundles</artifactId>
+        <groupId>org.opennms.ng</groupId>
+        <version>1.0-SNAPSHOT</version>
+    </parent>
     <modelVersion>4.0.0</modelVersion>
 
     <artifactId>enhydra-xa</artifactId>
 
     <name>OPENNMS :: Enhydra XA Adapter with pooling</name>
-        <description>OPENNMS Enhydra XA Adapter with pooling</description>
+    <description>OPENNMS Enhydra XA Adapter with pooling</description>
 
     <packaging>bundle</packaging>
 
@@ -43,10 +43,9 @@
     <dependencies>
 
         <dependency>
-                   <groupId>org.apache.felix</groupId>
-                   <artifactId>org.apache.felix.framework</artifactId>
-               </dependency>
-
+            <groupId>org.apache.felix</groupId>
+            <artifactId>org.apache.felix.framework</artifactId>
+        </dependency>
 
         <dependency>
             <groupId>xa-pool</groupId>

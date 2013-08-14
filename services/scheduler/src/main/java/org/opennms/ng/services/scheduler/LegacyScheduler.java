@@ -28,13 +28,6 @@
 
 package org.opennms.ng.services.scheduler;
 
-import org.opennms.core.concurrent.LogPreservingThreadFactory;
-import org.opennms.core.fiber.PausableFiber;
-import org.opennms.core.queue.FifoQueueImpl;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.util.Assert;
-
 import java.lang.reflect.UndeclaredThrowableException;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -42,6 +35,13 @@ import java.util.concurrent.ConcurrentSkipListMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.RejectedExecutionException;
+
+import org.opennms.core.concurrent.LogPreservingThreadFactory;
+import org.opennms.core.fiber.PausableFiber;
+import org.opennms.core.queue.FifoQueueImpl;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.util.Assert;
 
 /**
  * This class implements a simple scheduler to ensure the polling occurs at the
@@ -54,7 +54,7 @@ import java.util.concurrent.RejectedExecutionException;
  */
 public class LegacyScheduler implements Runnable, PausableFiber, Scheduler {
     
-    private static final Logger LOG = LoggerFactory.getLogger(org.opennms.ng.services.scheduler.LegacyScheduler.class);
+    private static final Logger LOG = LoggerFactory.getLogger(LegacyScheduler.class);
     
     /**
      * The map of queue that contain {@link org.opennms.ng.services.scheduler.ReadyRunnable ready runnable}

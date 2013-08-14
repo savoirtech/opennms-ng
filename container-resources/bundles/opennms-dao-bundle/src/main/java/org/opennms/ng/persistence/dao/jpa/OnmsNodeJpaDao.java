@@ -14,6 +14,7 @@ import org.opennms.netmgt.model.OnmsDistPoller;
 import org.opennms.netmgt.model.OnmsSnmpInterface;
 import org.opennms.netmgt.model.SurveillanceStatus;
 import org.opennms.ng.persistence.dao.OnmsNodeDao;
+import org.opennms.ng.persistence.entities.OnmsIpInterface;
 import org.opennms.ng.persistence.entities.OnmsNode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -282,9 +283,9 @@ public class OnmsNodeJpaDao extends GenericJpaDao<OnmsNode, Integer> implements 
      * {@inheritDoc}
      */
     @Override
-    public List<org.opennms.netmgt.model.OnmsIpInterface> findObsoleteIpInterfaces(Integer nodeId, Date scanStamp) {
+    public List<OnmsIpInterface> findObsoleteIpInterfaces(Integer nodeId, Date scanStamp) {
         // we exclude the primary interface from the obsolete list since the only way for them to be obsolete is when we have snmp
-        return findObjects(org.opennms.netmgt.model.OnmsIpInterface.class,
+        return findObjects(OnmsIpInterface.class,
             "from OnmsIpInterface ipInterface where ipInterface.node.id = ? and ipInterface.isSnmpPrimary != 'P' and (ipInterface.ipLastCapsdPoll "
                 + "is null or ipInterface.ipLastCapsdPoll < ?)",
             nodeId, scanStamp);

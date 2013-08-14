@@ -24,7 +24,7 @@
         </opennms.osgi.import.pkg>
 
         <opennms.osgi.export.pkg>
-            org.opennms.ng.services.collectd*
+            org.opennms.ng.services.collectd
         </opennms.osgi.export.pkg>
 
         <!-- Trying to get around dynamic class.forname loading -->
@@ -33,9 +33,20 @@
     </properties>
 
     <dependencies>
+
         <dependency>
-            <groupId>org.apache.camel</groupId>
-            <artifactId>camel-jms</artifactId>
+            <groupId>org.opennms.ng</groupId>
+            <artifactId>collectd-config</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>org.opennms.ng</groupId>
+            <artifactId>poll-outages-config</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>org.opennms.ng</groupId>
+            <artifactId>poller-config</artifactId>
         </dependency>
 
         <dependency>
@@ -51,6 +62,11 @@
         <dependency>
             <groupId>org.opennms.bundles</groupId>
             <artifactId>opennms-services-bundle</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>org.opennms.bundles</groupId>
+            <artifactId>opennms-dao-bundle</artifactId>
         </dependency>
 
         <dependency>

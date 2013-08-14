@@ -25,6 +25,7 @@
 
         <opennms.osgi.import.pkg>
             org.xbill.DNS;resolution:=optional,
+            org.opennms.bootstrap;resolution:=optional,
 
             *
         </opennms.osgi.import.pkg>
@@ -40,6 +41,7 @@
             org.opennms.core.xml;version="${opennms.version}",
             org.opennms.core.xml.bind;version="${opennms.version}",
             org.opennms.core.db;version="${opennms.version}",
+            org.opennms.netmgt.config.opennmsDataSources;version="${opennms.version}",
 
         </opennms.osgi.export.pkg>
 

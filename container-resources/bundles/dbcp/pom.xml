@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0"
-         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+<project xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xmlns="http://maven.apache.org/POM/4.0.0"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <parent>
         <artifactId>bundles</artifactId>
@@ -8,32 +8,34 @@
         <version>1.0-SNAPSHOT</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
-    <groupId>org.opennms.bundles</groupId>
+
+    <name>OPENNMS :: DBCP</name>
+    <description>OPENNMS DBCP</description>
+
+    <groupId>org.opennms.ng</groupId>
+    <artifactId>dbcp</artifactId>
+    <version>${commons-dbcp.version}</version>
 
     <packaging>bundle</packaging>
 
-    <name>OPENNMS :: Core SNMP API</name>
-    <description>OPENNMS Core SNMP API</description>
-
-    <artifactId>opennms-core-snmp-api</artifactId>
-    <version>${opennms.version}</version>
-
     <properties>
-        <pkgGroupId>org.opennms.bundles</pkgGroupId>
-        <pkgArtifactId>opennms-core-snmp-api</pkgArtifactId>
-        <pkgVersion>${opennms.version}</pkgVersion>
+        <pkgGroupId>org.opennms.ng</pkgGroupId>
+        <pkgArtifactId>dbcp</pkgArtifactId>
+        <pkgVersion>${commons-dbcp.version}</pkgVersion>
 
-        <opennms.osgi.export.pkg>
-
-            org.opennms.netmgt.snmp;version="${opennms.version}",
-            org.opennms.netmgt.snmp.internal;version="${opennms.version}",
-            org.opennms.netmgt.snmp.snmp4j;version="${opennms.version}",
-            org.snmp4j*
-
-        </opennms.osgi.export.pkg>
+        <opennms.osgi.import.pkg>
+            !org.apache.commons.dbcp*,
+            !org.apache.commons.jocl*
+            *
+        </opennms.osgi.import.pkg>
+        <opennms.osgi.export>
+            org.apache.commons.dbcp*;version="${commons-dbcp.version}" ,
+            org.apache.commons.jocl*;version="${commons-dbcp.version}" ,
+        </opennms.osgi.export>
 
         <opennms.osgi.include.resource>{maven-resources},{maven-dependencies}</opennms.osgi.include.resource>
         <opennms.osgi.failok>true</opennms.osgi.failok>
+
         <!-- Trying to get around dynamic class.forname loading -->
         <opennms.osgi.dynamic>*</opennms.osgi.dynamic>
 
@@ -42,17 +44,15 @@
     <dependencies>
 
         <dependency>
-            <groupId>org.opennms.core.snmp</groupId>
-            <artifactId>org.opennms.core.snmp.api</artifactId>
-            <version>${opennms.version}</version>
+            <groupId>org.apache.felix</groupId>
+            <artifactId>org.apache.felix.framework</artifactId>
         </dependency>
 
         <dependency>
-            <groupId>org.opennms.core.snmp</groupId>
-            <artifactId>org.opennms.core.snmp.implementations.snmp4j</artifactId>
-            <version>${opennms.version}</version>
+            <groupId>commons-dbcp</groupId>
+            <artifactId>commons-dbcp</artifactId>
+            <version>${commons-dbcp.version}</version>
         </dependency>
-
 
     </dependencies>
 
@@ -61,7 +61,6 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-shade-plugin</artifactId>
-                <version>${maven.shade.plugin.version}</version>
                 <executions>
                     <execution>
                         <phase>package</phase>
@@ -72,7 +71,7 @@
                             <artifactSet>
                                 <includes>
                                     <include>${pkgGroupId}:${pkgArtifactId}</include>
-                                    <!--include>org.opennms.core.snmp:org.opennms.core.snmp.implementations.snmp4j</include-->
+                                    <include>commons-dbcp:commons-dbcp</include>
                                 </includes>
                             </artifactSet>
 

@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0"
-         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+<project xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xmlns="http://maven.apache.org/POM/4.0.0"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <parent>
         <artifactId>bundles</artifactId>
@@ -8,51 +8,56 @@
         <version>1.0-SNAPSHOT</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
+
+    <name>OPENNMS :: Configuration</name>
+    <description>OPENNMS Configuration</description>
+
     <groupId>org.opennms.bundles</groupId>
+    <artifactId>opennms-config</artifactId>
+    <version>${opennms.version}</version>
 
     <packaging>bundle</packaging>
 
-    <name>OPENNMS :: Core SNMP API</name>
-    <description>OPENNMS Core SNMP API</description>
-
-    <artifactId>opennms-core-snmp-api</artifactId>
-    <version>${opennms.version}</version>
-
     <properties>
         <pkgGroupId>org.opennms.bundles</pkgGroupId>
-        <pkgArtifactId>opennms-core-snmp-api</pkgArtifactId>
+        <pkgArtifactId>opennms-config</pkgArtifactId>
         <pkgVersion>${opennms.version}</pkgVersion>
 
+        <opennms.osgi.import>
+            org.hibernate;resolution:=optional,
+            org.hibernate.annotations;resolution:=optional,
+            org.hibernate.criterion;resolution:=optional,
+            org.hibernate.engine;resolution:=optional,
+            org.hibernate.impl;resolution:=optional,
+            org.hibernate.transform;resolution:=optional,
+            org.hibernate.type;resolution:=optional,
+            org.hibernate.usertype;resolution:=optional,
+            org.opennms.netmgt.snmp;resolution:=optional,
+            org.springframework.security.core;resolution:=optional,
+            org.springframework.security.core.userdetails;resolution:=optional,
+            org.opennms.netmgt.dao.hibernate*; resolution:=optional,
+
+            org.apache.tomcat.jdbc.pool; version="1.1.1";resolution:=optional,
+            snaq.db;resolution:=optional,
+            *
+        </opennms.osgi.import>
         <opennms.osgi.export.pkg>
-
-            org.opennms.netmgt.snmp;version="${opennms.version}",
-            org.opennms.netmgt.snmp.internal;version="${opennms.version}",
-            org.opennms.netmgt.snmp.snmp4j;version="${opennms.version}",
-            org.snmp4j*
-
+            org.opennms.netmgt.config;version="${opennms.version}",
+            org.opennms.netmgt.filter;version="${opennms.version}",
         </opennms.osgi.export.pkg>
 
         <opennms.osgi.include.resource>{maven-resources},{maven-dependencies}</opennms.osgi.include.resource>
         <opennms.osgi.failok>true</opennms.osgi.failok>
-        <!-- Trying to get around dynamic class.forname loading -->
-        <opennms.osgi.dynamic>*</opennms.osgi.dynamic>
 
     </properties>
 
     <dependencies>
 
         <dependency>
-            <groupId>org.opennms.core.snmp</groupId>
-            <artifactId>org.opennms.core.snmp.api</artifactId>
+            <groupId>org.opennms</groupId>
+            <artifactId>opennms-config</artifactId>
             <version>${opennms.version}</version>
         </dependency>
-
-        <dependency>
-            <groupId>org.opennms.core.snmp</groupId>
-            <artifactId>org.opennms.core.snmp.implementations.snmp4j</artifactId>
-            <version>${opennms.version}</version>
-        </dependency>
-
 
     </dependencies>
 
@@ -72,7 +77,7 @@
                             <artifactSet>
                                 <includes>
                                     <include>${pkgGroupId}:${pkgArtifactId}</include>
-                                    <!--include>org.opennms.core.snmp:org.opennms.core.snmp.implementations.snmp4j</include-->
+
                                 </includes>
                             </artifactSet>
 

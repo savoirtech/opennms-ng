@@ -60,6 +60,8 @@
     </bean>
 
     <bean class="org.apache.commons.dbcp.BasicDataSource" id="nonJTA">
+        <property name="bundleContext" ref="blueprintBundleContext"/>
+
         <property name="driverClassName" value="${opennms.jdbc.driverClassName}"/>
         <property name="url" value="${opennms.jdbc.url}"/>
         <property name="username" value="${opennms.jdbc.username}"/>

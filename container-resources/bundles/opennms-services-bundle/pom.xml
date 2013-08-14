@@ -26,6 +26,7 @@
         <pkgVersion>${opennms.version}</pkgVersion>
 
         <opennms.osgi.import.pkg>
+            org.opennms.bootstrap;resolution:=optional,
             org.xbill.DNS;resolution:=optional,
             mx4j.log;resolution:=optional,
             org.apache.commons.jexl2; resolution:=optional,
@@ -61,19 +62,52 @@
             org.opennms.core.criteria; resolution:=optional,
             org.opennms.core.criteria.restrictions; resolution:=optional,
 
+            org.opennms.netmgt.dao.hibernate*; resolution:=optional,
+
             org.apache.tomcat.jdbc.pool; version="1.1.1";resolution:=optional,
 
             org.springframework.security.core; resolution:=optional,
             org.springframework.security.core.userdetails; resolution:=optional,
             snaq.db;resolution:=optional,,
-            twitter4j;resolution:=optional,
+            twitter4j*;resolution:=optional,
+            twitter4j.auth;resolution:=optional,
 
-            *
+            * ;resolution:=optional,
         </opennms.osgi.import.pkg>
         <opennms.osgi.export>
             org.opennms;version="${opennms.version}",
 
-            org.opennms.netmgt*;version="${opennms.version}",
+            org.opennms.netmgt.vacuumd*;version="${opennms.version}",
+            org.opennms.netmgt.utils*;version="${opennms.version}",
+            org.opennms.netmgt.trapd*;version="${opennms.version}",
+            org.opennms.netmgt.translator*;version="${opennms.version}",
+            org.opennms.netmgt.tl1d*;version="${opennms.version}",
+            org.opennms.netmgt.ticketd*;version="${opennms.version}",
+            org.opennms.netmgt.threshd*;version="${opennms.version}",
+            org.opennms.netmgt.syslogd*;version="${opennms.version}",
+            org.opennms.netmgt.statsd*;version="${opennms.version}",
+            org.opennms.netmgt.snmpinterfacepoller*;version="${opennms.version}",
+            org.opennms.netmgt.scriptd*;version="${opennms.version}",
+            org.opennms.netmgt.scheduler*;version="${opennms.version}",
+            org.opennms.netmgt.rtc*;version="${opennms.version}",
+            org.opennms.netmgt.queued*;version="${opennms.version}",
+            org.opennms.netmgt.poller*;version="${opennms.version}",
+            org.opennms.netmgt.passive*;version="${opennms.version}",
+            org.opennms.netmgt.discovery*;version="${opennms.version}",
+            org.opennms.netmgt.collectd*;version="${opennms.version}",
+            org.opennms.netmgt.archive*;version="${opennms.version}",
+            org.opennms.netmgt.actiond*;version="${opennms.version}",
+            org.opennms.netmgt.linkd*;version="${opennms.version}",
+            org.opennms.netmgt.xmlrpcd*;version="${opennms.version}",
+            org.opennms.netmgt.notifd*;version="${opennms.version}",
+            org.opennms.netmgt.eventd;version="${opennms.version}",
+            org.opennms.netmgt.eventd.adaptors*;version="${opennms.version}",
+            org.opennms.netmgt.eventd.jmx*;version="${opennms.version}",
+            org.opennms.netmgt.eventd.processor*;version="${opennms.version}",
+            org.opennms.netmgt.capsd*;version="${opennms.version}",
+            org.opennms.netmgt.daemon*;version="${opennms.version}",
+
+
             org.opennms.protocols*;version="${opennms.version}",
             org.opennms.spring*;version="${opennms.version}",
 

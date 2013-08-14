@@ -1,7 +1,9 @@
 package org.opennms.ng.persistence.dao;
 
 import java.io.Serializable;
+import java.util.List;
 
+import org.opennms.ng.persistence.notpurty.DataAccessException;
 import org.opennms.ng.persistence.notpurty.JpaCommands;
 
 public interface GenericDao<T, PK extends Serializable> extends JpaCommands {
@@ -37,4 +39,10 @@ public interface GenericDao<T, PK extends Serializable> extends JpaCommands {
     public void delete(T persistentObject);
 
     //Opennms API specific additions.
+
+    public List find(final String queryString, final Object... values) throws DataAccessException;
+
+    public List find(String queryString) throws DataAccessException;
+
+    public List find(String queryString, Object value) throws DataAccessException;
 }

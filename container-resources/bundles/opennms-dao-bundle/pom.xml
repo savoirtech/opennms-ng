@@ -45,8 +45,12 @@
             *
         </opennms.osgi.import.pkg>
         <opennms.osgi.export>
-            !org.opennms.netmgt.dao.api,
-            !org.opennms.netmgt.dao.support,
+            org.opennms.netmgt.dao;version="${opennms.version}",
+            org.opennms.netmgt.dao.support*;version="${opennms.version}",
+            org.opennms.netmgt.dao.stats*;version="${opennms.version}",
+            org.opennms.netmgt.dao.jmx*;version="${opennms.version}",
+            org.opennms.netmgt.dao.jaxb*;version="${opennms.version}",
+            org.opennms.netmgt.dao.castor*;version="${opennms.version}",
             org.opennms.ng.persistence.*,
 
         </opennms.osgi.export>

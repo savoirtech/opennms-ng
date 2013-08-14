@@ -26,14 +26,13 @@
            <pkgVersion>${jicmp.version}</pkgVersion>
 
            <opennms.osgi.import>
-
                *
-
            </opennms.osgi.import>
            <opennms.osgi.export.pkg>
 
                org.opennms.protocols.ip,
                org.opennms.protocols.icmp,
+               org.opennms.protocols.icmp6,
 
            </opennms.osgi.export.pkg>
 
@@ -49,6 +48,13 @@
                <artifactId>jicmp-api</artifactId>
                <version>${jicmp.version}</version>
            </dependency>
+
+           <dependency>
+                         <groupId>org.opennms</groupId>
+                         <artifactId>jicmp6-api</artifactId>
+                         <version>${jicmp6.version}</version>
+                     </dependency>
+
 
        </dependencies>
 

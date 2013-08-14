@@ -9,6 +9,7 @@
 
     <feature name="opennms-util" version="${project.version}">
         <feature>spring-jdbc</feature>
+        <bundle>mvn:org.opennms.ng/dbcp/${commons-dbcp.version}</bundle>
         <bundle>mvn:org.apache.servicemix.bundles/org.apache.servicemix.bundles.jakarta-regexp</bundle>
         <bundle>mvn:org.apache.servicemix.bundles/org.apache.servicemix.bundles.castor</bundle>
         <bundle>mvn:commons-io/commons-io/${commons-io.version}</bundle>
@@ -16,52 +17,82 @@
         <bundle>mvn:org.opennms.bundles/opennms-util/${opennms.version}</bundle>
     </feature>
 
+    <feature name="openjpa" version="${project.version}">
+        <feature>opennms-util</feature>
+        <bundle dependency='true'>mvn:org.apache.servicemix.bundles/org.apache.servicemix.bundles.asm/${asm-bundle.version}</bundle>
+        <bundle dependency='true'>mvn:org.apache.servicemix.bundles/org.apache.servicemix.bundles.ant/${ant.version}</bundle>
+        <bundle dependency='true'>mvn:org.apache.servicemix.bundles/org.apache.servicemix.bundles.serp/${serp.version}</bundle>
+        <bundle>mvn:org.apache.openjpa/openjpa/${openjpa.version}</bundle>
+    </feature>
+
     <feature name="opennms-config-model" version="${project.version}">
         <feature>opennms-util</feature>
+        <feature>openjpa</feature>
         <bundle>mvn:org.opennms.core/org.opennms.core.logging/${opennms.version}</bundle>
         <bundle>mvn:org.opennms.bundles/opennms-core-snmp-api/${opennms.version}</bundle>
         <bundle>mvn:org.opennms.bundles/opennms-model/${opennms.version}</bundle>
         <feature>spring-orm</feature>
         <bundle>mvn:org.opennms.bundles/opennms-config-model/${opennms.version}</bundle>
+        <bundle>mvn:org.opennms.bundles/opennms-config/${opennms.version}</bundle>
     </feature>
 
     <feature name="opennms-services-bundle" version="${project.version}">
         <bundle>mvn:org.opennms.ng/amq-pool/${project.version}</bundle>
 
-        <bundle>mvn:org.apache.servicemix.bundles/org.apache.servicemix.bundles.oro</bundle>
         <bundle>mvn:org.apache.servicemix.bundles/org.apache.servicemix.bundles.antlr/${antlr.version}</bundle>
         <bundle>mvn:org.apache.servicemix.bundles/org.apache.servicemix.bundles.jcifs/${jcifs.version}</bundle>
+        <bundle>mvn:org.apache.servicemix.bundles/org.apache.servicemix.bundles.oro</bundle>
         <bundle>mvn:org.apache.servicemix.bundles/org.apache.servicemix.bundles.aspectj/${aspectj.version}</bundle>
+        <bundle>mvn:org.apache.servicemix.bundles/org.apache.servicemix.bundles.jakarta-regexp</bundle>
+        <bundle>mvn:org.apache.servicemix.bundles/org.apache.servicemix.bundles.castor</bundle>
+        <bundle>mvn:commons-io/commons-io/${commons-io.version}</bundle>
 
-        <bundle>mvn:org.opennms.bundles/jldap/${jldap.version}</bundle>
+        <bundle>mvn:org.apache.servicemix.bundles/org.apache.servicemix.bundles.ant/${ant.version}</bundle>
+        <bundle>mvn:org.apache.servicemix.bundles/org.apache.servicemix.bundles.serp/${serp.version}</bundle>
+        <bundle>mvn:commons-collections/commons-collections/${commons-collections.version}</bundle>
 
-        <bundle>mvn:org.apache.servicemix.bundles/org.apache.servicemix.bundles.aspectj/${aspectj.version}</bundle>
-        <bundle>mvn:org.opennms.bundles/jldap/${jldap.version}</bundle>
-
-        <bundle>mvn:org.opennms.bundles/opennms-javamail-api/${opennms.version}</bundle>
         <bundle>mvn:org.apache.httpcomponents/httpcore-osgi/${httpcore.version}</bundle>
         <bundle>mvn:org.apache.httpcomponents/httpclient-osgi/${httpclient.version}</bundle>
-        <bundle>mvn:org.opennms.bundles/bsf/${bsf.version}</bundle>
+        <bundle>mvn:org.apache.httpcomponents/httpcore-osgi/${httpcore.version}</bundle>
+        <bundle>mvn:org.apache.httpcomponents/httpclient-osgi/${httpclient.version}</bundle>
 
-        <bundle>mvn:commons-dbcp/commons-dbcp/${commons-dbcp.version}</bundle>
+        <bundle>mvn:org.opennms.bundles/dnsjava/${project.version}</bundle>
+        <bundle>mvn:org.opennms.bundles/opennms-core-snmp-api/${opennms.version}</bundle>
+        <bundle>mvn:org.opennms.bundles/opennms-dao-api/${opennms.version}</bundle>
+        <bundle>mvn:org.opennms.core/org.opennms.core.logging/${opennms.version}</bundle>
+        <bundle>mvn:org.opennms.bundles/opennms-rrd-api/${opennms.version}</bundle>
+        <bundle>mvn:org.opennms.ng/database-schema-config/${project.version}</bundle>
+
+        <bundle>mvn:org.opennms.bundles/opennms-services-common/${opennms.version}</bundle>
+        <bundle>mvn:org.opennms.bundles/opennms-javamail-api/${opennms.version}</bundle>
+        <bundle>mvn:org.opennms.bundles/bsf/${bsf.version}</bundle>
+        <bundle>mvn:org.opennms.bundles/opennms-protocols/${opennms.version}</bundle>
+        <bundle>mvn:org.opennms/opennms-icmp-api/${opennms.version}</bundle>
+        <bundle>mvn:org.opennms.features/org.opennms.features.phonebook/${opennms.version}</bundle>
+        <bundle>mvn:org.opennms/opennms-icmp-api/${opennms.version}</bundle>
+        <bundle>mvn:org.opennms/opennms-icmp-jni6/${opennms.version}</bundle>
+        <bundle>mvn:org.opennms/opennms-icmp-jni/${opennms.version}</bundle>
+        <bundle>mvn:org.opennms.bundles/opennms-jicmp-api/${jicmp.version}</bundle>
+        <bundle>mvn:org.opennms.bundles/opennms-lib-rt/${lib-rt.version}</bundle>
+        <bundle>mvn:org.opennms.bundles/jldap/${jldap.version}</bundle>
+
+        <bundle>mvn:org.opennms.ng/dbcp/${commons-dbcp.version}</bundle>
         <bundle>mvn:org.opennms.ng/enhydra-xa/${project.version}</bundle>
         <bundle>mvn:org.opennms.bundles/postgresql/${project.version}</bundle>
-
         <bundle>mvn:org.opennms.ng/datasource/${project.version}</bundle>
+        <bundle>mvn:org.opennms.bundles/c3p0/${c3p0.version}</bundle>
 
-        <bundle>mvn:org.opennms.bundles/dnsjava/${project.version}</bundle>
-        <bundle>mvn:org.opennms.bundles/opennms-core-snmp-api/${opennms.version}</bundle>
+        <bundle>mvn:org.opennms.bundles/opennms-dao-bundle/${opennms.version}</bundle>
+        <bundle>mvn:org.opennms.bundles/opennms-model/${opennms.version}</bundle>
+        <bundle>mvn:org.opennms.bundles/opennms-config-model/${opennms.version}</bundle>
+        <bundle>mvn:org.opennms.bundles/opennms-config/${opennms.version}</bundle>
 
-        <feature>opennms-util</feature>
-        <bundle>mvn:org.opennms.core/org.opennms.core.logging/${opennms.version}</bundle>
-        <bundle>mvn:org.opennms.bundles/opennms-core-snmp-api/${opennms.version}</bundle>
+        <feature>spring-jdbc</feature>
+        <bundle>mvn:org.opennms.bundles/opennms-util/${opennms.version}</bundle>
+
         <feature>camel-quartz</feature>
         <feature>spring-orm</feature>
-
-        <bundle>mvn:org.opennms.features/org.opennms.features.phonebook/${opennms.version}</bundle>
-
-        <bundle>mvn:org.opennms.bundles/dnsjava/${project.version}</bundle>
-        <bundle>mvn:org.opennms.bundles/opennms-core-snmp-api/${opennms.version}</bundle>
+        <feature>openjpa</feature>
 
         <bundle>mvn:org.opennms.bundles/opennms-services-bundle/${opennms.version}</bundle>
 
@@ -77,7 +108,7 @@
 
         <bundle>mvn:org.apache.servicemix.bundles/org.apache.servicemix.bundles.oro</bundle>
 
-        <bundle>mvn:commons-dbcp/commons-dbcp/${commons-dbcp.version}</bundle>
+        <bundle>mvn:org.opennms.ng/dbcp/${commons-dbcp.version}</bundle>
         <bundle>mvn:org.opennms.ng/enhydra-xa/${project.version}</bundle>
         <bundle>mvn:org.opennms.bundles/postgresql/${project.version}</bundle>
 
@@ -87,7 +118,6 @@
         <bundle>mvn:org.opennms.bundles/dnsjava/${project.version}</bundle>
         <bundle>mvn:org.opennms.bundles/opennms-core-snmp-api/${opennms.version}</bundle>
 
-        <bundle>mvn:org.opennms.bundles/opennms-services-bundle/${opennms.version}</bundle>
         <feature>opennms-config-model</feature>
     </feature>
 
@@ -138,6 +168,8 @@
     <feature name="capsd" version="${project.version}">
         <feature>capsd-config</feature>
 
+        <feature>poller-config</feature>
+
         <bundle>mvn:org.apache.servicemix.bundles/org.apache.servicemix.bundles.antlr/${antlr.version}</bundle>
         <bundle>mvn:org.apache.servicemix.bundles/org.apache.servicemix.bundles.jcifs/${jcifs.version}</bundle>
         <bundle>mvn:org.apache.servicemix.bundles/org.apache.servicemix.bundles.aspectj/${aspectj.version}</bundle>
@@ -163,7 +195,11 @@
     </feature>
 
     <feature name="collectd" version="${project.version}">
+        <feature>event-config</feature>
         <feature>collectd-config</feature>
+        <feature>poller-config</feature>
+        <feature>poll-outages-config</feature>
+        <feature>capsd-config</feature>
 
         <bundle>mvn:org.apache.servicemix.bundles/org.apache.servicemix.bundles.antlr/${antlr.version}</bundle>
         <bundle>mvn:org.apache.servicemix.bundles/org.apache.servicemix.bundles.jcifs/${jcifs.version}</bundle>
@@ -202,6 +238,7 @@
 
     <feature name="poll-outages-config" version="${project.version}">
         <feature>poller-config</feature>
+        <bundle>mvn:org.opennms.ng/poll-outages-config/${project.version}</bundle>
     </feature>
 
     <feature name="poller" version="${project.version}">
@@ -227,16 +264,17 @@
     </feature>
 
     <feature name="trapd" version="${project.version}">
+        <!-- FIX  java.lang.RuntimeException: There is no SnmpStrategy registered.  Unable to find strategy org.opennms.netmgt.snmp.snmp4j.Snmp4JStrategy -->
         <feature>event-config</feature>
         <bundle>mvn:org.opennms.ng/trapd/${project.version}</bundle>
     </feature>
 
     <feature name="datasource" version="${project.version}">
-        <bundle>mvn:commons-dbcp/commons-dbcp/${commons-dbcp.version}</bundle>
+        <bundle>mvn:org.opennms.ng/dbcp/${commons-dbcp.version}</bundle>
         <bundle>mvn:org.opennms.ng/enhydra-xa/${project.version}</bundle>
         <bundle>mvn:org.hsqldb/hsqldb/${hsqldb.version}</bundle>
-        <bundle>mvn:org/opennms/bundles/postgresql/${project.version}</bundle>
-        <bundle>mvn:org.opennms.ng/opennms-datasource/${project.version}</bundle>
+        <bundle>mvn:org.opennms.bundles/postgresql/${project.version}</bundle>
+        <bundle>mvn:org.opennms.ng/datasource/${project.version}</bundle>
     </feature>
 
     <feature name="hsqldb-test-server" version="${project.version}">
@@ -245,17 +283,17 @@
     </feature>
 
     <feature name="opennms-dao-bundle" version="${project.version}">
+        <feature>opennms-util</feature>
         <bundle dependency='true'>mvn:org.apache.servicemix.bundles/org.apache.servicemix.bundles.ant/${ant.version}</bundle>
         <bundle dependency='true'>mvn:org.apache.servicemix.bundles/org.apache.servicemix.bundles.serp/${serp.version}</bundle>
         <bundle>mvn:org.apache.openjpa/openjpa/${openjpa.version}</bundle>
         <feature version="${project.version}">datasource</feature>
         <feature>transaction</feature>
         <feature>jndi</feature>
-        <bundle dependency='true'>mvn:commons-collections/commons-collections/${commons-collections.version}</bundle>
+        <bundle>mvn:commons-collections/commons-collections/${commons-collections.version}</bundle>
         <feature version="${aries.blueprint.version}">jpa</feature>
-        <bundle>mvn:org.opennms.ng/persistence/${project.version}</bundle>
-        <feature>collectd-config</feature>
-        <bundle>mvn:org.opennms.bundles/opennms-dao/${opennms.version}</bundle>
+
+        <bundle>mvn:org.opennms.bundles/opennms-dao-bundle/${opennms.version}</bundle>
     </feature>
 
 </features>

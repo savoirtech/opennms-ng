@@ -48,8 +48,8 @@
         <aries.blueprint.jpa.container.version>1.0.0</aries.blueprint.jpa.container.version>
         <aspectj.version>1.7.1_1</aspectj.version>
 
-        <ant.version>1.9.2.1</ant.version>
-
+        <ant.version>1.9.2_1</ant.version>
+        <asm-bundle.version>3.3_2</asm-bundle.version>
         <bsf.version>2.4.0</bsf.version>
         <c3p0.version>0.9.1.2</c3p0.version>
 
@@ -71,12 +71,15 @@
         <httpcore.version>4.2.4</httpcore.version>
         <jcifs.version>1.3.17_1</jcifs.version>
         <jicmp.version>1.4.1</jicmp.version>
+        <jicmp6.version>1.2.1</jicmp6.version>
         <jldap.version>4.3</jldap.version>
         <junit.version>4.11</junit.version>
         <log4jVersion>1.2.16</log4jVersion>
         <lib-rt.version>0.6</lib-rt.version>
         <openjpa.version>2.2.0</openjpa.version>
         <oracle.jdbc.version>6.0</oracle.jdbc.version>
+
+
 
         <pojosr-version>0.1.8</pojosr-version>
 
@@ -86,7 +89,7 @@
         <postgres.bundle.version>9.1.0.901</postgres.bundle.version>
         <quartz.version>1.6.6_2</quartz.version>
 
-        <serp.version>1.14.1.1</serp.version>
+        <serp.version>1.14.1_1</serp.version>
         <slf4j.version>1.7.2</slf4j.version>
         <spring.version>3.0.7.RELEASE</spring.version>
 
@@ -110,7 +113,8 @@
         </opennms.osgi.import.default.version>
         <opennms.osgi.import.defaults>
             org.springframework.*;version="[2.5,4)",
-            javax.persistence.*;version="[1.1,2)"
+            javax.persistence.*;version="[1.1,2)",
+            org.opennms.bootstrap;resolution:=optional,
         </opennms.osgi.import.defaults>
         <opennms.osgi.import.before.defaults/>
         <opennms.osgi.import.additional/>
@@ -636,6 +640,12 @@
             </dependency>
 
             <dependency>
+                <groupId>org.opennms.bundles</groupId>
+                <artifactId>opennms-dao-bundle</artifactId>
+                <version>${opennms.version}</version>
+            </dependency>
+
+            <dependency>
                 <groupId>org.opennms</groupId>
                 <artifactId>opennms-javamail-api</artifactId>
                 <version>${opennms.version}</version>
@@ -879,6 +889,12 @@
                 <groupId>postgresql</groupId>
                 <artifactId>postgresql</artifactId>
                 <version>${postgres.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>org.opennms.ng</groupId>
+                <artifactId>dbcp</artifactId>
+                <version>${commons-dbcp.version}</version>
             </dependency>
 
             <!-- Legacy -->

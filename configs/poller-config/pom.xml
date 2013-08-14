@@ -25,7 +25,6 @@
         <opennms.osgi.export.pkg>
             org.opennms.ng.services.pollerconfig
         </opennms.osgi.export.pkg>
-        <opennms.osgi.dynamic>*</opennms.osgi.dynamic>
     </properties>
 
     <dependencies>

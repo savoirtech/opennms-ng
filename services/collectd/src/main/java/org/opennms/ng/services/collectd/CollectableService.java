@@ -34,21 +34,28 @@ import java.util.Map;
 import org.opennms.core.logging.Logging;
 import org.opennms.core.utils.InetAddressUtils;
 import org.opennms.netmgt.EventConstants;
-import org.opennms.netmgt.collectd.*;
-import org.opennms.netmgt.collectd.Collectd;
-import org.opennms.ng.services.collectd.Collectd.SchedulingCompletedFlag;
+import org.opennms.netmgt.collectd.BasePersister;
+import org.opennms.netmgt.collectd.CollectionAgent;
+import org.opennms.netmgt.collectd.CollectionException;
+import org.opennms.netmgt.collectd.CollectionFailed;
+import org.opennms.netmgt.collectd.CollectionInitializationException;
+import org.opennms.netmgt.collectd.CollectionTimedOut;
+import org.opennms.netmgt.collectd.CollectionWarning;
+import org.opennms.netmgt.collectd.GroupPersister;
+import org.opennms.netmgt.collectd.OneToOnePersister;
+import org.opennms.netmgt.collectd.ServiceCollector;
 import org.opennms.netmgt.config.DataCollectionConfigFactory;
 import org.opennms.netmgt.config.collector.CollectionSet;
 import org.opennms.netmgt.config.collector.ServiceParameters;
-import org.opennms.netmgt.dao.api.CollectorConfigDao;
-import org.opennms.netmgt.dao.api.IpInterfaceDao;
 import org.opennms.netmgt.eventd.EventIpcManagerFactory;
-import org.opennms.netmgt.model.OnmsIpInterface;
 import org.opennms.netmgt.model.RrdRepository;
 import org.opennms.netmgt.model.events.EventBuilder;
-import org.opennms.netmgt.scheduler.ReadyRunnable;
-import org.opennms.netmgt.scheduler.Scheduler;
 import org.opennms.netmgt.threshd.ThresholdingVisitor;
+import org.opennms.ng.persistence.dao.OnmsIpInterfaceDao;
+import org.opennms.ng.persistence.entities.OnmsIpInterface;
+import org.opennms.ng.services.collectd.Collectd.SchedulingCompletedFlag;
+import org.opennms.ng.services.scheduler.ReadyRunnable;
+import org.opennms.ng.services.scheduler.Scheduler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.transaction.PlatformTransactionManager;
@@ -108,7 +115,7 @@ final class CollectableService implements ReadyRunnable {
 
     private final PlatformTransactionManager m_transMgr;
 
-    private final IpInterfaceDao m_ifaceDao;
+    private final OnmsIpInterfaceDao m_ifaceDao;
 
     private final ServiceParameters m_params;
 
@@ -124,7 +131,7 @@ final class CollectableService implements ReadyRunnable {
      * @param schedulingCompletedFlag a {@link org.opennms.netmgt.collectd.Collectd.SchedulingCompletedFlag} object.
      * @param transMgr a {@link org.springframework.transaction.PlatformTransactionManager} object.
      */
-    protected CollectableService(OnmsIpInterface iface, IpInterfaceDao ifaceDao, CollectionSpecification spec, Scheduler scheduler, SchedulingCompletedFlag schedulingCompletedFlag, PlatformTransactionManager transMgr) throws CollectionInitializationException {
+    protected CollectableService(OnmsIpInterface iface, OnmsIpInterfaceDao ifaceDao, CollectionSpecification spec, Scheduler scheduler, SchedulingCompletedFlag schedulingCompletedFlag, PlatformTransactionManager transMgr) throws CollectionInitializationException {
         m_agent = DefaultCollectionAgent.create(iface.getId(), ifaceDao, transMgr);
         m_spec = spec;
         m_scheduler = scheduler;
