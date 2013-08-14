@@ -20,6 +20,7 @@
         <opennms.osgi.import.pkg>
             org.exolab.castor.xml.util,
             org.opennms.netmgt,
+            org.opennms.netmgt.collectd;resolution:=optional,
             *
         </opennms.osgi.import.pkg>
 

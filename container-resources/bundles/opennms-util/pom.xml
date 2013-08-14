@@ -48,7 +48,7 @@
 
         <opennms.osgi.failok>true</opennms.osgi.failok>
         <!-- Trying to get around dynamic class.forname loading -->
-        <opennms.osgi.dynamic>org.postgresql</opennms.osgi.dynamic>
+        <opennms.osgi.dynamic>*</opennms.osgi.dynamic>
 
     </properties>
 

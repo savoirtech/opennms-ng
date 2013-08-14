@@ -60,6 +60,7 @@
         <property name="nodeDao" ref="nodeDao"/>
         <property name="eventIpcManager" ref="eventIpcManager"/>
         <property name="transactionTemplate" ref="transactionTemplate"/>
+        <property name="bundleContext" ref="blueprintBundleContext"/>
 
     </bean>
 

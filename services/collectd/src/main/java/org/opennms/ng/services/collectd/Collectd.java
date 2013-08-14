@@ -71,6 +71,7 @@ import org.opennms.ng.services.collectdconfig.CollectdPackage;
 import org.opennms.ng.services.scheduler.LegacyScheduler;
 import org.opennms.ng.services.scheduler.ReadyRunnable;
 import org.opennms.ng.services.scheduler.Scheduler;
+import org.osgi.framework.BundleContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.transaction.TransactionStatus;
@@ -158,7 +159,7 @@ public class Collectd implements EventListener {
     public void onInit() {
         Assert.notNull(m_collectorConfigDao, "collectorConfigDao must not be null");
         Assert.notNull(m_eventIpcManager, "eventIpcManager must not be null");
-        //Assert.notNull(m_transTemplate, "transTemplate must not be null");
+        Assert.notNull(m_transTemplate, "transTemplate must not be null");
         Assert.notNull(m_ifaceDao, "ifaceDao must not be null");
         Assert.notNull(m_nodeDao, "nodeDao must not be null");
 
@@ -1404,7 +1405,9 @@ public class Collectd implements EventListener {
             String svcName = collector.getService();
             try {
                 LOG.debug("instantiateCollectors: Loading collector {}, classname {}", svcName, collector.getClassName());
-                Class<?> cc = Class.forName(collector.getClassName());
+                Class<?> cc = bundleContext.getBundle().loadClass(collector.getClassName());
+
+                    //Class.forName(collector.getClassName());
                 ServiceCollector sc = (ServiceCollector) cc.newInstance();
 
                 sc.initialize(Collections.<String, String>emptyMap());
@@ -1426,5 +1429,11 @@ public class Collectd implements EventListener {
         public synchronized void setSchedulingCompleted(boolean schedulingCompleted) {
             m_schedulingCompleted = schedulingCompleted;
         }
+    }
+
+    private BundleContext bundleContext;
+
+    public void setBundleContext(BundleContext bundleContext) {
+        this.bundleContext = bundleContext;
     }
 }
