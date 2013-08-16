@@ -165,7 +165,7 @@ public class OnmsNodeJpaDao extends GenericJpaDao<OnmsNode, Integer> implements 
     public SurveillanceStatus findSurveillanceStatusByCategoryLists(final Collection<OnmsCategory> rowCategories,
                                                                     final Collection<OnmsCategory> columnCategories) {
 
-        Query q = em.createQuery(
+        Query q = em.createNativeQuery(
                 "select" +
                         " count(distinct case when outages.outageid is not null and monSvc.status = 'A' then monSvc.id else null end) as svcCount," +
                         " count(distinct case when outages.outageid is null and monSvc.status = 'A' then node.nodeid else null end) as upNodeCount," +
@@ -177,11 +177,8 @@ public class OnmsNodeJpaDao extends GenericJpaDao<OnmsNode, Integer> implements 
                         " left outer join ifservices monsvc on (monsvc.ipinterfaceid = ip.id)" +
                         " left outer join outages on (outages.ifserviceid = monsvc.id and outages.ifregainedservice is null)" +
                         " where nodeType <> 'D'" +
-                        " and cn1.categoryid in (:rowCategories)" +
-                        " and cn2.categoryid in (:columnCategories)");
-
-        q.setParameter("rowCategories", rowCategories);
-        q.setParameter("columnCategories",columnCategories);
+                        " and cn1.categoryid in (" + categoryListToNameList(rowCategories) + ")" +
+                        " and cn2.categoryid in (" + categoryListToNameList(columnCategories) + ")");
 
         Object[] tuple = (Object[])q.getSingleResult();
         return new SimpleSurveillanceStatus((Number) tuple[0], (Number) tuple[1], (Number) tuple[2]);
@@ -232,6 +229,7 @@ public class OnmsNodeJpaDao extends GenericJpaDao<OnmsNode, Integer> implements 
 
          */
     }
+
 
     /**
      * {@inheritDoc}
