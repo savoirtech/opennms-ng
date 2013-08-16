@@ -131,9 +131,12 @@ public class OnmsNodeJpaDao extends GenericJpaDao<OnmsNode, Integer> implements 
     @Override
     public List<OnmsNode> findAllByCategoryList(Collection<OnmsCategory> categories) {
         return find("select distinct n from OnmsNode as n " + "join n.categories c " + "left join fetch n.assetRecord "
-            + "left join fetch n.ipInterfaces as ipInterface " + "left join fetch n.snmpInterfaces as snmpIface"
-            + "left join fetch ipInterface.monitoredServices as monSvc " + "left join fetch monSvc.serviceType "
-            + "left join fetch monSvc.currentOutages " + "where c.name in (" + categoryListToNameList(categories) + ")" + "and n.type != 'D'");
+            + "left join fetch n.ipInterfaces as ipInterface "
+            + "left join fetch n.snmpInterfaces as snmpIface "
+            + "left join fetch ipInterface.monitoredServices as monSvc "
+            + "left join fetch monSvc.serviceType "
+            + "left join fetch monSvc.currentOutages "
+            + "where c.name in (" + categoryListToNameList(categories) + ") and n.type != 'D'");
     }
 
     /**
@@ -143,10 +146,16 @@ public class OnmsNodeJpaDao extends GenericJpaDao<OnmsNode, Integer> implements 
     public List<OnmsNode> findAllByCategoryLists(final Collection<OnmsCategory> rowCategories, final Collection<OnmsCategory> columnCategories) {
 
         Query q = em.createQuery(
-            "select distinct n from OnmsNode as n " + "join n.categories c1 " + "join n.categories c2 " + "left join fetch n.assetRecord "
-                + "left join fetch n.ipInterfaces as iface " + "left join fetch n.snmpInterfaces as snmpIface"
-                + "left join fetch iface.monitoredServices as monSvc " + "left join fetch monSvc.serviceType "
-                + "left join fetch monSvc.currentOutages " + "where c1 in (:rowCategories) " + "and c2 in (:colCategories) " + "and n.type != 'D'")
+            "select distinct n from OnmsNode as n " +
+                    "join n.categories c1 " +
+                    "join n.categories c2 " +
+                    "left join fetch n.assetRecord "
+                + "left join fetch n.ipInterfaces as iface "
+                + "left join fetch n.snmpInterfaces as snmpIface "
+                + "left join fetch iface.monitoredServices as monSvc "
+                + "left join fetch monSvc.serviceType "
+                + "left join fetch monSvc.currentOutages "
+                + "where c1 in (:rowCategories) and c2 in (:colCategories) and n.type != 'D'")
                     .setParameter("rowCategories", rowCategories).setParameter("colCategories", columnCategories);
 
         return q.getResultList();
