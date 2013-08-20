@@ -26,6 +26,7 @@
         <module>trapd</module>
         <module>collectd</module>
         <module>threshd</module>
+        <module>translator</module>
     </modules>
 
 </project>

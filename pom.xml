@@ -543,6 +543,12 @@
 
             <dependency>
                 <groupId>org.opennms.ng</groupId>
+                <artifactId>translator-config</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>org.opennms.ng</groupId>
                 <artifactId>collectd-config</artifactId>
                 <version>${project.version}</version>
             </dependency>
