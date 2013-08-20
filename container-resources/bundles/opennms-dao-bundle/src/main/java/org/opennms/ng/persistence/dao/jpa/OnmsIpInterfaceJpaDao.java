@@ -1,16 +1,21 @@
 package org.opennms.ng.persistence.dao.jpa;
 
 import java.net.InetAddress;
+import java.net.UnknownHostException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.opennms.core.utils.InetAddressUtils;
+import org.opennms.netmgt.model.events.EventUtils;
 import org.opennms.ng.persistence.dao.OnmsIpInterfaceDao;
 import org.opennms.ng.persistence.entities.OnmsIpInterface;
 import org.opennms.ng.persistence.entities.OnmsNode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.util.Assert;
+
+import javax.persistence.Query;
 
 public class OnmsIpInterfaceJpaDao extends GenericJpaDao<OnmsIpInterface, Integer> implements OnmsIpInterfaceDao {
 
@@ -19,23 +24,25 @@ public class OnmsIpInterfaceJpaDao extends GenericJpaDao<OnmsIpInterface, Intege
 
     public OnmsIpInterfaceJpaDao() {
         super(OnmsIpInterface.class);
+//        m_findByServiceTypeQuery = System.getProperty("org.opennms.dao.ipinterface.findByServiceType",
+//                "select distinct ipInterface from OnmsIpInterface as ipInterface join ipInterface.monitoredServices as monSvc where monSvc.serviceType"
+//                        + ".name = ?");
         m_findByServiceTypeQuery = System.getProperty("org.opennms.dao.ipinterface.findByServiceType",
-            "select distinct ipInterface from OnmsIpInterface as ipInterface join ipInterface.monitoredServices as monSvc where monSvc.serviceType"
-                + ".name = ?");
+            "select distinct ipi from OnmsIpInterface ipi JOIN ipi.monitoredServices monSvc JOIN monSvc.serviceType svcType where svcType.name = ?1");
     }
 
     /**
      * {@inheritDoc}
      */
     public OnmsIpInterface get(OnmsNode node, String ipAddress) {
-        return findUnique("from OnmsIpInterface as ipInterface where ipInterface.node = ? and ipInterface.ipAddress = ?", node, ipAddress);
+        return findUnique("from OnmsIpInterface as ipInterface where ipInterface.node = ?1 and ipInterface.ipAddress = ?1", node, ipAddress);
     }
 
     /**
      * {@inheritDoc}
      */
     public List<OnmsIpInterface> findByIpAddress(String ipAddress) {
-        return find("from OnmsIpInterface ipInterface where ipInterface.ipAddress = ?", ipAddress);
+        return find("from OnmsIpInterface ipInterface where ipInterface.ipAddress = ?1", ipAddress);
     }
 
     /**
@@ -43,15 +50,16 @@ public class OnmsIpInterfaceJpaDao extends GenericJpaDao<OnmsIpInterface, Intege
      */
     public List<OnmsIpInterface> findByNodeId(Integer nodeId) {
         Assert.notNull(nodeId, "nodeId cannot be null");
-        return find("from OnmsIpInterface ipInterface where ipInterface.node.id = ?", nodeId);
+        return find("from OnmsIpInterface ipInterface where ipInterface.node.id = ?1", nodeId);
     }
 
     /**
      * {@inheritDoc}
      */
     public OnmsIpInterface findByNodeIdAndIpAddress(Integer nodeId, String ipAddress) {
-        return findUnique("select ipInterface from OnmsIpInterface as ipInterface where ipInterface.node.id = ? and ipInterface.ipAddress = ?",
-            nodeId, ipAddress);
+        InetAddress addr = InetAddressUtils.getInetAddress(ipAddress);
+        return findUnique("select ipInterface from OnmsIpInterface as ipInterface where ipInterface.node.id = ?1 and ipInterface.ipAddress = ?2",
+            nodeId, addr);
     }
 
     /**
@@ -68,6 +76,11 @@ public class OnmsIpInterfaceJpaDao extends GenericJpaDao<OnmsIpInterface, Intege
      */
     public List<OnmsIpInterface> findByServiceType(String svcName) {
 
+//        Query q = em.createQuery(m_findByServiceTypeQuery);
+//        q.setParameter("name", svcName);
+//
+//        return q.getResultList();
+
         return find(m_findByServiceTypeQuery, svcName);
     }
 
@@ -82,7 +95,7 @@ public class OnmsIpInterfaceJpaDao extends GenericJpaDao<OnmsIpInterface, Intege
             "left join fetch ipInterface.node.snmpInterfaces as snmpIf " +
             "left join fetch snmpIf.ipInterfaces " +
             "join ipInterface.monitoredServices as monSvc " +
-            "where monSvc.serviceType.name = ?", svcName);
+            "where monSvc.serviceType.name = ?1", svcName);
     }
 
     /**

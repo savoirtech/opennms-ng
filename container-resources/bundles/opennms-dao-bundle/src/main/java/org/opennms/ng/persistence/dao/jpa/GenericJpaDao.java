@@ -74,7 +74,7 @@ public abstract class GenericJpaDao<T, PK extends Serializable> extends Abstract
 
     @Override
     public List find(String queryString, Object value) throws DataAccessException {
-        return find(queryString, new Object[]{value, null});
+        return find(queryString, new Object[]{value});
     }
 
     /**
@@ -112,7 +112,7 @@ public abstract class GenericJpaDao<T, PK extends Serializable> extends Abstract
         final Query query = em.createQuery(queryString);
         if (args != null) {
             for (int i = 0;i < args.length;i++) {
-                query.setParameter(i, args[i]);
+                query.setParameter(i+1, args[i]);
             }
         }
         final Object result = query.getSingleResult();
