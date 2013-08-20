@@ -105,6 +105,21 @@ public  class EventTranslatorConfigFactory implements EventTranslatorConfig {
      */
 	private DataSource m_dbConnFactory = null;
 
+    public EventTranslatorConfigFactory() throws IOException, MarshalException, ValidationException {
+
+        File cfgFile = ConfigFileConstants.getFile(ConfigFileConstants.TRANSLATOR_CONFIG_FILE_NAME);
+                    InputStream stream = null;
+
+                    try {
+                        stream = new FileInputStream(cfgFile);
+                        unmarshall(stream);
+                    } finally {
+                        if (stream != null) {
+                            IOUtils.closeQuietly(stream);
+                        }
+                    }
+
+    }
 
     /**
      * Private constructor
@@ -228,7 +243,7 @@ public  class EventTranslatorConfigFactory implements EventTranslatorConfig {
         m_singleton = null;
         m_loaded = false;
 
-        this.init();
+       init();
     }
 
     /**
@@ -280,6 +295,7 @@ public  class EventTranslatorConfigFactory implements EventTranslatorConfig {
     }
 
     private List<String> getTranslationUEIs() {
+        if (getConfig()==null) LOG.error("Config is null!!!");
 		Translation translation = getConfig().getTranslation();
 		if (translation == null)
 			return Collections.emptyList();
@@ -861,4 +877,5 @@ public  class EventTranslatorConfigFactory implements EventTranslatorConfig {
     public void setDataSource(DataSource dataSource) {
         this.dataSource = dataSource;
     }
+
 }

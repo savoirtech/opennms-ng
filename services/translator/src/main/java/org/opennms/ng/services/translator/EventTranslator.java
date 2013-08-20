@@ -96,7 +96,7 @@ public class EventTranslator implements EventListener {
     /**
      * <p>onInit</p>
      */
-    protected void onInit() {
+    public void onInit() {
         if (m_initialized) {
             return;
         }
@@ -122,7 +122,7 @@ public class EventTranslator implements EventListener {
     /**
      * <p>onStop</p>
      */
-    protected void onStop() {
+    public void onStop() {
         m_initialized = false;
         m_eventMgr = null;
         m_config = null;

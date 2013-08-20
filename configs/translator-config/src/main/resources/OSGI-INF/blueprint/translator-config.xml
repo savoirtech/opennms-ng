@@ -17,7 +17,15 @@
                               system-properties="override">
     </ext:property-placeholder>
 
-    <bean id="eventTranslatorConfig" class="org.opennms.ng.services.translatorconfig.EventTranslatorConfigFactory" init-method="init"/>
+    <reference id="jta" interface="javax.sql.DataSource"
+               filter="(transactional=true)" availability="mandatory"/>
+
+    <reference id="nonJTA" interface="javax.sql.DataSource"
+               filter="(transactional=false)" availability="mandatory"/>
+
+    <bean id="eventTranslatorConfig" class="org.opennms.ng.services.translatorconfig.EventTranslatorConfigFactory" init-method="init">
+        <property name="dataSource" ref="nonJTA"/>
+    </bean>
 
     <service ref="eventTranslatorConfig" interface="org.opennms.ng.services.translatorconfig.EventTranslatorConfig"/>
 
