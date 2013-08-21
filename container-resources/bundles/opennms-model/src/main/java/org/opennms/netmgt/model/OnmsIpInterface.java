@@ -315,7 +315,7 @@ public class OnmsIpInterface extends OnmsEntity implements Serializable {
      *
      * @return a {@link org.opennms.netmgt.model.OnmsNode} object.
      */
-    @ManyToOne(optional=false, fetch=FetchType.LAZY)
+    @ManyToOne(optional=false, fetch=FetchType.LAZY, cascade = CascadeType.ALL)
     @JoinColumn(name="nodeId")
     @XmlElement(name="nodeId")
     @XmlIDREF
@@ -338,7 +338,7 @@ public class OnmsIpInterface extends OnmsEntity implements Serializable {
      * @return a {@link java.util.Set} object.
      */
     @XmlTransient
-    @OneToMany(mappedBy="ipInterface",orphanRemoval=true)
+    @OneToMany(mappedBy="ipInterface",orphanRemoval=true, cascade = CascadeType.ALL)
     @org.hibernate.annotations.Cascade(org.hibernate.annotations.CascadeType.ALL)
     public Set<OnmsMonitoredService> getMonitoredServices() {
         return m_monitoredServices ;
@@ -360,7 +360,7 @@ public class OnmsIpInterface extends OnmsEntity implements Serializable {
      * @return a {@link org.opennms.netmgt.model.OnmsSnmpInterface} object.
      */
     @XmlElement(name = "snmpInterface")
-    @ManyToOne(optional=true, fetch=FetchType.LAZY)
+    @ManyToOne(optional=true, fetch=FetchType.LAZY, cascade = CascadeType.ALL)
     @JoinColumn(name="snmpInterfaceId")
     public OnmsSnmpInterface getSnmpInterface() {
         return m_snmpInterface;
@@ -411,7 +411,7 @@ public class OnmsIpInterface extends OnmsEntity implements Serializable {
      * @return a {@link java.net.InetAddress} object.
      */
     @Column(name="ipAddr")
-    @Externalizer("getAddress")
+    @Externalizer("getHostAddress")
     @Factory("InetAddressUtils.getInetAddress")
     @XmlElement(name="ipAddress")
     @Type(type="org.opennms.netmgt.model.InetAddressUserType")
