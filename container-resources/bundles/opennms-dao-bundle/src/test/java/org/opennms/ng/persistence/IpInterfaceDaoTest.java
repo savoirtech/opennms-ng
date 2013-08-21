@@ -1,8 +1,8 @@
 package org.opennms.ng.persistence;
 
 import org.junit.Test;
+import org.opennms.netmgt.model.OnmsIpInterface;
 import org.opennms.ng.persistence.dao.OnmsIpInterfaceDao;
-import org.opennms.ng.persistence.entities.OnmsIpInterface;
 
 
 import static org.junit.Assert.assertNotNull;
@@ -22,6 +22,6 @@ public class IpInterfaceDaoTest extends AbstractTestBase {
         assertNull(ipInterface);
 
         dao.findByServiceType("test");
-//        dao.findByNodeIdAndIpAddress(1,"127.0.0.1");
+        dao.findByNodeIdAndIpAddress(1,"127.0.0.1");
     }
 }

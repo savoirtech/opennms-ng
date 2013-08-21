@@ -9,12 +9,8 @@ import java.util.List;
 import java.util.Map;
 import javax.persistence.Query;
 
-import org.opennms.netmgt.model.OnmsCategory;
-import org.opennms.netmgt.model.OnmsDistPoller;
-import org.opennms.netmgt.model.OnmsSnmpInterface;
-import org.opennms.netmgt.model.SurveillanceStatus;
+import org.opennms.netmgt.model.*;
 import org.opennms.ng.persistence.dao.OnmsNodeDao;
-import org.opennms.ng.persistence.entities.OnmsIpInterface;
 import org.opennms.ng.persistence.entities.OnmsNode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
