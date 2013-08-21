@@ -22,6 +22,6 @@ public class IpInterfaceDaoTest extends AbstractTestBase {
         assertNull(ipInterface);
 
         dao.findByServiceType("test");
-        dao.findByNodeIdAndIpAddress(1,"127.0.0.1");
+        //dao.findByNodeIdAndIpAddress(1,"127.0.0.1");
     }
 }
