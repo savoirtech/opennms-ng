@@ -28,7 +28,7 @@
         <jta-data-source>osgi:service/javax.sql.DataSource/(transactional=true)</jta-data-source>
         <non-jta-data-source>osgi:service/javax.sql.DataSource/(transactional=false)</non-jta-data-source>
 
-        <exclude-unlisted-classes>true</exclude-unlisted-classes>
+        <exclude-unlisted-classes>false</exclude-unlisted-classes>
         <validation-mode>NONE</validation-mode>
 
         <properties>
@@ -44,7 +44,7 @@
             <property name="openjpa.ConnectionFactoryMode" value="local"/>
             <property name="openjpa.LockManager" value="none"/>
 
-            <property name="openjpa.Log" value="DefaultLevel=TRACE, Runtime=TRACE, Tool=WARN, SQL=TRACE"/>
+            <property name="openjpa.Log" value="DefaultLevel=TRACE, Runtime=TRACE, Tool=TRACE, SQL=TRACE"/>
 
         </properties>
     </persistence-unit>
