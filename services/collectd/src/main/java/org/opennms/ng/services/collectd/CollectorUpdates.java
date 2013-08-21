@@ -28,10 +28,10 @@
 
 package org.opennms.ng.services.collectd;
 
+import org.opennms.netmgt.model.OnmsIpInterface;
+
 import java.util.HashMap;
 import java.util.Map;
-
-import org.opennms.ng.persistence.entities.OnmsIpInterface;
 
 /**
  * The CollectorUpdates class encapsulates changes to a SnmpCollector which is

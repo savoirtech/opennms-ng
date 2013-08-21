@@ -4,7 +4,7 @@ import java.net.InetAddress;
 import java.util.List;
 import java.util.Map;
 
-import org.opennms.ng.persistence.entities.OnmsIpInterface;
+import org.opennms.netmgt.model.OnmsIpInterface;
 import org.opennms.ng.persistence.entities.OnmsNode;
 
 public interface OnmsIpInterfaceDao extends GenericDao<OnmsIpInterface, Integer> {

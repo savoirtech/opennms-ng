@@ -94,8 +94,7 @@
                         <configuration>
                             <classifier>sources</classifier>
                             <includeArtifactIds>opennms-model</includeArtifactIds>
-
-                            <failOnMissingClassifierArtifact>false</failOnMissingClassifierArtifact>
+                            <excludes>org/opennms/netmgt/model/OnmsIpInterface.java</excludes>
                             <outputDirectory>${project.build.directory}/generated</outputDirectory>
                         </configuration>
                     </execution>
