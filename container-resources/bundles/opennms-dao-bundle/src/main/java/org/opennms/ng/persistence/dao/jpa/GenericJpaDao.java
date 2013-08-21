@@ -2,6 +2,7 @@ package org.opennms.ng.persistence.dao.jpa;
 
 import java.io.Serializable;
 import java.util.List;
+import javax.persistence.NoResultException;
 import javax.persistence.Query;
 
 import org.opennms.ng.persistence.dao.GenericDao;
@@ -115,7 +116,12 @@ public abstract class GenericJpaDao<T, PK extends Serializable> extends Abstract
                 query.setParameter(i+1, args[i]);
             }
         }
-        final Object result = query.getSingleResult();
+        Object result;
+        try{
+            result =  query.getSingleResult();
+        } catch (NoResultException e){
+            result = null;
+        }
         return result == null ? null : type.cast(result);
     }
 
