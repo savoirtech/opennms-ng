@@ -47,6 +47,8 @@ import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlTransient;
 import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 
+import org.apache.openjpa.persistence.Externalizer;
+import org.apache.openjpa.persistence.Factory;
 import org.hibernate.annotations.Type;
 import org.opennms.core.utils.InetAddressUtils;
 import org.opennms.core.xml.bind.InetAddressXmlAdapter;
@@ -409,6 +411,8 @@ public class OnmsIpInterface extends OnmsEntity implements Serializable {
      * @return a {@link java.net.InetAddress} object.
      */
     @Column(name="ipAddr")
+    @Externalizer("getAddress")
+    @Factory("InetAddressUtils.getInetAddress")
     @XmlElement(name="ipAddress")
     @Type(type="org.opennms.netmgt.model.InetAddressUserType")
     @XmlJavaTypeAdapter(InetAddressXmlAdapter.class)
