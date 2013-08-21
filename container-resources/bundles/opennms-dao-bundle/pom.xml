@@ -34,7 +34,16 @@
             org.apache.tools.ant.taskdefs;resolution:="optional",
             org.apache.tools.ant.types;resolution:="optional",
 
-            org.hibernate*;resolution:="optional",
+            org.hibernate;resolution:=optional,
+            org.hibernate.annotations;resolution:=optional,
+            org.hibernate.criterion;resolution:=optional,
+            org.hibernate.engine;resolution:=optional,
+            org.hibernate.impl;resolution:=optional,
+            org.hibernate.transform;resolution:=optional,
+            org.hibernate.type;resolution:=optional,
+            org.hibernate.usertype;resolution:=optional,
+            org.springframework.security.core;resolution:=optional,
+            org.springframework.security.core.userdetails;resolution:=optional,
             org.apache.openjpa.enhance;version="[2.1.0,3)",
             org.apache.openjpa.util;version="[2.1.0,3)",
             javax.persistence,
@@ -55,14 +64,8 @@
 
         </opennms.osgi.export>
 
-        <opennms.osgi.private.pkg>
-            org.opennms.core.criteria,
-            org.opennms.core.criteria.restrictions,
-        </opennms.osgi.private.pkg>
-
         <opennms.osgi.failok>true</opennms.osgi.failok>
         <!-- Trying to get around dynamic class.forname loading -->
-        <opennms.osgi.dynamic>*</opennms.osgi.dynamic>
 
         <opennms.osgi.jpa.context>META-INF/persistence.xml</opennms.osgi.jpa.context>
 

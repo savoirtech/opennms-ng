@@ -82,6 +82,7 @@
         <bundle>mvn:org.opennms.ng/datasource/${project.version}</bundle>
         <bundle>mvn:org.opennms.bundles/c3p0/${c3p0.version}</bundle>
 
+        <bundle>mvn:org.opennms.core/org.opennms.core.criteria/${opennms.version}</bundle>
         <bundle>mvn:org.opennms.bundles/opennms-dao-bundle/${opennms.version}</bundle>
         <bundle>mvn:org.opennms.bundles/opennms-model/${opennms.version}</bundle>
         <bundle>mvn:org.opennms.bundles/opennms-config-model/${opennms.version}</bundle>
