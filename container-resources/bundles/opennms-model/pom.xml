@@ -97,6 +97,7 @@
                             <excludes>
                                 org/opennms/netmgt/model/OnmsIpInterface.java,
                                 org/opennms/netmgt/model/OnmsAlarm.java,
+                                org/opennms/netmgt/model/OnmsEvent.java,
                                 org/opennms/netmgt/model/OnmsNotification.java,
                                 org/opennms/netmgt/model/OnmsSnmpInterface.java
                             </excludes>
