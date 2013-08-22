@@ -36,5 +36,24 @@ public class IpInterfaceDaoTest extends AbstractTestBase {
         ipi.setIsManaged("M");
         ipi.setIpHostName("TEST");
         dao.create(ipi);
+
+        //get
+        dao.get(node,"127.0.0.1");
+
+        //findByIpAddress
+        dao.findByIpAddress("127.0.0.1");
+
+        //findByNodeId
+        dao.findByNodeId(1);
+
+        //findByForeignKeyAndIpAddress
+        dao.findByForeignKeyAndIpAddress("1","1","127.0.0.1");
+
+        //findHierarchyByServiceType
+        //dao.findHierarchyByServiceType("test");
+
+        //findPrimaryInterfaceByNodeId
+        dao.findPrimaryInterfaceByNodeId(1);
+
     }
 }
