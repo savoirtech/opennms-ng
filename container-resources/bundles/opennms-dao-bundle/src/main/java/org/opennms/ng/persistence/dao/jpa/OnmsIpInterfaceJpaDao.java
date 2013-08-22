@@ -35,14 +35,14 @@ public class OnmsIpInterfaceJpaDao extends GenericJpaDao<OnmsIpInterface, Intege
      * {@inheritDoc}
      */
     public OnmsIpInterface get(OnmsNode node, String ipAddress) {
-        return findUnique("from OnmsIpInterface as ipInterface where ipInterface.node = ?1 and ipInterface.ipAddress = ?1", node, ipAddress);
+        return findUnique("select ipInterface from OnmsIpInterface ipInterface where ipInterface.node = ?1 and ipInterface.ipAddress = ?2", node, InetAddressUtils.getInetAddress(ipAddress));
     }
 
     /**
      * {@inheritDoc}
      */
     public List<OnmsIpInterface> findByIpAddress(String ipAddress) {
-        return find("from OnmsIpInterface ipInterface where ipInterface.ipAddress = ?1", ipAddress);
+        return find("select ipInterface from OnmsIpInterface ipInterface where ipInterface.ipAddress = ?1",  InetAddressUtils.getInetAddress(ipAddress));
     }
 
     /**
@@ -50,7 +50,7 @@ public class OnmsIpInterfaceJpaDao extends GenericJpaDao<OnmsIpInterface, Intege
      */
     public List<OnmsIpInterface> findByNodeId(Integer nodeId) {
         Assert.notNull(nodeId, "nodeId cannot be null");
-        return find("from OnmsIpInterface ipInterface where ipInterface.node.id = ?1", nodeId);
+        return find("select ipInterface from OnmsIpInterface ipInterface where ipInterface.node.id = ?1", nodeId);
     }
 
     /**
@@ -58,8 +58,8 @@ public class OnmsIpInterfaceJpaDao extends GenericJpaDao<OnmsIpInterface, Intege
      */
     public OnmsIpInterface findByNodeIdAndIpAddress(Integer nodeId, String ipAddress) {
         InetAddress addr = InetAddressUtils.getInetAddress(ipAddress);
-        return findUnique("select ipInterface from OnmsIpInterface as ipInterface where ipInterface.node.id = ?1 and ipInterface.ipAddress = ?2",
-            nodeId, addr);
+        return findUnique("select ipInterface from OnmsIpInterface as ipInterface join ipInterface.node as node where node.id = ?1 and ipInterface.ipAddress = ?2",
+            nodeId, InetAddressUtils.getInetAddress(ipAddress));
     }
 
     /**
@@ -67,8 +67,8 @@ public class OnmsIpInterfaceJpaDao extends GenericJpaDao<OnmsIpInterface, Intege
      */
     public OnmsIpInterface findByForeignKeyAndIpAddress(String foreignSource, String foreignId, String ipAddress) {
         return findUnique(
-            "select ipInterface from OnmsIpInterface as ipInterface join ipInterface.node as node where node.foreignSource = ? and node.foreignId ="
-                + " ? and ipInterface.ipAddress = ?", foreignSource, foreignId, ipAddress);
+            "select ipInterface from OnmsIpInterface as ipInterface join ipInterface.node as node where node.foreignSource = ?1 and node.foreignId ="
+                + " ?2 and ipInterface.ipAddress = ?3", foreignSource, foreignId, InetAddressUtils.getInetAddress(ipAddress));
     }
 
     /**
@@ -89,12 +89,12 @@ public class OnmsIpInterfaceJpaDao extends GenericJpaDao<OnmsIpInterface, Intege
      */
     public List<OnmsIpInterface> findHierarchyByServiceType(String svcName) {
         return find("select distinct ipInterface " +
-            "from OnmsIpInterface as ipInterface " +
-            "left join fetch ipInterface.node as node " +
+            "from OnmsIpInterface ipInterface " +
+            "left join fetch ipInterface.node node " +
             "left join fetch node.assetRecord " +
-            "left join fetch ipInterface.node.snmpInterfaces as snmpIf " +
+            "left join fetch node.snmpInterfaces snmpIf " +
             "left join fetch snmpIf.ipInterfaces " +
-            "join ipInterface.monitoredServices as monSvc " +
+            "join ipInterface.monitoredServices monSvc " +
             "where monSvc.serviceType.name = ?1", svcName);
     }
 
@@ -159,7 +159,7 @@ public class OnmsIpInterfaceJpaDao extends GenericJpaDao<OnmsIpInterface, Intege
         // SELECT ipaddr FROM ipinterface WHERE nodeid = ? AND issnmpprimary = 'P'
 
         List<OnmsIpInterface> primaryInterfaces = find(
-            "from OnmsIpInterface as ipInterface where ipInterface.node.id = ? and ipInterface.isSnmpPrimary = 'P' order by ipLastCapsdPoll desc",
+            "select ipInterface from OnmsIpInterface ipInterface where ipInterface.node.id = ?1 and ipInterface.isSnmpPrimary = 'P' order by ipInterface.ipLastCapsdPoll desc",
             nodeId);
         if (primaryInterfaces.size() < 1) {
             return null;
