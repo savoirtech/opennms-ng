@@ -94,9 +94,7 @@
                         <configuration>
                             <classifier>sources</classifier>
                             <includeArtifactIds>opennms-model</includeArtifactIds>
-                            <excludes>org/opennms/netmgt/model/OnmsIpInterface.java,org/opennms/netmgt/model/OnmsAlarm.java</excludes>
-
-
+                            <excludes>org/opennms/netmgt/model/OnmsIpInterface.java,org/opennms/netmgt/model/OnmsAlarm.java,org/opennms/netmgt/model/OnmsNotification.java</excludes>
                             <outputDirectory>${project.build.directory}/generated</outputDirectory>
                         </configuration>
                     </execution>
