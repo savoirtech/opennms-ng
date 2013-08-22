@@ -6,7 +6,6 @@ import org.opennms.netmgt.model.OnmsIpInterface;
 import org.opennms.ng.persistence.dao.OnmsIpInterfaceDao;
 import org.opennms.ng.persistence.entities.OnmsNode;
 
-
 import java.util.Date;
 
 import static org.junit.Assert.assertNotNull;
@@ -32,7 +31,8 @@ public class IpInterfaceDaoTest extends AbstractTestBase {
         OnmsNode node = new OnmsNode();
         node.setCreateTime(new Date());
         node.setLabel("TEST");
-        OnmsIpInterface ipi = new OnmsIpInterface(InetAddressUtils.getInetAddress("127.0.0.1"),node);
+
+        OnmsIpInterface ipi = new OnmsIpInterface(InetAddressUtils.getInetAddress("127.0.0.1"), node);
         ipi.setIsManaged("M");
         ipi.setIpHostName("TEST");
         dao.create(ipi);
