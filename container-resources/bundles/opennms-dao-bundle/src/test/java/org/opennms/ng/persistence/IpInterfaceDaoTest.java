@@ -35,6 +35,6 @@ public class IpInterfaceDaoTest extends AbstractTestBase {
         OnmsIpInterface ipi = new OnmsIpInterface(InetAddressUtils.getInetAddress("127.0.0.1"),node);
         ipi.setIsManaged("M");
         ipi.setIpHostName("TEST");
-        dao.update(ipi);
+        dao.create(ipi);
     }
 }

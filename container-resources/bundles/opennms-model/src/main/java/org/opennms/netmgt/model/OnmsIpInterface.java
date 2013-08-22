@@ -414,16 +414,16 @@ public class OnmsIpInterface extends OnmsEntity implements Serializable {
     @XmlElement(name = "ipAddress")
     @XmlJavaTypeAdapter(InetAddressXmlAdapter.class)
     @Externalizer("getHostAddress")
-    @Factory("OnmsIpInterface.getShit")
+    @Factory("OnmsIpInterface.strToAddr")
     @Column(name = "ipAddr")
     public InetAddress getIpAddress() {
         return m_ipAddress;
     }
 
 
-    public static InetAddress getShit(String penis){
+    public static InetAddress strToAddr(String addr){
 
-        return org.opennms.netmgt.model.InetAddressUtils.addr(penis);
+        return org.opennms.netmgt.model.InetAddressUtils.addr(addr);
     }
 
     /**
