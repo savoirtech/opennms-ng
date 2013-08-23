@@ -59,11 +59,17 @@
     <bean id="suspectEventProcessorFactory" class="org.opennms.ng.services.capsd.DefaultProcessorFactory">
         <property name="capsdDbSyncer" ref="syncer"/>
         <property name="pluginManager" ref="pluginManager"/>
+        <property name="eventIpcManager" ref="eventIpcManager"/>
+        <property name="capsdConfig" ref="capsdConfig"/>
+        <property name="pollerConfig" ref="pollerConfig"/>
     </bean>
 
     <bean id="rescanProcessorFactory" class="org.opennms.ng.services.capsd.DefaultProcessorFactory">
         <property name="capsdDbSyncer" ref="syncer"/>
         <property name="pluginManager" ref="pluginManager"/>
+        <property name="eventIpcManager" ref="eventIpcManager"/>
+        <property name="capsdConfig" ref="capsdConfig"/>
+        <property name="pollerConfig" ref="pollerConfig"/>
     </bean>
 
     <bean id="suspectRunner" class="java.util.concurrent.Executors" factory-method="newFixedThreadPool">
@@ -81,6 +87,7 @@
         <argument ref="rescanRunner"/>
         <argument ref="rescanProcessorFactory"/>
         <argument ref="capsdConfig"/>
+        <property name="eventIpcManager" ref="eventIpcManager"/>
     </bean>
 
     <bean id="capsdBroadcastProcessor" class="org.opennms.ng.services.capsd.BroadcastEventProcessor">
@@ -88,6 +95,9 @@
         <property name="suspectEventProcessorFactory" ref="suspectEventProcessorFactory"/>
         <property name="suspectQueue" ref="suspectRunner"/>
         <property name="localServer" ref="serverName"/>
+        <property name="eventIpcManager" ref="eventIpcManager"/>
+        <property name="capsdConfig" ref="capsdConfig"/>
+        <property name="pollerConfig" ref="pollerConfig"/>
 
     </bean>
 
@@ -105,6 +115,9 @@
         <property name="suspectRunner" ref="suspectRunner"/>
         <property name="rescanRunner" ref="rescanRunner"/>
         <property name="eventListener" ref="capsdEventListenerAdapter"/>
+        <property name="eventIpcManager" ref="eventIpcManager"/>
+        <property name="capsdConfig" ref="capsdConfig"/>
+        <property name="pollerConfig" ref="pollerConfig"/>
     </bean>
 
     <bean id="jdbcTemplate" class="org.springframework.jdbc.core.JdbcTemplate">

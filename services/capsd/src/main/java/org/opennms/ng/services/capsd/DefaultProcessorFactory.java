@@ -28,7 +28,8 @@
 
 package org.opennms.ng.services.capsd;
 
-
+import org.opennms.netmgt.model.events.EventIpcManager;
+import org.opennms.ng.services.capsdconfig.CapsdConfig;
 import org.opennms.ng.services.pollerconfig.PollerConfig;
 
 /**
@@ -41,8 +42,17 @@ public class DefaultProcessorFactory implements SuspectEventProcessorFactory, Re
 
     private CapsdDbSyncer m_capsdDbSyncer;
     private PluginManager m_pluginManager;
-
+    private EventIpcManager eventIpcManager;
     private PollerConfig pollerConfig;
+    private CapsdConfig capsdConfig;
+
+    public void setPollerConfig(PollerConfig pollerConfig) {
+        this.pollerConfig = pollerConfig;
+    }
+
+    public void setCapsdConfig(CapsdConfig capsdConfig) {
+        this.capsdConfig = capsdConfig;
+    }
 
     /**
      * <p>setCapsdDbSyncer</p>
@@ -65,30 +75,41 @@ public class DefaultProcessorFactory implements SuspectEventProcessorFactory, Re
     /* (non-Javadoc)
      * @see org.opennms.netmgt.capsd.SuspectEventProcessorFactory#createSuspectEventProcessor(java.lang.String)
      */
-    /** {@inheritDoc} */
+
+    /**
+     * {@inheritDoc}
+     */
     @Override
-    public SuspectEventProcessor createSuspectEventProcessor(String ifAddress) {
-        return new SuspectEventProcessor(m_capsdDbSyncer, m_pluginManager, ifAddress);
+    public SuspectEventProcessor createSuspectEventProcessor(String ifAddress, PollerConfig pollerConfig, CapsdConfig capsdConfig,
+                                                             EventIpcManager eventIpcManager) {
+        return new SuspectEventProcessor(m_capsdDbSyncer, m_pluginManager, ifAddress, pollerConfig, capsdConfig, eventIpcManager);
     }
 
     /* (non-Javadoc)
      * @see org.opennms.netmgt.capsd.RescanProcessorFactory#createRescanProcessor(int)
      */
-    /** {@inheritDoc} */
+
+    /**
+     * {@inheritDoc}
+     */
     @Override
-    public RescanProcessor createRescanProcessor(int nodeId) {
-        return new RescanProcessor(nodeId, false, m_capsdDbSyncer, m_pluginManager);
+    public RescanProcessor createRescanProcessor(int nodeId, CapsdConfig capsdConfig, EventIpcManager eventIpcManager) {
+        return new RescanProcessor(nodeId, false, m_capsdDbSyncer, m_pluginManager, capsdConfig, eventIpcManager);
     }
 
     /* (non-Javadoc)
      * @see org.opennms.netmgt.capsd.RescanProcessorFactory#createForcedRescanProcessor(int)
      */
-    /** {@inheritDoc} */
+
+    /**
+     * {@inheritDoc}
+     */
     @Override
-    public RescanProcessor createForcedRescanProcessor(int nodeId) {
-        return new RescanProcessor(nodeId, true, m_capsdDbSyncer, m_pluginManager);
+    public RescanProcessor createForcedRescanProcessor(int nodeId, CapsdConfig capsdConfig, EventIpcManager eventIpcManager) {
+        return new RescanProcessor(nodeId, true, m_capsdDbSyncer, m_pluginManager, capsdConfig, eventIpcManager);
     }
 
-
-
+    public void setEventIpcManager(EventIpcManager eventIpcManager) {
+        this.eventIpcManager = eventIpcManager;
+    }
 }

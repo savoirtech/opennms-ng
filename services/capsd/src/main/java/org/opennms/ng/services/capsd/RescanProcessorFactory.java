@@ -28,7 +28,8 @@
 
 package org.opennms.ng.services.capsd;
 
-
+import org.opennms.netmgt.model.events.EventIpcManager;
+import org.opennms.ng.services.capsdconfig.CapsdConfig;
 
 /**
  * <p>RescanProcessorFactory interface.</p>
@@ -44,7 +45,7 @@ public interface RescanProcessorFactory {
      * @param nodeId a int.
      * @return a {@link org.opennms.netmgt.capsd.RescanProcessor} object.
      */
-    public abstract RescanProcessor createRescanProcessor(int nodeId);
+    public abstract RescanProcessor createRescanProcessor(int nodeId, CapsdConfig capsdConfig, EventIpcManager eventIpcManager);
 
     /**
      * <p>createForcedRescanProcessor</p>
@@ -52,6 +53,5 @@ public interface RescanProcessorFactory {
      * @param nodeId a int.
      * @return a {@link org.opennms.netmgt.capsd.RescanProcessor} object.
      */
-    public abstract RescanProcessor createForcedRescanProcessor(int nodeId);
-
+    public abstract RescanProcessor createForcedRescanProcessor(int nodeId, CapsdConfig capsdConfig, EventIpcManager eventIpcManager);
 }

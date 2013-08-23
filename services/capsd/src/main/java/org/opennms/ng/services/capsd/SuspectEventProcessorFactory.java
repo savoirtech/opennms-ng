@@ -28,6 +28,10 @@
 
 package org.opennms.ng.services.capsd;
 
+import org.opennms.netmgt.model.events.EventIpcManager;
+import org.opennms.ng.services.capsdconfig.CapsdConfig;
+import org.opennms.ng.services.pollerconfig.PollerConfig;
+
 /**
  * <p>SuspectEventProcessorFactory interface.</p>
  *
@@ -42,6 +46,5 @@ public interface SuspectEventProcessorFactory {
      * @param ifAddress a {@link String} object.
      * @return a {@link org.opennms.netmgt.capsd.SuspectEventProcessor} object.
      */
-    public abstract SuspectEventProcessor createSuspectEventProcessor(String ifAddress);
-
+    public abstract SuspectEventProcessor createSuspectEventProcessor(String ifAddress,PollerConfig pollerConfig, CapsdConfig capsdConfig, EventIpcManager eventIpcManager);
 }

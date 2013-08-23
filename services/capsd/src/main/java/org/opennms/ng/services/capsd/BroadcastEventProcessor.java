@@ -52,10 +52,13 @@ import org.opennms.netmgt.model.OnmsNode;
 import org.opennms.netmgt.model.capsd.DbIfServiceEntry;
 import org.opennms.netmgt.model.capsd.DbIpInterfaceEntry;
 import org.opennms.netmgt.model.capsd.DbNodeEntry;
+import org.opennms.netmgt.model.events.EventIpcManager;
 import org.opennms.netmgt.model.events.annotations.EventHandler;
 import org.opennms.netmgt.model.events.annotations.EventListener;
 import org.opennms.netmgt.xml.event.Event;
+import org.opennms.ng.services.capsdconfig.CapsdConfig;
 import org.opennms.ng.services.capsdconfig.CapsdConfigFactory;
+import org.opennms.ng.services.pollerconfig.PollerConfig;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.InitializingBean;
@@ -73,6 +76,17 @@ public class BroadcastEventProcessor implements InitializingBean {
     private SuspectEventProcessor suspectEventProcessor;
     private Set<String> queuedSuspectTracker = new HashSet<String>();
     private static final Logger LOG = LoggerFactory.getLogger(BroadcastEventProcessor.class);
+    private EventIpcManager eventIpcManager;
+    private PollerConfig pollerConfig;
+
+    public void setPollerConfig(PollerConfig pollerConfig) {
+        this.pollerConfig = pollerConfig;
+    }
+
+    public void setEventIpcManager(EventIpcManager eventIpcManager) {
+        this.eventIpcManager = eventIpcManager;
+    }
+
     /**
      * SQL statement used to add an interface/server mapping into the database;
      */
@@ -1571,7 +1585,7 @@ public class BroadcastEventProcessor implements InitializingBean {
         // new suspect event
         try {
             LOG.debug("onMessage: Adding interface to suspectInterface Q: {}", interfaceValue);
-            m_suspectQ.execute(m_suspectEventProcessorFactory.createSuspectEventProcessor(interfaceValue));
+            m_suspectQ.execute(m_suspectEventProcessorFactory.createSuspectEventProcessor(interfaceValue,pollerConfig,capsdConfig,eventIpcManager));
         } catch (final Throwable ex) {
             LOG.error("onMessage: Failed to add interface to suspect queue", ex);
         }
@@ -1581,6 +1595,13 @@ public class BroadcastEventProcessor implements InitializingBean {
         synchronized (queuedSuspectTracker) {
             return (queuedSuspectTracker.contains(ipAddr));
         }
+    }
+
+
+    private CapsdConfig capsdConfig;
+
+    public void setCapsdConfig(CapsdConfig capsdConfig) {
+        this.capsdConfig = capsdConfig;
     }
 
     /**

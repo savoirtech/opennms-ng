@@ -99,7 +99,8 @@
                                 org/opennms/netmgt/model/OnmsAlarm.java,
                                 org/opennms/netmgt/model/OnmsEvent.java,
                                 org/opennms/netmgt/model/OnmsNotification.java,
-                                org/opennms/netmgt/model/OnmsSnmpInterface.java
+                                org/opennms/netmgt/model/OnmsSnmpInterface.java,
+                                org/opennms/netmgt/model/OnmsNode.java,
                             </excludes>
                             <outputDirectory>${project.build.directory}/generated</outputDirectory>
                         </configuration>

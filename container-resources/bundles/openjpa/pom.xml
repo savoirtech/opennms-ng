@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xmlns="http://maven.apache.org/POM/4.0.0"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <parent>
+        <artifactId>bundles</artifactId>
+        <groupId>org.opennms.ng</groupId>
+        <version>1.0-SNAPSHOT</version>
+    </parent>
+    <modelVersion>4.0.0</modelVersion>
+
+    <name>OPENNMS :: OpenJPA</name>
+    <description>OPENNMS OpenJPA</description>
+
+    <groupId>org.opennms.ng</groupId>
+    <artifactId>openjpa</artifactId>
+    <version>${openjpa.version}</version>
+
+    <packaging>bundle</packaging>
+
+    <properties>
+        <pkgGroupId>org.opennms.ng</pkgGroupId>
+        <pkgArtifactId>openjpa</pkgArtifactId>
+        <pkgVersion>${openjpa.version}</pkgVersion>
+
+        <opennms.osgi.import.pkg>
+            com.ibm.*;resolution:=optional,
+            org.postgresql.*;resolution:=optional,
+            org.apache.tools.ant.*;resolution:=optional,
+            org.apache.log4j.*;resolution:=optional,org.slf4j.*;resolution:=optional,org.apache.commons.logging.*;resolution:=optional,javax.activation.xa*;resolution:=optional,javax.jms.*;version="[1.1.0,1.2)";resolution:=optional,javax.transaction.*;version="[1.1.0,1.2)";resolution:=optional,javax.validation.*;version="[1.0.0,1.1)";resolution:=optional,javax.xml.bind.*;resolution:=optional,serp.*;resolution:=optional,javax.persistence.*;version="[1.1.0,2.1)",*
+        </opennms.osgi.import.pkg>
+        <opennms.osgi.export>
+            org.apache.openjpa.*;version=${openjpa.version}
+        </opennms.osgi.export>
+
+        <opennms.osgi.include.resource>{maven-resources},{maven-dependencies}</opennms.osgi.include.resource>
+        <opennms.osgi.failok>true</opennms.osgi.failok>
+
+        <!-- Trying to get around dynamic class.forname loading -->
+        <opennms.osgi.dynamic>*</opennms.osgi.dynamic>
+
+    </properties>
+
+    <dependencies>
+        <dependency>
+            <groupId>org.apache.openjpa</groupId>
+            <artifactId>openjpa</artifactId>
+            <version>${openjpa.version}</version>
+        </dependency>
+
+    </dependencies>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-shade-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>shade</goal>
+                        </goals>
+                        <configuration>
+                            <artifactSet>
+                                <includes>
+                                    <include>${pkgGroupId}:${pkgArtifactId}</include>
+
+                                </includes>
+                            </artifactSet>
+
+                            <promoteTransitiveDependencies>true</promoteTransitiveDependencies>
+                            <createDependencyReducedPom>true</createDependencyReducedPom>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
+
+</project>

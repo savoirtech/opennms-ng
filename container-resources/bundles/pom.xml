@@ -23,6 +23,7 @@
         <module>jldap</module>
         <module>postgresql</module>
         <module>dnsjava</module>
+        <module>openjpa</module>
 
         <module>opennms-javamail-api</module>
         <module>opennms-model</module>

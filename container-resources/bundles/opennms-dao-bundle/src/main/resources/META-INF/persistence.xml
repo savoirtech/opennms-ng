@@ -7,28 +7,28 @@
         <jta-data-source>blueprint:comp/jta</jta-data-source>
         <non-jta-data-source>blueprint:comp/nonJTA</non-jta-data-source>
         <class>org.opennms.netmgt.model.OnmsNode</class>
-                <class>org.opennms.netmgt.model.OnmsArpInterface</class>
-                <class>org.opennms.netmgt.model.OnmsAssetRecord</class>
-                <class>org.opennms.netmgt.model.OnmsCategory</class>
-                <class>org.opennms.netmgt.model.OnmsDistPoller</class>
-                <class>org.opennms.netmgt.model.OnmsIpInterface</class>
-                <class>org.opennms.netmgt.model.PathElement</class>
-                <class>org.opennms.netmgt.model.OnmsSnmpInterface</class>
-                <class>org.opennms.netmgt.model.OnmsArpInterface$StatusType</class>
-                <class>org.opennms.netmgt.model.OnmsGeolocation</class>
-                <class>org.opennms.netmgt.model.PrimaryType</class>
-                <class>org.opennms.netmgt.model.OnmsMonitoredService</class>
-                <class>org.opennms.netmgt.model.OnmsApplication</class>
-                <class>org.opennms.netmgt.model.OnmsOutage</class>
-                <class>org.opennms.netmgt.model.OnmsServiceType</class>
-                <class>org.opennms.netmgt.model.OnmsEvent</class>
-                <class>org.opennms.netmgt.model.OnmsAlarm</class>
-                <class>org.opennms.netmgt.model.OnmsNotification</class>
-                <class>org.opennms.netmgt.model.OnmsMemo</class>
-                <class>org.opennms.netmgt.model.OnmsReductionKeyMemo</class>
-                <class>org.opennms.netmgt.model.OnmsUserNotification</class>
+        <class>org.opennms.netmgt.model.OnmsArpInterface</class>
+        <class>org.opennms.netmgt.model.OnmsAssetRecord</class>
+        <class>org.opennms.netmgt.model.OnmsCategory</class>
+        <class>org.opennms.netmgt.model.OnmsDistPoller</class>
+        <class>org.opennms.netmgt.model.OnmsIpInterface</class>
+        <class>org.opennms.netmgt.model.PathElement</class>
+        <class>org.opennms.netmgt.model.OnmsSnmpInterface</class>
+        <class>org.opennms.netmgt.model.OnmsArpInterface$StatusType</class>
+        <class>org.opennms.netmgt.model.OnmsGeolocation</class>
+        <class>org.opennms.netmgt.model.PrimaryType</class>
+        <class>org.opennms.netmgt.model.OnmsMonitoredService</class>
+        <class>org.opennms.netmgt.model.OnmsApplication</class>
+        <class>org.opennms.netmgt.model.OnmsOutage</class>
+        <class>org.opennms.netmgt.model.OnmsServiceType</class>
+        <class>org.opennms.netmgt.model.OnmsEvent</class>
+        <class>org.opennms.netmgt.model.OnmsAlarm</class>
+        <class>org.opennms.netmgt.model.OnmsNotification</class>
+        <class>org.opennms.netmgt.model.OnmsMemo</class>
+        <class>org.opennms.netmgt.model.OnmsReductionKeyMemo</class>
+        <class>org.opennms.netmgt.model.OnmsUserNotification</class>
 
-                <class>org.opennms.ng.persistence.entities.OnmsNode</class>
+        <class>org.opennms.ng.persistence.entities.OnmsNode</class>
         <exclude-unlisted-classes>false</exclude-unlisted-classes>
         <validation-mode>NONE</validation-mode>
         <properties>
@@ -42,6 +42,12 @@
             <property name="openjpa.LockManager" value="pessimistic(VersionCheckOnReadLock=true,VersionUpdateOnWriteLock=true)"/>
             <property name="openjpa.LockTimeout" value="30000"/>
             <property name="openjpa.jdbc.SynchronizeMappings" value="buildSchema(ForeignKeys=true)"/>
+           <!--
+            <property name="openjpa.jdbc.DBDictionary" value="postgres"/>
+            -->
+            <property name="openjpa.jdbc.DBDictionary" value="StoreCharsAsNumbers=false"/>
+            <property name="openjpa.jdbc.DriverDataSource" value="auto"/>
+
 
             <property name="openjpa.Log" value="DefaultLevel=WARN, Runtime=WARN, Tool=WARN, SQL=WARN"/>
 
@@ -50,8 +56,7 @@
 
     <persistence-unit name="opennms-test" transaction-type="RESOURCE_LOCAL">
         <provider>org.apache.openjpa.persistence.PersistenceProviderImpl</provider>
-        
-        
+
         <class>org.opennms.netmgt.model.OnmsNode</class>
         <class>org.opennms.netmgt.model.OnmsArpInterface</class>
         <class>org.opennms.netmgt.model.OnmsAssetRecord</class>

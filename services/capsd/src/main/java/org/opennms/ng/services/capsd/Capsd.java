@@ -38,8 +38,10 @@ import org.opennms.core.utils.BeanUtils;
 import org.opennms.core.utils.InetAddressUtils;
 import org.opennms.netmgt.capsd.CapsdDbSyncer;
 import org.opennms.netmgt.capsd.RescanProcessor;
-
+import org.opennms.netmgt.model.events.EventIpcManager;
 import org.opennms.netmgt.model.events.StoppableEventListener;
+import org.opennms.ng.services.capsdconfig.CapsdConfig;
+import org.opennms.ng.services.pollerconfig.PollerConfig;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.util.Assert;
@@ -62,7 +64,6 @@ import org.springframework.util.Assert;
 public class Capsd {
 
     private String name = "CAPSD";
-
     private static final Logger LOG = LoggerFactory.getLogger(Capsd.class);
     /**
      * Database synchronization lock for synchronizing write access to the
@@ -100,18 +101,9 @@ public class Capsd {
      */
     private SuspectEventProcessorFactory m_suspectEventProcessorFactory;
     private CapsdDbSyncer m_capsdDbSyncer;
-
-    /**
-     * <P>
-     * Static initialization
-     * </P>
-     */
-
-    static {
-        m_address = InetAddressUtils.getLocalHostAddressAsString();
-    } // end static class initialization
-
-
+    private EventIpcManager eventIpcManager;
+    private PollerConfig pollerConfig;
+    private CapsdConfig capsdConfig;
 
     /**
      * Constructs the Capsd objec
@@ -134,6 +126,24 @@ public class Capsd {
     static Object getDbSyncLock() {
         return m_dbSyncLock;
     }
+
+    public void setPollerConfig(PollerConfig pollerConfig) {
+        this.pollerConfig = pollerConfig;
+    }
+
+    public void setEventIpcManager(EventIpcManager eventIpcManager) {
+        this.eventIpcManager = eventIpcManager;
+    }
+
+    /**
+     * <P>
+     * Static initialization
+     * </P>
+     */
+
+    static {
+        m_address = InetAddressUtils.getLocalHostAddressAsString();
+    } // end static class initialization
 
     /**
      * <p>onStop</p>
@@ -207,7 +217,6 @@ public class Capsd {
         // Set the Set that SuspectEventProcessor will use to track
         // suspect scans that are in progress
 
-
         // Likewise, a separate Set for the RescanProcessor
         RescanProcessor.setQueuedRescansTracker(new HashSet<Integer>());
 
@@ -231,6 +240,10 @@ public class Capsd {
         // XXX Resume all threads?
     }
 
+    public void setCapsdConfig(CapsdConfig capsdConfig) {
+        this.capsdConfig = capsdConfig;
+    }
+
     /**
      * This method is used by other managed beans to forward an IP Address for
      * capability scanning. The If the interface converts properly then it is
@@ -247,7 +260,8 @@ public class Capsd {
             @Override
             public void run() {
                 final InetAddress addr = InetAddressUtils.addr(ifAddr);
-                final SuspectEventProcessor proc = m_suspectEventProcessorFactory.createSuspectEventProcessor(InetAddressUtils.str(addr));
+                final SuspectEventProcessor proc = m_suspectEventProcessorFactory.createSuspectEventProcessor(InetAddressUtils.str(addr), pollerConfig,capsdConfig,
+                    eventIpcManager);
                 proc.run();
             }
         });

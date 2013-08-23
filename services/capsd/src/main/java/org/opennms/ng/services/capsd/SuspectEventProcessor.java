@@ -54,13 +54,13 @@ import org.opennms.netmgt.capsd.snmp.IfTableEntry;
 import org.opennms.netmgt.capsd.snmp.IfXTableEntry;
 import org.opennms.netmgt.capsd.snmp.IpAddrTable;
 import org.opennms.netmgt.capsd.snmp.SystemGroup;
-import org.opennms.netmgt.eventd.EventIpcManagerFactory;
 import org.opennms.netmgt.model.OnmsNode;
 import org.opennms.netmgt.model.capsd.DbIfServiceEntry;
 import org.opennms.netmgt.model.capsd.DbIpInterfaceEntry;
 import org.opennms.netmgt.model.capsd.DbNodeEntry;
 import org.opennms.netmgt.model.capsd.DbSnmpInterfaceEntry;
 import org.opennms.netmgt.model.events.EventBuilder;
+import org.opennms.netmgt.model.events.EventIpcManager;
 import org.opennms.netmgt.xml.event.Event;
 import org.opennms.ng.services.capsdconfig.CapsdConfig;
 import org.opennms.ng.services.collectdconfig.CollectdConfigFactory;
@@ -102,6 +102,7 @@ public class SuspectEventProcessor implements Runnable {
     private Set<String> m_queuedSuspectTracker = new HashSet<String>();
     private PollerConfig pollerConfig;
     private CapsdConfig capsdConfig;
+    private EventIpcManager eventIpcManager;
     /**
      * IP address of new suspect interface
      */
@@ -128,6 +129,19 @@ public class SuspectEventProcessor implements Runnable {
         synchronized (m_queuedSuspectTracker) {
             m_queuedSuspectTracker.add(ifAddress);
         }
+    }
+
+    public SuspectEventProcessor(CapsdDbSyncer capsdDbSyncer, PluginManager pluginManager, String ifAddress,PollerConfig pollerConfig,CapsdConfig capsdConfig, EventIpcManager eventIpcManager) {
+        Assert.notNull(capsdDbSyncer, "The capsdDbSyncer argument cannot be null");
+        Assert.notNull(pluginManager, "The pluginManager argument cannot be null");
+        Assert.notNull(ifAddress, "The ifAddress argument cannot be null");
+
+        m_capsdDbSyncer = capsdDbSyncer;
+        m_pluginManager = pluginManager;
+        m_suspectIf = ifAddress;
+        this.pollerConfig=pollerConfig;
+        this.eventIpcManager = eventIpcManager;
+        this.capsdConfig=capsdConfig;
     }
 
     /**
@@ -236,6 +250,10 @@ public class SuspectEventProcessor implements Runnable {
                 d.cleanUp();
             }
         }
+    }
+
+    public void setEventIpcManager(EventIpcManager eventIpcManager) {
+        this.eventIpcManager = eventIpcManager;
     }
 
     /**
@@ -1698,7 +1716,7 @@ public class SuspectEventProcessor implements Runnable {
     private void sendEvent(Event newEvent) {
         // Send event to Eventd
         try {
-            EventIpcManagerFactory.getIpcManager().sendNow(newEvent);
+            eventIpcManager.sendNow(newEvent);
 
             LOG.debug("sendEvent: successfully sent: {}", toString(newEvent));
         } catch (Throwable t) {

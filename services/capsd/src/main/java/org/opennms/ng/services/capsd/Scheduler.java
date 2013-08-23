@@ -46,6 +46,7 @@ import org.opennms.core.db.DataSourceFactory;
 import org.opennms.core.fiber.PausableFiber;
 import org.opennms.core.utils.DBUtils;
 import org.opennms.netmgt.capsd.ReparentViaSmb;
+import org.opennms.netmgt.model.events.EventIpcManager;
 import org.opennms.ng.services.capsdconfig.CapsdConfig;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -108,6 +109,11 @@ public class Scheduler implements Runnable, PausableFiber {
     private ExecutorService m_rescanQ;
     private RescanProcessorFactory m_rescanProcessorFactory;
     private CapsdConfig capsdConfig;
+    private EventIpcManager eventIpcManager;
+
+    public void setEventIpcManager(EventIpcManager eventIpcManager) {
+        this.eventIpcManager = eventIpcManager;
+    }
 
     /**
      * Constructs a new instance of the scheduler.
@@ -279,7 +285,7 @@ public class Scheduler implements Runnable, PausableFiber {
      */
     void forceRescan(int nodeId) {
         try {
-            m_rescanQ.execute(m_rescanProcessorFactory.createForcedRescanProcessor(nodeId));
+            m_rescanQ.execute(m_rescanProcessorFactory.createForcedRescanProcessor(nodeId,capsdConfig,eventIpcManager));
         } catch (RejectedExecutionException e) {
             LOG.error("forceRescan: Failed to add node {} to the rescan queue.", nodeId, e);
         }
@@ -602,7 +608,7 @@ public class Scheduler implements Runnable, PausableFiber {
         @Override
         public void run() {
             try {
-                m_rescanProcessorFactory.createRescanProcessor(getNodeId()).run();
+                m_rescanProcessorFactory.createRescanProcessor(getNodeId(),capsdConfig,eventIpcManager).run();
             } finally {
                 setLastScanned(new Date());
                 setScheduled(false);

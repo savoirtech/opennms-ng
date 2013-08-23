@@ -64,7 +64,6 @@ import org.opennms.netmgt.model.events.EventBuilder;
 import org.opennms.netmgt.model.events.EventIpcManager;
 import org.opennms.netmgt.xml.event.Event;
 import org.opennms.ng.services.capsdconfig.CapsdConfig;
-import org.opennms.ng.services.capsdconfig.CapsdConfigFactory;
 import org.opennms.ng.services.collectdconfig.CollectdConfigFactory;
 import org.opennms.ng.services.pollerconfig.PollerConfig;
 import org.slf4j.Logger;
@@ -195,6 +194,21 @@ public final class RescanProcessor implements Runnable {
         synchronized (m_queuedRescanTracker) {
             m_queuedRescanTracker.add(nodeId);
         }
+    }
+
+    public RescanProcessor(int nodeId, boolean forceRescan, CapsdDbSyncer capsdDbSyncer, PluginManager pluginManager,CapsdConfig capsdConfig, EventIpcManager eventIpcManager) {
+        m_nodeId = nodeId;
+                m_forceRescan = forceRescan;
+                m_capsdDbSyncer = capsdDbSyncer;
+                m_pluginManager = pluginManager;
+        this.eventIpcManager = eventIpcManager;
+        this.capsdConfig=capsdConfig;
+
+                // Add the node ID of the node to be rescanned to the Set that tracks
+                // rescan requests
+                synchronized (m_queuedRescanTracker) {
+                    m_queuedRescanTracker.add(nodeId);
+                }
     }
 
     /**
@@ -1389,7 +1403,7 @@ public final class RescanProcessor implements Runnable {
      * the corresponding DbSnmpInterfaceEntry is stored.
      */
     private DbIpInterfaceEntry getNewDbIpInterfaceEntry(DbNodeEntry node, IfSnmpCollector snmpc, boolean doesSnmp, InetAddress ifaddr) {
-        CapsdConfig cFactory = CapsdConfigFactory.getInstance();
+        CapsdConfig cFactory = capsdConfig;
         PollerConfig pollerCfgFactory = getPollerConfig();
 
         int ifIndex = -1;
@@ -2513,7 +2527,7 @@ public final class RescanProcessor implements Runnable {
      */
     private void updateServiceInfo(Connection dbc, DbNodeEntry node, DbIpInterfaceEntry dbIpIfEntry, boolean isNewIpEntry,
                                    List<IfCollector.SupportedProtocol> protocols) throws SQLException {
-        CapsdConfig cFactory = CapsdConfigFactory.getInstance();
+        CapsdConfig cFactory = capsdConfig;
         PollerConfig pollerCfgFactory = getPollerConfig();
         org.opennms.netmgt.config.poller.Package ipPkg = null;
 
@@ -2650,7 +2664,7 @@ public final class RescanProcessor implements Runnable {
          */
 
         PollerConfig pollerCfgFactory = getPollerConfig();
-        CapsdConfig cFactory = CapsdConfigFactory.getInstance();
+        CapsdConfig cFactory = capsdConfig;
         InetAddress ifaddr = dbIpIfEntry.getIfAddress();
         org.opennms.netmgt.config.poller.Package ipPkg = null;
 
@@ -3361,22 +3375,22 @@ public final class RescanProcessor implements Runnable {
             }
         }
 
-        InetAddress newSnmpPrimaryIf = CapsdConfigFactory.getInstance().determinePrimarySnmpInterface(snmpLBAddresses, strict);
+        InetAddress newSnmpPrimaryIf = capsdConfig.determinePrimarySnmpInterface(snmpLBAddresses, strict);
         String psiType = ConfigFileConstants.getFileName(ConfigFileConstants.COLLECTD_CONFIG_FILE_NAME) + " loopback addresses";
 
         if (newSnmpPrimaryIf == null) {
-            newSnmpPrimaryIf = CapsdConfigFactory.getInstance().determinePrimarySnmpInterface(snmpAddresses, strict);
+            newSnmpPrimaryIf = capsdConfig.determinePrimarySnmpInterface(snmpAddresses, strict);
             psiType = ConfigFileConstants.getFileName(ConfigFileConstants.COLLECTD_CONFIG_FILE_NAME) + " addresses";
         }
 
         strict = false;
         if (newSnmpPrimaryIf == null) {
-            newSnmpPrimaryIf = CapsdConfigFactory.getInstance().determinePrimarySnmpInterface(snmpLBAddresses, strict);
+            newSnmpPrimaryIf = capsdConfig.determinePrimarySnmpInterface(snmpLBAddresses, strict);
             psiType = "DB loopback addresses";
         }
 
         if (newSnmpPrimaryIf == null) {
-            newSnmpPrimaryIf = CapsdConfigFactory.getInstance().determinePrimarySnmpInterface(snmpAddresses, strict);
+            newSnmpPrimaryIf = capsdConfig.determinePrimarySnmpInterface(snmpAddresses, strict);
             psiType = "DB addresses";
         }
 
