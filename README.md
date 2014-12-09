@@ -3,7 +3,7 @@ opennms-ng
 --
 What is OpenNMS-NG?
 -------------------
-OpenNMS-NG is a modular imlementation of the OpenNMS monitoring stack based on OSGi.  It is seriously a work in progress.
+OpenNMS-NG is a modular implementation of the OpenNMS monitoring stack based on OSGi.  It is seriously a work in progress.
 
 OpenNMS-NG runs in Karaf and its goal is to allow daemons and components to run in a distributed fashion.  The idea is to provide persistent messaging as the backbone and allow for consumer-based event polling for obtaining messages.  By implementing this style of architecture, events can be handled on multiple machine utilizing a competing consumer methodology.  This allows OpenNMS to become fault tolerant with no single point of failure, and also allows it to scale massively in a horizontal capacity, theoretically allowing it to handle any load or any sized datacenter(s).  This also lends itself well to cloud deployments and ability to scale based on load.
 
@@ -20,23 +20,23 @@ Building OpenNMG-NG requires maven and Java.  First do a <code>git clone https:/
 
 Preparing the OpenNMS-NG runtime
 --------------------------------
-OpenNMS-NG requires that OpenNMS, ActiveMQ, PosgreSQL, and Karaf(aetos) are all available.   It is assumed that OpenNMS, PostgreSQL, and ActiveMQ will be running on the same machine as OpenNMS-NG.  This can be changed through the etc files to make the deployment more distibuted.  But for the sake of getting it running, we will assume it is all on the same machine.
+OpenNMS-NG requires that OpenNMS, ActiveMQ, PosgreSQL, and Karaf(aetos) are all available.   It is assumed that OpenNMS, PostgreSQL, and ActiveMQ will be running on the same machine as OpenNMS-NG.  This can be changed through the etc files to make the deployment more distributed.  But for the sake of getting it running, we will assume it is all on the same machine.
 
 ### OpenNMS Installation ###
-The installation of OpenNMS is beyond the scope of this document and you should be familar with how to get it installed.  The reason for its installation if for its configuration files and the database schema.  Information for how to install OpenNMS can be found <a href="http://www.opennms.org/documentation/installguide.html">here</a>.  Typically OpenNMS will be installed at /opt/opennms.  OpenNMS *does not* and *should not* be runnining when it comes time to execute OpenNMS-NG.  But we do need to get it to install the PostgreSQL database schema and have its configuration files available.  Once the database has been installed into PostgreSQL, you may shut down OpenNMS.
+The installation of OpenNMS is beyond the scope of this document and you should be familiar with how to get it installed.  The reason for its installation if for its configuration files and the database schema.  Information for how to install OpenNMS can be found <a href="http://www.opennms.org/documentation/installguide.html">here</a>.  Typically OpenNMS will be installed at /opt/opennms.  OpenNMS *does not* and *should not* be runnining when it comes time to execute OpenNMS-NG.  But we do need to get it to install the PostgreSQL database schema and have its configuration files available.  Once the database has been installed into PostgreSQL, you may shut down OpenNMS.
 
 ### ActiveMQ Installation ###
-Download a version of ActiveMQ from <a href="http://activemq.apache.org/download.html">here</a>. You may follow the instructions for installing and running ActiveMQ can be found <a href="http://activemq.apache.org/getting-started.html">here</a>.  Follow these instuctions to get ActiveMQ running.
+Download a version of ActiveMQ from <a href="http://activemq.apache.org/download.html">here</a>. You may follow the instructions for installing and running ActiveMQ can be found <a href="http://activemq.apache.org/getting-started.html">here</a>.  Follow these instructions to get ActiveMQ running.
 
 ### Aetos or Karaf installation ###
-We recommend that you use aetos since it is a karaf build with all of the necessary dependencies in it.  You may checkout the latest version (master) of aetos from <a href="https://github.com/savoirtech/aetos">here</a>.  Build it with the usual <code>mvn clean install</code> at the root aetos directory.  When it has completed building, there will be a tar.gz bunlde underneath the $AETOS_ROOT/aetos/target directory named something like "aetos-X.X-SNAPSHOT.tar.gz".  Retrieve that bundle and expand it somewhere.  The expnded version is your custom karaf build (aetos).
+We recommend that you use aetos since it is a karaf build with all of the necessary dependencies in it.  You may checkout the latest version (master) of aetos from <a href="https://github.com/savoirtech/aetos">here</a>.  Build it with the usual <code>mvn clean install</code> at the root aetos directory.  When it has completed building, there will be a tar.gz bundle underneath the $AETOS_ROOT/aetos/target directory named something like "aetos-X.X-SNAPSHOT.tar.gz".  Retrieve that bundle and expand it somewhere.  The expnded version is your custom karaf build (aetos).
 
 If you choose to use karaf, you may download it from the <a href="http://karaf.apache.org">Karaf website</a>.  Just be sure the version you use is 2.3.1 or later.
 
 From this point forward aetos and karaf will be referred to as "karaf".
 
 ### Getting Karaf configuration set up ###
-Once karaf has been expanded, we need to do a softlink to the OpenNMS installation under the karaf home directroy.  <code>cd</code> into the karaf directory to setup the softlink.  Assuming OpenNMS was installed in the default location of /opt/opennms, you would then issue the command:
+Once karaf has been expanded, we need to do a softlink to the OpenNMS installation under the karaf home directory.  <code>cd</code> into the karaf directory to setup the softlink.  Assuming OpenNMS was installed in the default location of /opt/opennms, you would then issue the command:
 
 <code>ln -s /opt/opennms opennms</code>
 
