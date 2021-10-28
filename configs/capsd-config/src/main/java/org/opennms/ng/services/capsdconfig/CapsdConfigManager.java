@@ -49,22 +49,10 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.io.IOUtils;
-import org.exolab.castor.xml.MarshalException;
-import org.exolab.castor.xml.Marshaller;
-import org.exolab.castor.xml.ValidationException;
 import org.opennms.core.utils.ByteArrayComparator;
 import org.opennms.core.utils.ConfigFileConstants;
 import org.opennms.core.utils.InetAddressUtils;
-import org.opennms.netmgt.config.capsd.CapsdConfiguration;
-import org.opennms.netmgt.config.capsd.IpManagement;
-import org.opennms.netmgt.config.capsd.Property;
-import org.opennms.netmgt.config.capsd.ProtocolConfiguration;
-import org.opennms.netmgt.config.capsd.ProtocolPlugin;
-import org.opennms.netmgt.config.capsd.Range;
-import org.opennms.netmgt.config.capsd.SmbAuth;
-import org.opennms.netmgt.config.capsd.SmbConfig;
 import org.opennms.ng.services.collectdconfig.CollectdConfigFactory;
-import org.opennms.ng.util.xml.CastorUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -125,8 +113,6 @@ public class CapsdConfigManager implements CapsdConfig {
      * <p>Constructor for CapsdConfigManager.</p>
      *
      * @param is a {@link java.io.InputStream} object.
-     * @throws org.exolab.castor.xml.MarshalException    if any.
-     * @throws org.exolab.castor.xml.ValidationException if any.
      */
     public CapsdConfigManager(InputStream is) throws MarshalException, ValidationException {
         m_config = CastorUtils.unmarshal(CapsdConfiguration.class, is);
@@ -201,11 +187,9 @@ public class CapsdConfigManager implements CapsdConfig {
      *
      * @throws java.io.IOException                       if any.
      * @throws java.io.FileNotFoundException             if any.
-     * @throws org.exolab.castor.xml.MarshalException    if any.
-     * @throws org.exolab.castor.xml.ValidationException if any.
      */
     //@Override
-    public synchronized void update() throws IOException, FileNotFoundException, MarshalException, ValidationException {
+    public synchronized void update() throws IOException, FileNotFoundException {
         File configFile = ConfigFileConstants.getFile(ConfigFileConstants.CAPSD_CONFIG_FILE_NAME);
 
         LOG.debug("Checking to see if capsd configuration should be reloaded from {}", configFile);

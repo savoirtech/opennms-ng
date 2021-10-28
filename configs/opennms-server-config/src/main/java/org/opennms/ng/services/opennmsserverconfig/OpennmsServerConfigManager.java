@@ -30,31 +30,23 @@ package org.opennms.ng.services.opennmsserverconfig;
 
 import java.io.InputStream;
 
-import org.exolab.castor.xml.MarshalException;
-import org.exolab.castor.xml.ValidationException;
-import org.opennms.netmgt.config.server.LocalServer;
-import org.opennms.ng.util.xml.CastorUtils;
-
 /**
  * <p>OpennmsServerConfigManager class.</p>
  */
 public class OpennmsServerConfigManager implements OpennmsServerConfig {
-    /**
-     * The config class loaded from the config file
-     */
-    private LocalServer m_config;
+
     
     /**
      * <p>Constructor for OpennmsServerConfigManager.</p>
      *
      * @param is a {@link java.io.InputStream} object.
-     * @throws org.exolab.castor.xml.MarshalException if any.
-     * @throws org.exolab.castor.xml.ValidationException if any.
-     */
-    protected OpennmsServerConfigManager(final InputStream is) throws MarshalException, ValidationException {
 
-        m_config = CastorUtils.unmarshal(LocalServer.class, is);
-    }
+     */
+    public OpennmsServerConfigManager(final InputStream is)  { }
+
+    public OpennmsServerConfigManager() {}
+
+
 
     /**
      * Return the local opennms server name.
@@ -63,7 +55,7 @@ public class OpennmsServerConfigManager implements OpennmsServerConfig {
      */
     @Override
     public String getServerName() {
-        return m_config.getServerName();
+        return "nms1";
     }
 
     /**
@@ -73,7 +65,7 @@ public class OpennmsServerConfigManager implements OpennmsServerConfig {
      */
     @Override
     public String getDefaultCriticalPathIp() {
-        return m_config.getDefaultCriticalPathIp();
+        return "127.0.0.1";
     }
 
     /**
@@ -83,7 +75,7 @@ public class OpennmsServerConfigManager implements OpennmsServerConfig {
      */
     @Override
     public String getDefaultCriticalPathService() {
-        return m_config.getDefaultCriticalPathService();
+        return "ICMP";
     }
 
     /**
@@ -93,7 +85,7 @@ public class OpennmsServerConfigManager implements OpennmsServerConfig {
      */
     @Override
     public int getDefaultCriticalPathTimeout() {
-        return m_config.getDefaultCriticalPathTimeout();
+        return 1000;
     }
 
     /**
@@ -103,7 +95,7 @@ public class OpennmsServerConfigManager implements OpennmsServerConfig {
      */
     @Override
     public int getDefaultCriticalPathRetries() {
-        return m_config.getDefaultCriticalPathRetries();
+        return 1;
     }
 
     /**
@@ -114,7 +106,7 @@ public class OpennmsServerConfigManager implements OpennmsServerConfig {
      */
     @Override
     public boolean verifyServer() {
-        return Boolean.valueOf(m_config.getVerifyServer());
+        return false;
     }
 
 }

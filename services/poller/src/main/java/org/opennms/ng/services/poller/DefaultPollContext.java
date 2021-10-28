@@ -46,6 +46,7 @@ import org.opennms.netmgt.model.events.EventListener;
 import org.opennms.netmgt.poller.QueryManager;
 import org.opennms.netmgt.xml.event.Event;
 import org.opennms.ng.services.opennmsserverconfig.OpennmsServerConfigFactory;
+import org.opennms.ng.services.opennmsserverconfig.OpennmsServerConfigManager;
 import org.opennms.ng.services.poller.pollables.PendingPollEvent;
 import org.opennms.ng.services.poller.pollables.PollContext;
 import org.opennms.ng.services.poller.pollables.PollEvent;
@@ -403,12 +404,12 @@ public class DefaultPollContext implements PollContext, EventListener {
         Map<String, Object> map = new HashMap<String, Object>();
         map.put(
                 "retry",
-                Long.valueOf(
-                         OpennmsServerConfigFactory.getInstance().getDefaultCriticalPathRetries()));
+                (new OpennmsServerConfigManager()).getDefaultCriticalPathRetries()
+        );
         map.put(
                 "timeout",
-                Long.valueOf(
-                         OpennmsServerConfigFactory.getInstance().getDefaultCriticalPathTimeout()));
+                (new OpennmsServerConfigManager()).getDefaultCriticalPathTimeout()
+        );
 
         result = p.isProtocolSupported(addr, map);
         return result;

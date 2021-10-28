@@ -34,12 +34,9 @@ import java.io.IOException;
 import java.io.InputStream;
 
 import org.apache.commons.io.IOUtils;
-import org.exolab.castor.xml.MarshalException;
-import org.exolab.castor.xml.ValidationException;
 import org.opennms.core.utils.ConfigFileConstants;
 import org.opennms.netmgt.config.collectd.CollectdConfiguration;
 import org.opennms.ng.services.opennmsserverconfig.OpennmsServerConfig;
-import org.opennms.ng.util.xml.CastorUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.util.Assert;

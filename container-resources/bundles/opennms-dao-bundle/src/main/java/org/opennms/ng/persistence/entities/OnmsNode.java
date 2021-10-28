@@ -27,5 +27,5 @@ public class OnmsNode extends org.opennms.netmgt.model.OnmsNode {
         return super.getId();    //TODO
     }
 
-
+    // public int pcGetManagedFieldCount() { return 0;  }
 }

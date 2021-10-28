@@ -32,8 +32,6 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 
-import org.exolab.castor.xml.MarshalException;
-import org.exolab.castor.xml.ValidationException;
 import org.opennms.core.utils.ConfigFileConstants;
 
 /**

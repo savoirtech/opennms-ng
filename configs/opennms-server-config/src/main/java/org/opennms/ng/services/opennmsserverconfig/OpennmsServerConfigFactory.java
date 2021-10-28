@@ -28,14 +28,10 @@
 
 package org.opennms.ng.services.opennmsserverconfig;
 
-import java.io.File;
-import java.io.FileInputStream;
+
 import java.io.IOException;
 import java.io.InputStream;
 
-import org.exolab.castor.xml.MarshalException;
-import org.exolab.castor.xml.ValidationException;
-import org.opennms.core.utils.ConfigFileConstants;
 
 /**
  * This is the singleton class used to load the configuration for the OpenNMS
@@ -52,6 +48,7 @@ public class OpennmsServerConfigFactory extends OpennmsServerConfigManager {
      * The singleton instance of this factory
      */
     private static OpennmsServerConfigFactory m_singleton = null;
+    final static String OPENNMS_SERVER_CONFIG_FILE_NAME_STR = "opennms-server.xml";
 
     /**
      * This member is set to true if the configuration file has been loaded.
@@ -62,10 +59,8 @@ public class OpennmsServerConfigFactory extends OpennmsServerConfigManager {
      * <p>Constructor for OpennmsServerConfigFactory.</p>
      *
      * @param is a {@link java.io.InputStream} object.
-     * @throws org.exolab.castor.xml.MarshalException if any.
-     * @throws org.exolab.castor.xml.ValidationException if any.
      */
-    public OpennmsServerConfigFactory(final InputStream is) throws MarshalException, ValidationException {
+    public OpennmsServerConfigFactory(final InputStream is) {
         super(is);
     }
 
@@ -73,50 +68,16 @@ public class OpennmsServerConfigFactory extends OpennmsServerConfigManager {
      * Load the config from the default config file and create the singleton
      * instance of this factory.
      *
-     * @exception java.io.IOException
-     *                Thrown if the specified config file cannot be read
-     * @exception org.exolab.castor.xml.MarshalException
-     *                Thrown if the file does not conform to the schema.
-     * @exception org.exolab.castor.xml.ValidationException
-     *                Thrown if the contents do not match the required schema.
-     * @throws java.io.IOException if any.
-     * @throws org.exolab.castor.xml.MarshalException if any.
-     * @throws org.exolab.castor.xml.ValidationException if any.
+
      */
-    public synchronized void init() throws IOException, MarshalException, ValidationException {
-        if (m_loaded) {
-            // init already called - return
-            // to reload, reload() will need to be called
-            return;
-        }
-
-        File cfgFile = ConfigFileConstants.getFile(ConfigFileConstants.OPENNMS_SERVER_CONFIG_FILE_NAME);
-
-        InputStream cfgIn = new FileInputStream(cfgFile);
-        m_singleton = new OpennmsServerConfigFactory(cfgIn);
-        cfgIn.close();
-
-        m_loaded = true;
+    public synchronized void init() throws IOException {
     }
 
     /**
      * Reload the config from the default config file
      *
-     * @exception java.io.IOException
-     *                Thrown if the specified config file cannot be read/loaded
-     * @exception org.exolab.castor.xml.MarshalException
-     *                Thrown if the file does not conform to the schema.
-     * @exception org.exolab.castor.xml.ValidationException
-     *                Thrown if the contents do not match the required schema.
-     * @throws java.io.IOException if any.
-     * @throws org.exolab.castor.xml.MarshalException if any.
-     * @throws org.exolab.castor.xml.ValidationException if any.
      */
-    public  synchronized void reload() throws IOException, MarshalException, ValidationException {
-        m_singleton = null;
-        m_loaded = false;
-
-        init();
+    public  synchronized void reload() throws IOException {
     }
 
     /**
@@ -127,10 +88,7 @@ public class OpennmsServerConfigFactory extends OpennmsServerConfigManager {
      *             Thrown if the factory has not yet been initialized.
      */
     public static synchronized OpennmsServerConfigFactory getInstance() {
-        if (!m_loaded)
-            throw new IllegalStateException("The factory has not been initialized");
-
-        return m_singleton;
+        return null;
     }
     
     /**
@@ -139,8 +97,7 @@ public class OpennmsServerConfigFactory extends OpennmsServerConfigManager {
      * @param instance a {@link org.opennms.ng.services.opennmsserverconfig.OpennmsServerConfigFactory} object.
      */
     public static synchronized void setInstance(OpennmsServerConfigFactory instance) {
-        m_singleton = instance;
-        m_loaded = true;
     }
+
 
 }

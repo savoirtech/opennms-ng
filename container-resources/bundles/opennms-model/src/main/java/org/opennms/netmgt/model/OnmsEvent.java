@@ -47,6 +47,7 @@ import org.apache.openjpa.persistence.Factory;
 import org.apache.openjpa.persistence.Persistent;
 import org.hibernate.annotations.Filter;
 import org.hibernate.annotations.Type;
+import org.opennms.core.network.InetAddressXmlAdapter;
 import org.opennms.core.xml.bind.InetAddressXmlAdapter;
 import org.springframework.core.style.ToStringCreator;
 

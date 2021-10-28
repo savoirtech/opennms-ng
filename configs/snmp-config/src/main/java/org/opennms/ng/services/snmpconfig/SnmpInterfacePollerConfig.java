@@ -28,8 +28,6 @@
 
 package org.opennms.ng.services.snmpconfig;
 
-import org.exolab.castor.xml.MarshalException;
-import org.exolab.castor.xml.ValidationException;
 
 import java.io.IOException;
 import java.util.List;

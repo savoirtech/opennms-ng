@@ -32,8 +32,6 @@ import java.io.IOException;
 import java.net.InetAddress;
 import java.util.List;
 
-import org.exolab.castor.xml.MarshalException;
-import org.exolab.castor.xml.ValidationException;
 import org.opennms.netmgt.config.capsd.CapsdConfiguration;
 import org.opennms.netmgt.config.capsd.Property;
 import org.opennms.netmgt.config.capsd.ProtocolConfiguration;

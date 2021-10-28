@@ -16,11 +16,9 @@
         <module>container-resources</module>
         <module>tools</module>
         <module>db-integration</module>
-
         <module>services</module>
         <module>features</module>
         <module>tests</module>
-
     </modules>
 
     <properties>
@@ -40,7 +38,7 @@
 
         <!-- OPENNMS -->
 
-        <opennms.version>1.13.0-SNAPSHOT</opennms.version>
+        <opennms.version>29.0.0-SNAPSHOT</opennms.version>
 
         <activemq.version>5.7.0</activemq.version>
         <antlr.version>2.7.7_5</antlr.version>
@@ -159,11 +157,10 @@
     </properties>
 
     <repositories>
-
         <repository>
             <id>central</id>
             <name>Central Maven Repo</name>
-            <url>http://repo1.maven.org/maven2</url>
+            <url>https://repo1.maven.org/maven2</url>
         </repository>
         <repository>
             <id>com.springsource.repository.bundles.release</id>

@@ -48,9 +48,6 @@ import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
-import org.exolab.castor.xml.MarshalException;
-import org.exolab.castor.xml.Marshaller;
-import org.exolab.castor.xml.ValidationException;
 import org.opennms.core.utils.ByteArrayComparator;
 import org.opennms.core.utils.IpListFromUrl;
 import org.opennms.core.xml.MarshallingResourceFailureException;
@@ -69,7 +66,6 @@ import org.opennms.netmgt.poller.ServiceMonitor;
 import org.opennms.netmgt.poller.ServiceMonitorLocator;
 import org.opennms.ng.services.databaseschemaconfig.FilterDaoFactory;
 import org.opennms.ng.services.opennmsserverconfig.OpennmsServerConfig;
-import org.opennms.ng.util.xml.CastorUtils;
 import org.osgi.framework.BundleContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

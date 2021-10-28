@@ -19,7 +19,6 @@
     <modules>
         <module>datasource</module>
         <module>db</module>
-
     </modules>
 
 </project>

@@ -32,9 +32,6 @@ package org.opennms.ng.services.collectdconfig;
 import java.io.IOException;
 import java.lang.reflect.UndeclaredThrowableException;
 import java.util.Collection;
-
-import org.exolab.castor.xml.MarshalException;
-import org.exolab.castor.xml.ValidationException;
 import org.opennms.netmgt.config.collectd.Collector;
 import org.opennms.ng.services.opennmsserverconfig.OpennmsServerConfig;
 import org.slf4j.Logger;

@@ -39,6 +39,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -48,7 +49,6 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.opennms.core.utils.InetAddressUtils;
-import org.opennms.core.utils.IntSet;
 import org.opennms.netmgt.config.CollectdConfigFactory;
 import org.opennms.netmgt.config.DataCollectionConfigDao;
 import org.opennms.netmgt.config.StorageStrategy;
@@ -102,6 +102,65 @@ public class DefaultResourceDao implements ResourceDao, InitializingBean {
     private NodeResourceType m_nodeResourceType;
     private DomainResourceType m_domainResourceType;
     private NodeSourceResourceType m_nodeSourceResourceType;
+
+    public class IntSet {
+        private Set<Integer> m_set = new HashSet<Integer>();
+
+        public boolean add(int n) {
+            return m_set.add(new Integer(n));
+        }
+
+        public boolean addAll(IntSet s) {
+            return m_set.addAll(s.m_set);
+        }
+
+        public void clear() {
+            m_set.clear();
+        }
+
+        public boolean contains(int n) {
+            return m_set.contains(new Integer(n));
+        }
+
+        public boolean containsAll(IntSet s) {
+            return m_set.containsAll(s.m_set);
+        }
+
+        public boolean isEmpty() {
+            return m_set.isEmpty();
+        }
+
+        public Iterator<Integer> iterator() {
+            return m_set.iterator();
+        }
+
+        public boolean remove(int n) {
+            return m_set.remove(new Integer(n));
+        }
+
+        public boolean removeAll(IntSet s) {
+            return m_set.remove(s.m_set);
+        }
+
+        public boolean retainAll(IntSet s) {
+            return m_set.retainAll(s.m_set);
+        }
+
+        public int size() {
+            return m_set.size();
+        }
+
+        public int[] toArray() {
+            int[] array = new int[size()];
+
+            int i = 0;
+            for (Iterator<Integer> it = m_set.iterator(); it.hasNext(); i++) {
+                Integer element = it.next();
+                array[i] = element.intValue();
+            }
+            return array;
+        }
+    }
     
     /**
      * <p>Constructor for DefaultResourceDao.</p>

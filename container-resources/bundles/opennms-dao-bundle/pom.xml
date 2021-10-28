@@ -203,13 +203,12 @@
             <plugin>
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>openjpa-maven-plugin</artifactId>
-
+                <version>1.2</version>
                 <configuration>
                     <includes>**/entities/*.class</includes>
                     <excludes>**/domain/XML*.class</excludes>
                     <addDefaultConstructor>true</addDefaultConstructor>
                     <enforcePropertyRestrictions>true</enforcePropertyRestrictions>
-
                 </configuration>
                 <executions>
                     <execution>

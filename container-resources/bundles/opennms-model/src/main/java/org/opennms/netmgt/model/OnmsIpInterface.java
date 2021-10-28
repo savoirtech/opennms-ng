@@ -49,6 +49,7 @@ import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 import org.apache.openjpa.persistence.Externalizer;
 import org.apache.openjpa.persistence.Factory;
 import org.apache.openjpa.persistence.Persistent;
+import org.opennms.core.network.InetAddressXmlAdapter;
 import org.opennms.core.utils.InetAddressUtils;
 import org.opennms.core.xml.bind.InetAddressXmlAdapter;
 import org.opennms.netmgt.model.events.AddEventVisitor;

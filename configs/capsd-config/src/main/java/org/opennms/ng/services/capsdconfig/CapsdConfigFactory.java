@@ -31,8 +31,6 @@ package org.opennms.ng.services.capsdconfig;
 import java.io.File;
 import java.io.IOException;
 
-import org.exolab.castor.xml.MarshalException;
-import org.exolab.castor.xml.ValidationException;
 import org.opennms.core.utils.ConfigFileConstants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

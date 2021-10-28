@@ -31,10 +31,7 @@ package org.opennms.ng.services.eventconfig;
 import java.io.File;
 import java.io.IOException;
 
-import org.exolab.castor.xml.MarshalException;
-import org.exolab.castor.xml.ValidationException;
 import org.opennms.core.utils.ConfigFileConstants;
-import org.opennms.core.xml.CastorUtils;
 import org.opennms.netmgt.config.archiver.events.EventsArchiverConfiguration;
 import org.springframework.core.io.FileSystemResource;
 

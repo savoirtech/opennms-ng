@@ -139,6 +139,26 @@ public class DefaultRrdDao implements RrdDao, InitializingBean {
         return values;
     }
 
+    @Override
+    public InputStream createGraph(String command) {
+        return createGraph(command, new File("/tmp")); // MCB assume that is the default workDir
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * Create an RRD graph.
+
+     */
+
+    public InputStream createGraph(String command, File workDir) throws DataRetrievalFailureException {
+        try {
+            return m_rrdStrategy.createGraph(command, workDir);
+        } catch (Throwable e) {
+            throw new DataRetrievalFailureException("Could not create graph: " + e, e);
+        }
+    }
+
     /**
      * <p>afterPropertiesSet</p>
      *
@@ -205,20 +225,7 @@ public class DefaultRrdDao implements RrdDao, InitializingBean {
         m_rrdBinaryPath = rrdBinaryPath;
     }
 
-    /**
-     * {@inheritDoc}
-     *
-     * Create an RRD graph.
-     * @see org.opennms.netmgt.dao.api.RrdDao#createGraph(String, java.io.File)
-     */
-    @Override
-    public InputStream createGraph(String command, File workDir) throws DataRetrievalFailureException {
-       try {
-           return m_rrdStrategy.createGraph(command, workDir);
-       } catch (Throwable e) {
-           throw new DataRetrievalFailureException("Could not create graph: " + e, e);
-       }
-    }
+
 
     /**
      * <p>getGraphTopOffsetWithText</p>

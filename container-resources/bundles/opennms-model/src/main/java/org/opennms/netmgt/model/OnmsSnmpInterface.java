@@ -46,9 +46,10 @@ import org.apache.openjpa.persistence.Externalizer;
 import org.apache.openjpa.persistence.Factory;
 import org.apache.openjpa.persistence.Persistent;
 import org.hibernate.annotations.Type;
+import org.opennms.core.network.InetAddressXmlAdapter;
 import org.opennms.core.utils.AlphaNumeric;
 import org.opennms.core.utils.RrdLabelUtils;
-import org.opennms.core.xml.bind.InetAddressXmlAdapter;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.core.style.ToStringCreator;

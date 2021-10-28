@@ -37,12 +37,9 @@ import java.io.OutputStreamWriter;
 import java.io.Writer;
 
 import org.apache.commons.io.IOUtils;
-import org.exolab.castor.xml.MarshalException;
-import org.exolab.castor.xml.ValidationException;
 import org.opennms.core.utils.ConfigFileConstants;
 import org.opennms.netmgt.config.poller.PollerConfiguration;
 import org.opennms.ng.services.opennmsserverconfig.OpennmsServerConfig;
-import org.opennms.ng.util.xml.CastorUtils;
 import org.osgi.framework.BundleContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

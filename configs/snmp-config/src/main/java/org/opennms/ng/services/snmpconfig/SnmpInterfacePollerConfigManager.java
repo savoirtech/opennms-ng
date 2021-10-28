@@ -28,12 +28,8 @@
 
 package org.opennms.ng.services.snmpconfig;
 
-import org.exolab.castor.xml.MarshalException;
-import org.exolab.castor.xml.Marshaller;
-import org.exolab.castor.xml.ValidationException;
 import org.opennms.core.utils.ByteArrayComparator;
 import org.opennms.core.utils.IpListFromUrl;
-import org.opennms.core.xml.CastorUtils;
 import org.opennms.netmgt.config.snmpinterfacepoller.*;
 import org.opennms.netmgt.config.snmpinterfacepoller.Package;
 import org.opennms.ng.services.databaseschemaconfig.FilterDaoFactory;

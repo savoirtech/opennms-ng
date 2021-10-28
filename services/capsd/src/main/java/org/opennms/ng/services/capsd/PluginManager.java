@@ -35,7 +35,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 
-import org.exolab.castor.xml.ValidationException;
 import org.opennms.core.utils.InetAddressUtils;
 import org.opennms.netmgt.capsd.CapsdProtocolInfo;
 import org.opennms.netmgt.capsd.CapsdProtocolInfo.Action;
